@@ -1,5 +1,3 @@
-import { Analytics } from "@vercel/analytics/next";
-import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Montserrat } from "next/font/google";
 import type { ReactNode } from "react";
@@ -7,6 +5,14 @@ import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 import "@/app/globals.css";
+import { Providers } from "./providers";
+import Header from "@/components/Header/Header";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import {
+  MobileSidebarTrigger,
+  RegistrySidebar,
+} from "@/components/registry/registry-sidebar";
+import { Toaster } from "@/components/ui/sonner";
 
 export const metadata: Metadata = {
   title: "Registry Starter",
@@ -29,11 +35,45 @@ const MontserratSerif = Montserrat({
   variable: "--font-serif",
 });
 
+// Создаем Client Component для условного рендеринга
+function ConditionalLayout({
+  children,
+  showSidebar,
+}: {
+  children: ReactNode;
+  showSidebar: boolean;
+}) {
+  "use client";
+
+  return (
+    <>
+      <Header />
+      {showSidebar ? (
+        <SidebarProvider>
+          <MobileSidebarTrigger />
+          <RegistrySidebar />
+          <main className="flex w-full justify-center">{children}</main>
+        </SidebarProvider>
+      ) : (
+        <main className="w-full">{children}</main>
+      )}
+      <Toaster />
+    </>
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
+  // Определяем страницы без сайдбара статически (на сервере)
+  const noSidebarPages = ["/assignments", "/login", "/register"];
+
+  // По умолчанию показываем сайдбар
+  // Точное определение будет в Client Component
+  const showSidebar = true;
+
   return (
     <html
       lang="en"
@@ -41,17 +81,19 @@ export default function RootLayout({
         GeistSans.variable,
         GeistMono.variable,
         MontserratSerif.variable,
-        "bg-background text-foreground",
+        "bg-background text-foreground"
       )}
     >
       <meta
         name="robots"
         content="noindex, nofollow, noarchive, nosnippet, noimageindex"
       />
-      <body className="flex grow">
-        {children}
-        <Analytics />
-        <SpeedInsights />
+      <body>
+        <Providers>
+          <ConditionalLayout showSidebar={showSidebar}>
+            {children}
+          </ConditionalLayout>
+        </Providers>
       </body>
     </html>
   );
