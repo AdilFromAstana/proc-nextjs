@@ -56,6 +56,13 @@ export const gettingStartedItems = [
   { title: "Design Tokens", path: "/tokens" },
 ];
 
+export const groupsItems = [
+  { title: "Новая группа", path: "/classes/create" },
+  { title: "Мои группы", path: "/classes" },
+  { title: "Кабинеты", path: "/rooms" },
+  { title: "Коды приглашения", path: "/invites" },
+];
+
 export function MobileSidebarTrigger() {
   const { setOpenMobile } = useSidebar();
 
@@ -140,6 +147,44 @@ export function RegistrySidebar() {
                 <SidebarGroupContent>
                   <SidebarMenu>
                     {libraryItems.map((item) => (
+                      <SidebarMenuItem key={item.path}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathname === item.path}
+                        >
+                          <Link
+                            onClick={() => setOpenMobile(false)}
+                            href={item.path}
+                          >
+                            {item.title}
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+
+          <Collapsible defaultOpen={true} className="group/collapsible">
+            <SidebarGroup>
+              <CollapsibleTrigger className="w-full">
+                <SidebarGroupLabel className="flex cursor-pointer items-center justify-between">
+                  <div className="flex min-w-0 items-center">
+                    <Home className="size-4 flex-shrink-0" />
+                    <span className="ml-2 opacity-100 transition-all duration-200">
+                      Мои группы
+                    </span>
+                  </div>
+                  <ChevronDown className="size-4 flex-shrink-0 opacity-100 transition-all duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {groupsItems.map((item) => (
                       <SidebarMenuItem key={item.path}>
                         <SidebarMenuButton
                           asChild
