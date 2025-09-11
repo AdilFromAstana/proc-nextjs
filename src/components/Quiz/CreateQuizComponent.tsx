@@ -5,10 +5,14 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "../ui/accordion";
-import FillBlanksForm from "./FillBlanksForm";
-import DragNDropForm from "./DragNDropForm";
+
 import TestQuestionForm from "./TestQuestionForm";
 import FreeQuestionForm from "./FreeQuestionForm";
+import FillBlanksForm from "./FillBlanksForm";
+import DragNDropForm from "./DragNDropForm";
+import LibraryQuestionsForm from "./LibraryQuestionsForm";
+import ImportFromFileForm from "./ImportFromFileForm";
+
 import { ApiQuizResponse, Question, QuestionType } from "@/types/quizQuestion";
 
 type Props = {
@@ -26,6 +30,8 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
   const [sortOrder, setSortOrder] = useState("");
 
   const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [isLibraryModalOpen, setIsLibraryModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
   const remainingChars = 200 - quizDescription.length;
 
@@ -50,8 +56,8 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
     { type: "free", name: "Открытый вопрос", icon: "💬" },
     { type: "fill-blanks", name: "Заполните пробелы", icon: "🔤" },
     { type: "drag-drop", name: "Drag & Drop", icon: "↔️" },
-    { type: "library", name: "Выбрать из библиотеки", icon: "📚" },
     { type: "import", name: "Импортировать из файла", icon: "📁" },
+    { type: "library", name: "Выбрать из библиотеки", icon: "📚" },
   ];
 
   const mapApiComponentTypeToQuestionType = (
@@ -144,12 +150,28 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
   };
 
   const handleAddQuestion = (questionType: QuestionType) => {
+    if (questionType === "library") {
+      // Открываем модальное окно библиотеки
+      setIsLibraryModalOpen(true);
+      return;
+    }
+
+    if (questionType === "import") {
+      // Открываем модальное окно импорта
+      setIsImportModalOpen(true);
+      return;
+    }
+
     const initialContent = getInitialContentForType(questionType);
 
     const newQuestion: Question = {
       id: `q-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type: questionType,
       content: initialContent,
+      settings: {
+        score_encouragement: "10", // Значение по умолчанию
+        score_penalty: "5", // Значение по умолчанию
+      },
     };
     setQuestions((prev) => [...prev, newQuestion]);
   };
@@ -171,6 +193,40 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
     setIsPanelOpen(!isPanelOpen);
   };
 
+  const handleAddFromLibrary = (libraryQuestion: any) => {
+    // Здесь создаем новый вопрос из выбранного из библиотеки
+    const newQuestion: Question = {
+      id: `q-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      type: mapApiComponentTypeToQuestionType(libraryQuestion.component_type),
+      content: convertApiComponentToContent(libraryQuestion),
+      settings: {
+        score_encouragement: "10",
+        score_penalty: "5",
+      },
+    };
+    setQuestions((prev) => [...prev, newQuestion]);
+    setIsLibraryModalOpen(false);
+  };
+
+  const handleImportFromFile = (importedData: any) => {
+    // Здесь обрабатываем импортированные данные
+    // Для примера создаем один вопрос из импорта
+    const newQuestion: Question = {
+      id: `q-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+      type: "test", // или другой тип в зависимости от импорта
+      content: {
+        text: importedData.filename || "Импортированный вопрос",
+        // Добавьте остальные поля в зависимости от формата импорта
+      },
+      settings: {
+        score_encouragement: "10",
+        score_penalty: "5",
+      },
+    };
+    setQuestions((prev) => [...prev, newQuestion]);
+    setIsImportModalOpen(false);
+  };
+
   const renderQuestionForm = (question: Question) => {
     const commonProps = {
       onAdd: (data: Omit<Question, "id">) =>
@@ -180,16 +236,27 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
 
     switch (question.type) {
       case "test":
-        return <TestQuestionForm {...commonProps} />;
+        return (
+          <TestQuestionForm
+            {...commonProps}
+            initialData={question.content as any}
+          />
+        );
       case "free":
-        return <FreeQuestionForm {...commonProps} />;
+        return (
+          <FreeQuestionForm
+            {...commonProps}
+            initialData={question.content as any}
+          />
+        );
       case "fill-blanks":
         return <FillBlanksForm {...commonProps} />;
       case "drag-drop":
         return <DragNDropForm {...commonProps} />;
+      case "library":
+        return <LibraryQuestionsForm {...commonProps} />;
       case "import":
-        // return <ImportFromFileForm {...commonProps} />;
-        return null;
+        return <ImportFromFileForm {...commonProps} />;
       default:
         return null;
     }
@@ -224,6 +291,11 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
       default:
         return "FreeQuestionComponent";
     }
+  };
+
+  // Функция для получения баллов за правильный ответ
+  const getScoreEncouragement = (question: Question): string => {
+    return question.settings?.score_encouragement || "0";
   };
 
   return (
@@ -354,34 +426,42 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
             key={question.id}
             className="bg-white rounded-lg shadow-md border"
           >
-            {/* Заголовок карточки */}
-            <div className="flex items-center px-4 py-3 bg-gray-50 border-b">
-              <div className="flex items-center text-sm text-gray-600">
-                <svg
-                  className="w-4 h-4 mr-1"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
-                  />
-                </svg>
-                <span>{index + 1}</span>
+            <div className="flex items-center justify-between px-4 py-3 bg-gray-50 border-b">
+              <div className="flex items-center">
+                <div className="flex items-center text-sm text-gray-600">
+                  <svg
+                    className="w-4 h-4 mr-1"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 6h16M4 12h16M4 18h16"
+                    />
+                  </svg>
+                  <span>{index + 1}</span>
+                </div>
+                <div className="ml-4 flex items-center">
+                  <span className="text-sm">
+                    {quizQuestionTypes.find((btn) => btn.type === question.type)
+                      ?.icon || "📝"}
+                  </span>
+                  <span className="ml-1 text-sm text-gray-700">
+                    {
+                      quizQuestionTypes.find(
+                        (btn) => btn.type === question.type
+                      )?.name
+                    }
+                  </span>
+                </div>
               </div>
-              <div className="ml-4 flex items-center">
-                <span className="text-sm">
-                  {quizQuestionTypes.find((btn) => btn.type === question.type)
-                    ?.icon || "📝"}
-                </span>
-                <span className="ml-1 text-sm text-gray-700">
-                  {
-                    quizQuestionTypes.find((btn) => btn.type === question.type)
-                      ?.name
-                  }
+              <div className="flex items-center text-sm text-gray-600">
+                <span className="mr-1">Баллы:</span>
+                <span className="font-medium">
+                  {getScoreEncouragement(question)}
                 </span>
               </div>
             </div>
@@ -404,7 +484,9 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
           <div className="bg-white border border-gray-200 rounded-lg shadow-md p-4 mt-4">
             <div className="flex flex-wrap justify-center gap-6">
               {quizQuestionTypes
-                .filter((btn) => btn.type !== "library") // Временно скрываем библиотеку
+                .filter(
+                  (btn) => btn.type !== "library" && btn.type !== "import"
+                ) // Убираем библиотеку и импорт из панели
                 .map((btn) => (
                   <button
                     key={btn.type}
@@ -417,6 +499,75 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
                     </span>
                   </button>
                 ))}
+              {/* Отдельные кнопки для библиотеки и импорта */}
+              <button
+                onClick={() => handleAddQuestion("library")}
+                className="flex flex-col items-center group hover:bg-gray-100 p-3 rounded-md transition min-w-[120px]"
+              >
+                <span className="text-2xl mb-2">📚</span>
+                <span className="text-sm text-gray-700 text-center">
+                  Выбрать из библиотеки
+                </span>
+              </button>
+              <button
+                onClick={() => handleAddQuestion("import")}
+                className="flex flex-col items-center group hover:bg-gray-100 p-3 rounded-md transition min-w-[120px]"
+              >
+                <span className="text-2xl mb-2">📁</span>
+                <span className="text-sm text-gray-700 text-center">
+                  Импортировать из файла
+                </span>
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Модальное окно библиотеки */}
+        {isLibraryModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">
+                    Выбрать из библиотеки вопросов
+                  </h2>
+                  <button
+                    onClick={() => setIsLibraryModalOpen(false)}
+                    className="text-gray-500 hover:text-gray-700 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+                <LibraryQuestionsForm
+                  onAdd={handleAddFromLibrary}
+                  onCancel={() => setIsLibraryModalOpen(false)}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Модальное окно импорта */}
+        {isImportModalOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="p-6">
+                <div className="flex justify-between items-center mb-4">
+                  <h2 className="text-xl font-semibold">
+                    Импортировать вопросы из файла
+                  </h2>
+                  <button
+                    onClick={() => setIsImportModalOpen(false)}
+                    className="text-gray-500 hover:text-gray-700 text-2xl"
+                  >
+                    ×
+                  </button>
+                </div>
+                <ImportFromFileForm
+                  onAdd={handleImportFromFile}
+                  onCancel={() => setIsImportModalOpen(false)}
+                />
+              </div>
             </div>
           </div>
         )}

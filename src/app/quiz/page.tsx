@@ -2,11 +2,18 @@
 
 import CreateQuizComponent from "@/components/Quiz/CreateQuizComponent";
 import { mockQuiz } from "@/mockQuiz";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 
 type Props = {};
 
 export default function QuizListPage({}: Props) {
+  const router = useRouter();
+
+  const handleCreateQuiz = () => {
+    router.push("/quiz/create");
+  };
+
   return (
     <div className="w-full m-8">
       <div className="mb-8 ">
@@ -17,7 +24,10 @@ export default function QuizListPage({}: Props) {
 
       <div className="flex flex-col md:flex-row gap-6 mb-8">
         <div className="flex-shrink-0">
-          <button className="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">
+          <button
+            className="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+            onClick={handleCreateQuiz}
+          >
             <svg
               className="w-4 h-4 mr-2"
               fill="none"
@@ -74,8 +84,6 @@ export default function QuizListPage({}: Props) {
           </div>
         </div>
       ))}
-
-      <CreateQuizComponent />
     </div>
   );
 }

@@ -1,14 +1,32 @@
 import { Question } from "@/types/quizQuestion";
-import React from "react";
+import React, { useState, useEffect } from "react";
+
+type FreeQuestionContent = {
+  text: string;
+  answer: string;
+};
 
 type Props = {
   onAdd: (question: Omit<Question, "id">) => void;
   onCancel: () => void;
+  initialData?: Partial<FreeQuestionContent>;
 };
 
-export default function FreeQuestionForm({ onAdd, onCancel }: Props) {
-  const [questionText, setQuestionText] = React.useState("");
-  const [answer, setAnswer] = React.useState("");
+export default function FreeQuestionForm({
+  onAdd,
+  onCancel,
+  initialData,
+}: Props) {
+  const [questionText, setQuestionText] = useState(initialData?.text || "");
+  const [answer, setAnswer] = useState(initialData?.answer || "");
+
+  // Обновляем состояние при изменении initialData
+  useEffect(() => {
+    if (initialData) {
+      setQuestionText(initialData.text || "");
+      setAnswer(initialData.answer || "");
+    }
+  }, [initialData]);
 
   const handleAdd = () => {
     if (!questionText.trim() || !answer.trim()) return;
@@ -20,16 +38,10 @@ export default function FreeQuestionForm({ onAdd, onCancel }: Props) {
         answer,
       },
     });
-
-    setQuestionText("");
-    setAnswer("");
   };
 
   return (
-    <div className="mt-6 p-6 border border-gray-200 rounded-md bg-white">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">
-        Открытый вопрос
-      </h2>
+    <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Вопрос
