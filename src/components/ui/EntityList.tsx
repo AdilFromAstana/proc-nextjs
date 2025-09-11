@@ -107,7 +107,6 @@ const EntityListComponent = forwardRef<EntityListRef, EntityListComponentProps>(
       );
     };
 
-    // Рендер данных сущности
     const renderEntityData = (entity: any) => {
       if (renderData) {
         return renderData(entity);
@@ -126,8 +125,6 @@ const EntityListComponent = forwardRef<EntityListRef, EntityListComponentProps>(
         </div>
       );
     };
-
-    console.log("EntityListComponent rendered with entities:", entities);
 
     return (
       <div className={`entity-list-component ${className}`}>
@@ -152,7 +149,6 @@ const EntityListComponent = forwardRef<EntityListRef, EntityListComponentProps>(
             ))}
           </div>
         ) : (
-          // Список сущностей
           <div
             className={`space-y-2 ${bordered ? "border rounded-lg p-2" : ""}`}
           >
@@ -165,9 +161,8 @@ const EntityListComponent = forwardRef<EntityListRef, EntityListComponentProps>(
                 <div
                   key={entity.id}
                   className={`
-                    p-3 rounded-lg transition-colors
+                    p-3 rounded-lg transition-colors relative cursor-pointer hover:bg-gray-50
                     ${bordered ? "border" : ""}
-                    ${selectOnClick ? "cursor-pointer hover:bg-gray-50" : ""}
                     ${isSelected ? "bg-blue-50 border-blue-200" : "bg-white"}
                   `}
                   onClick={() => handleEntityClick(entity)}

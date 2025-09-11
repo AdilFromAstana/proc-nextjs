@@ -23,8 +23,16 @@ import AssignmentExportModalComponent, {
   AssignmentExportModalRef,
 } from "@/components/Assignment/ExportModalComponent";
 
-// Типы
 import { Assignment, mockAssignments } from "@/types/assignment";
+import IdentificationList from "@/components/Oqylyk/Assignment/Student/IdentificationList";
+import TimeStatesComponent from "@/components/Oqylyk/Assignment/Student/TimeStatesComponent";
+import QuizResultListComponent from "@/components/Oqylyk/Assignment/Student/QuizResultList";
+import VideoSessionListComponent from "@/components/Oqylyk/Assignment/Student/VideoSessionList";
+import CreateViolationModal from "@/components/Oqylyk/Assignment/Student/CreateViolationModal";
+import VideoModalViewerComponent from "@/components/Oqylyk/Assignment/Student/VideoModalViewerComponent";
+import AssignmentViolationsComponent from "@/components/Oqylyk/Assignment/Student/ViolationsComponent";
+import AssignmentActions from "@/components/Oqylyk/Assignment/Student/ActionsComponent";
+import AssignmentCommentBlockComponent from "@/components/Oqylyk/Assignment/CommentBlockComponent";
 
 interface ClientPageProps {
   initialData: {
@@ -47,6 +55,8 @@ export default function AssignmentsClientPage({
   sortOrderOptions,
   sortStatusOptions,
 }: ClientPageProps) {
+  const [open, setOpen] = useState(false);
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -112,7 +122,7 @@ export default function AssignmentsClientPage({
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       setEntities(mockData);
-      setTotalPages(5); // Mock значение
+      setTotalPages(1); // Mock значение
 
       // Обновляем URL
       const urlParams = new URLSearchParams();
@@ -183,63 +193,55 @@ export default function AssignmentsClientPage({
 
         {/* FILTERS */}
         <div className="w-full md:w-7/12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-          <div>
-            <Input
-              placeholder="Поиск..."
-              value={postData.query || ""}
-              onChange={(e) => handleQueryChange(e.target.value)}
-              className="bg-white"
-            />
-          </div>
+          <Input
+            placeholder="Поиск..."
+            value={postData.query || ""}
+            onChange={(e) => handleQueryChange(e.target.value)}
+            className="bg-white"
+          />
 
-          <div>
-            <Select
-              value={postData.status || "all"}
-              onValueChange={handleStatusChange}
-            >
-              <SelectTrigger className="bg-white">
-                <SelectValue placeholder="Статус" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Все статусы</SelectItem>
-                {sortStatusOptions.map((option) => (
-                  <SelectItem key={option.id} value={option.id}>
-                    {option.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select
+            value={postData.status || "all"}
+            onValueChange={handleStatusChange}
+          >
+            <SelectTrigger className="bg-white w-full">
+              <SelectValue placeholder="Статус" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Все статусы</SelectItem>
+              {sortStatusOptions.map((option) => (
+                <SelectItem key={option.id} value={option.id}>
+                  {option.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <div>
-            <Select value={postData.type} onValueChange={handleTypeChange}>
-              <SelectTrigger className="bg-white">
-                <SelectValue placeholder="Тип" />
-              </SelectTrigger>
-              <SelectContent>
-                {sortTypeOptions.map((option) => (
-                  <SelectItem key={option.id} value={option.id}>
-                    {option.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={postData.type} onValueChange={handleTypeChange}>
+            <SelectTrigger className="bg-white w-full">
+              <SelectValue placeholder="Тип" />
+            </SelectTrigger>
+            <SelectContent>
+              {sortTypeOptions.map((option) => (
+                <SelectItem key={option.id} value={option.id}>
+                  {option.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-          <div>
-            <Select value={postData.orderBy} onValueChange={handleOrderChange}>
-              <SelectTrigger className="bg-white">
-                <SelectValue placeholder="Сортировка" />
-              </SelectTrigger>
-              <SelectContent>
-                {sortOrderOptions.map((option) => (
-                  <SelectItem key={option.id} value={option.id}>
-                    {option.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <Select value={postData.orderBy} onValueChange={handleOrderChange}>
+            <SelectTrigger className="bg-white w-full">
+              <SelectValue placeholder="Сортировка" />
+            </SelectTrigger>
+            <SelectContent>
+              {sortOrderOptions.map((option) => (
+                <SelectItem key={option.id} value={option.id}>
+                  {option.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -268,6 +270,140 @@ export default function AssignmentsClientPage({
           />
         </div>
       )}
+
+      <AssignmentCommentBlockComponent
+        viewer="owner"
+        assignment={{
+          id: 123,
+          isProcessStatus: () => true,
+        }}
+        student={{
+          id: 1,
+          firstname: "Иван",
+          lastname: "Иванов",
+          photo: "https://placehold.co/100x100/3b82f6/FFFFFF?text=ИИ",
+          getFullName: function () {
+            return `Иван Иванов`;
+          },
+          getFirstName: function () {
+            return "Иван ";
+          },
+        }}
+        component={{
+          id: 456,
+          component_type: "FreeQuestionComponent",
+        }}
+        result={{
+          id: 789,
+          assignment_result_id: 101,
+        }}
+        disabled={false}
+      />
+      {/* <AssignmentActions /> */}
+
+      {/* <DonutChart />
+      <ResultChartComponent
+        results={{
+          data: [
+            { result: 3 },
+            { result: 3 },
+            { result: 3 },
+            { result: 3 },
+            { result: 3 },
+          ],
+          length: 5,
+          getPoints: () => 25,
+          map: function (callback) {
+            this.data.forEach(callback);
+          },
+        }}
+      /> */}
+      {/* <IdentificationList
+        identities={{
+          models: [
+            // Single photo
+            {
+              id: 1,
+              screenshot:
+                "https://faces.object.pscloud.io/faces/2025/09/10/07c9bedc0309a8d43d2166d6660e7005.jpg?X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2COPHSOSEG4LBR8CEGWK%2F20250910%2Fkz-ala-1%2Fs3%2Faws4_request&X-Amz-Date=20250910T071215Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Signature=0d47774fdb7ba5489e71a850c24df9a5c958eb73441dbab38e3f304582f563c5",
+              getTime: () => "10:30:15",
+            },
+            // Series photos
+            {
+              id: 2,
+              screenshots: [
+                "https://assignments.object.pscloud.io/assignments/2025/09/10/2afd0a76430f1da862d8b37c34c60c3a.jpg?X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2COPHSOSEG4LBR8CEGWK%2F20250910%2Fkz-ala-1%2Fs3%2Faws4_request&X-Amz-Date=20250910T071215Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Signature=19500f0e2f3679ef15d5e29f5e643364a2cbce8e40b2b9cd973308cccb7a7280",
+                "https://assignments.object.pscloud.io/assignments/2025/09/10/50fd2a6db3966dd803449b251e19131f.jpg?X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2COPHSOSEG4LBR8CEGWK%2F20250910%2Fkz-ala-1%2Fs3%2Faws4_request&X-Amz-Date=20250910T071215Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Signature=05bb1befc830eb09dffd46da2b0c2b99c6a8b8aec6fa9afa592fad61e8818aa5",
+                "https://assignments.object.pscloud.io/assignments/2025/09/10/77383e3b56b58203462a2074840c0f28.jpg?X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2COPHSOSEG4LBR8CEGWK%2F20250910%2Fkz-ala-1%2Fs3%2Faws4_request&X-Amz-Date=20250910T071215Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Signature=11d96dfb8f8e3c6dc6100e16f262ab990f679e88185500490bb20f8dac876356",
+              ],
+              getTime: () => "11:45:30",
+            },
+            // Single photo again
+            {
+              id: 3,
+              screenshot:
+                "https://faces.object.pscloud.io/faces/2025/09/09/83847b6fe60a10e869a5966d18527d6a.jpg?X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=2COPHSOSEG4LBR8CEGWK%2F20250910%2Fkz-ala-1%2Fs3%2Faws4_request&X-Amz-Date=20250910T071215Z&X-Amz-SignedHeaders=host&X-Amz-Expires=3600&X-Amz-Signature=37e07501a309f6ed549c3feaf15e0a4e9e9c3b0668f085c2089790ce7f94ff9f",
+              getTime: () => "12:15:45",
+            },
+            // Series photos with more images
+            {
+              id: 4,
+              getTime: () => "14:05:25",
+            },
+          ],
+        }}
+      /> */}
+
+      {/* <AssignmentStudentCertificateComponent {...mockComplexCertificateData} /> */}
+      {/* 
+      <QuizResultListComponent
+        {...{
+          assignment: mockAssignment,
+          student: mockStudent,
+          assessments: null, // будет брать из assignment
+          attempt: mockAttempt,
+          components: mockComponents,
+          results: mockResults,
+          disabled: false,
+          viewer: "owner",
+        }}
+      />
+
+      <VideoSessionListComponent
+        assignment={mockAssignment}
+        student={mockStudent}
+        onSelected={(group) => console.log("Selected group:", group)}
+      /> */}
+
+      {/* <Button onClick={() => setOpen(true)}>Открыть модальное окно</Button>
+
+      <CreateViolationModal
+        assignment={mockAssignment}
+        student={mockStudent}
+        open={open}
+        onOpenChange={setOpen}
+        onSubmit={(data) => {
+          console.log("Создано нарушение:", data);
+          setOpen(false);
+        }}
+      /> */}
+
+      {/* <VideoModalViewerComponent /> */}
+      <AssignmentViolationsComponent />
+
+      <TimeStatesComponent
+        {...{
+          assignment: {
+            id: 124,
+          },
+          student: {
+            id: 457,
+          },
+          available_time: 0,
+          is_started: true,
+          is_finished: true,
+        }}
+      />
 
       {/* EXPORT MODAL */}
       <AssignmentExportModalComponent ref={exportModalRef} />

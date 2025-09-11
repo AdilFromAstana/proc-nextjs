@@ -9,11 +9,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 // Кастомные компоненты
-import AssignmentActionsComponent from "@/components/Oqylyk/Assignment/Student/ActionsComponent";
-// import AssignmentStudentListComponent from "@/components/Oqylyq/Assignment/Student/ListComponent";
-// import AssignmentCommentBlockComponent from "@/components/Oqylyq/Assignment/CommentBlockComponent";
-// import AssignmentAccessControlComponent from "@/components/Oqylyq/Assignment/AccessControlComponent";
+import AssignmentActions from "@/components/Oqylyk/Assignment/Student/ActionsComponent";
+import AssignmentStudentListComponent from "@/components/Oqylyk/Assignment/Student/ListComponent/AssignmentStudentListComponent";
 // import AssignmentMaterialComponent from "@/components/Oqylyq/Assignment/MaterialComponent";
+// import AssignmentAccessControlComponent from "@/components/Oqylyq/Assignment/AccessControlComponent";
 // import AssignmentTeacherComponent from "@/components/Oqylyq/Assignment/TeacherComponent";
 // import AssignmentClassComponent from "@/components/Oqylyq/Assignment/ClassComponent";
 // import AssignmentDateTimeRestrictComponent from "@/components/Oqylyq/Assignment/DateTimeRestrictComponent";
@@ -29,6 +28,7 @@ import AssignmentActionsComponent from "@/components/Oqylyk/Assignment/Student/A
 // Типы
 import { Assignment, AssignmentData } from "@/types/assignment";
 import { Progress } from "@/components/ui/progress";
+import AssignmentCommentBlockComponent from "@/components/Oqylyk/Assignment/CommentBlockComponent";
 
 interface AssignmentViewClientPageProps {
   assignment: AssignmentData;
@@ -312,7 +312,7 @@ export function AssignmentViewClientPage({
   return (
     <div className="oqylyq-page assignment-page p-8 w-full">
       {/* OTHER INFO */}
-      <Card className="p-2 pb-0">
+      <Card className="p-2 pb-0 border-none">
         {/* PROGRESS */}
         {entity.progress && (
           <div className="mb-4">
@@ -329,24 +329,15 @@ export function AssignmentViewClientPage({
         {/* ACTIONS */}
         <div className="mb-4">
           <h3 className="text-lg font-medium mb-2">Действия</h3>
-          <AssignmentActionsComponent
-            apiUrl={undefined}
-            assignment={entity}
-            student={undefined}
-            attempt={undefined}
-            list={actionList}
-            clickable={false} // значение по умолчанию
-            fetching={true} // значение по умолчанию
-            live={false} // значение по умолчанию
-            refreshing={false}
-            interval={20000} // значение по умолчанию
-            portion={10} // значение по умолчанию
-            onSelected={undefined} // значение по умолчанию
-          />
+          <AssignmentActions />
+          <AssignmentStudentListComponent />
         </div>
       </Card>
 
       <Separator className="my-6" />
+
+      <AssignmentCommentBlockComponent />
+      {/* <MaterialComponent /> */}
     </div>
   );
 }

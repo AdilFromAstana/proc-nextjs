@@ -6,7 +6,7 @@ async function getInitialData(searchParams: {
 }) {
   // Здесь будет реальный API вызов
   const mockAssignments: never[] = [];
-  const mockTotalPages = 5;
+  const mockTotalPages = 1;
 
   // ✅ Используем await для searchParams
   const params = await searchParams;

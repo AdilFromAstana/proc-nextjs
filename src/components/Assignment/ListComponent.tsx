@@ -20,15 +20,12 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 
-// Типы
 import { Assignment } from "@/types/assignment";
 
-// Кастомные компоненты
 import EntityListComponent, { EntityListRef } from "@/components/ui/EntityList";
 import AssignmentRadialChartComponent from "@/components/Assignment/UI/RadialChartComponent";
 import AssignmentStatusComponent from "@/components/Assignment/UI/StatusComponent";
 
-// Хуки для enum'ов
 import { useAssignmentTypes } from "@/hooks/useAssignmentTypes";
 import { useAssignmentStatuses } from "@/hooks/useAssignmentStatuses";
 import { useBasket } from "@/hooks/useBasket";
@@ -45,13 +42,11 @@ interface AssignmentListComponentProps {
   onSelected?: (assignment: Assignment) => void;
 }
 
-// ✅ Интерфейс для ref методов
 export interface AssignmentListRef {
   showLoader: () => void;
   hideLoader: () => void;
 }
 
-// ✅ Используем forwardRef
 const AssignmentListComponent = forwardRef<
   AssignmentListRef,
   AssignmentListComponentProps
