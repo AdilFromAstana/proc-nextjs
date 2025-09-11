@@ -1,14 +1,16 @@
 // src/types/class.ts
 
-export interface Class {
+export type Class = {
   id: number;
   name: string;
   description: string;
   createdAt: string;
   studentCount: number;
   teacherCount: number;
-  status: "active" | "archived";
-}
+  status: "active" | "inactive";
+  studentIds: number[];
+  teacherIds: number[];
+};
 
 export interface CreateClassData {
   name: string;

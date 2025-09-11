@@ -23,6 +23,7 @@ type UniversalListComponentProps<T extends BaseItem = BaseItem> = {
   filters?: FilterOption[];
   defaultFilter?: string;
   renderItem: (item: T) => React.ReactNode;
+  onClickItem?: (item: T) => void;
   viewAllLink?: string;
   enableHideToggle?: boolean;
   loading?: boolean;
@@ -36,6 +37,7 @@ export default function UniversalListComponent<T extends BaseItem>({
   filters = [],
   defaultFilter = "all",
   renderItem,
+  onClickItem,
   viewAllLink = "#",
   enableHideToggle = false,
   loading = false,
@@ -50,7 +52,7 @@ export default function UniversalListComponent<T extends BaseItem>({
     if (!loading) {
       const timer = setTimeout(() => {
         setIsLoading(false);
-      }, 300);
+      }, 3000);
       return () => clearTimeout(timer);
     }
   }, [loading]);
@@ -165,7 +167,13 @@ export default function UniversalListComponent<T extends BaseItem>({
           </div>
         ) : (
           filteredItems.map((item) => (
-            <div key={item.id}>{renderItem(item)}</div>
+            <div
+              key={item.id}
+              onClick={() => onClickItem && onClickItem(item)}
+              className={onClickItem ? "cursor-pointer" : ""}
+            >
+              {renderItem(item)}
+            </div>
           ))
         )}
       </div>

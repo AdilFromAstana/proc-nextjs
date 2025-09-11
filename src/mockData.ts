@@ -401,9 +401,11 @@ export const mockClasses: Class[] = [
     description:
       "Изучение дифференциального и интегрального исчисления, пределов, рядов и их приложений в науке и инженерии",
     createdAt: "2024-01-15",
-    studentCount: 28,
+    studentCount: 4,
     teacherCount: 2,
     status: "active",
+    studentIds: [1, 2, 3, 4],
+    teacherIds: [1, 5],
   },
   {
     id: 2,
@@ -411,9 +413,11 @@ export const mockClasses: Class[] = [
     description:
       "Изучение структуры, свойств, состава и реакций органических соединений и их роли в биологических процессах",
     createdAt: "2024-01-20",
-    studentCount: 22,
+    studentCount: 3,
     teacherCount: 1,
     status: "active",
+    studentIds: [5, 6, 7],
+    teacherIds: [2],
   },
   {
     id: 3,
@@ -421,9 +425,11 @@ export const mockClasses: Class[] = [
     description:
       "Исследование цивилизаций Древнего Египта, Греции, Рима и других древних обществ от зарождения до падения",
     createdAt: "2024-01-10",
-    studentCount: 35,
+    studentCount: 2,
     teacherCount: 1,
     status: "active",
+    studentIds: [8, 9],
+    teacherIds: [3],
   },
   {
     id: 4,
@@ -431,39 +437,57 @@ export const mockClasses: Class[] = [
     description:
       "Основы программирования, алгоритмы, структуры данных и разработка приложений на языке Python",
     createdAt: "2024-02-01",
-    studentCount: 31,
-    teacherCount: 3,
+    studentCount: 1,
+    teacherCount: 2,
     status: "active",
+    studentIds: [10],
+    teacherIds: [4, 5],
+  },
+];
+
+export const mockStudents = [
+  { id: 1, name: "Александр Петров", avatar: "/avatars/student1.jpg" },
+  { id: 2, name: "Мария Иванова", avatar: "/avatars/student2.jpg" },
+  { id: 3, name: "Дмитрий Сидоров", avatar: "/avatars/student3.jpg" },
+  { id: 4, name: "Елена Козлова", avatar: "/avatars/student4.jpg" },
+  { id: 5, name: "Иван Смирнов", avatar: "/avatars/student5.jpg" },
+  { id: 6, name: "Анна Волкова", avatar: "/avatars/student6.jpg" },
+  { id: 7, name: "Павел Морозов", avatar: "/avatars/student7.jpg" },
+  { id: 8, name: "Ольга Леонова", avatar: "/avatars/student8.jpg" },
+  { id: 9, name: "Сергей Никитин", avatar: "/avatars/student9.jpg" },
+  { id: 10, name: "Татьяна Зайцева", avatar: "/avatars/student10.jpg" },
+];
+
+export const mockTeachers = [
+  {
+    id: 1,
+    name: "Профессор Андреев",
+    avatar: "/avatars/teacher1.jpg",
+    subject: "Математика",
+  },
+  {
+    id: 2,
+    name: "Доктор Белова",
+    avatar: "/avatars/teacher2.jpg",
+    subject: "Химия",
+  },
+  {
+    id: 3,
+    name: "Историк Громов",
+    avatar: "/avatars/teacher3.jpg",
+    subject: "История",
+  },
+  {
+    id: 4,
+    name: "Программист Кузнецов",
+    avatar: "/avatars/teacher4.jpg",
+    subject: "Информатика",
   },
   {
     id: 5,
-    name: "Физика элементарных частиц",
-    description:
-      "Изучение стандартной модели физики частиц, квантовой механики и современных исследований в области физики высоких энергий",
-    createdAt: "2024-01-25",
-    studentCount: 15,
-    teacherCount: 2,
-    status: "active",
-  },
-  {
-    id: 6,
-    name: "Литература 19 века",
-    description:
-      "Анализ произведений великих писателей XIX века, включая Толстого, Достоевского, Диккенса и других классиков",
-    createdAt: "2023-12-01",
-    studentCount: 26,
-    teacherCount: 1,
-    status: "archived",
-  },
-  {
-    id: 7,
-    name: "Биология клетки",
-    description:
-      "Изучение строения и функций клеток, клеточных процессов, молекулярной биологии и генетики",
-    createdAt: "2024-01-30",
-    studentCount: 29,
-    teacherCount: 2,
-    status: "active",
+    name: "Методист Федорова",
+    avatar: "/avatars/teacher5.jpg",
+    subject: "Педагогика",
   },
 ];
 
