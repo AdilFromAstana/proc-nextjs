@@ -1,15 +1,6 @@
 "use client";
 
-import {
-  Blocks,
-  ChevronDown,
-  Component,
-  Home,
-  Menu,
-  Search,
-  ToyBrick,
-  X,
-} from "lucide-react";
+import { ChevronDown, Home, Menu, ToyBrick, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -22,7 +13,6 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sidebar,
@@ -45,6 +35,7 @@ const componentItems = getComponents();
 const blockItems = getBlocks();
 
 export const libraryItems = [
+  { title: "Главная", path: "/" },
   { title: "Задания", path: "/assignments" },
   { title: "База уроков", path: "/lessons" },
   { title: "База тестов и задач", path: "/quiz" },
@@ -52,9 +43,11 @@ export const libraryItems = [
   { title: "Медиафайлы", path: "/media" },
 ];
 
-export const gettingStartedItems = [
-  { title: "Home", path: "/" },
-  { title: "Design Tokens", path: "/tokens" },
+export const groupsItems = [
+  { title: "Новая группа", path: "/classes/create" },
+  { title: "Мои группы", path: "/classes" },
+  { title: "Кабинеты", path: "/rooms" },
+  { title: "Коды приглашения", path: "/invites" },
 ];
 
 export function MobileSidebarTrigger() {
