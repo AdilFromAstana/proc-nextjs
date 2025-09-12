@@ -1,12 +1,7 @@
 import { Question, QuestionType } from "@/types/quizQuestion";
 import React, { useState, useEffect } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "../ui/accordion";
-import { mockData, mockQuiz } from "@/mockQuiz";
+
+import { mockQuizLibrary } from "@/mockQuiz";
 
 // Типы для вопросов из библиотеки
 type LibraryQuestion = {
@@ -26,42 +21,48 @@ type Props = {
 };
 
 export default function LibraryQuestionsForm({ onAdd, onCancel }: Props) {
-  // Мок-данные
-
   // Преобразование данных в формат LibraryQuestion
-  const questions: LibraryQuestion[] = mockData.entities.components.map(
-    (component) => {
+  const questions: LibraryQuestion[] = mockQuizLibrary.entities.data.map(
+    (component: any) => {
       if (component.component_type === "FreeQuestionComponent") {
         return {
           id: component.id,
           type: "test",
-          text: component.component.question || "",
+          text: component.question || "",
           options:
-            component.component.options?.map((opt) => ({
+            component.options?.map((opt: any) => ({
               id: opt.id,
               text: opt.answer || "",
               isCorrect: opt.is_true === 1,
             })) || [],
-          difficulty: component.settings.group,
-          points: parseInt(component.settings.score_encouragement || "0"),
+          hint: component.hint || undefined,
+          difficulty: component.settings?.group,
+          points: component.settings?.score_encouragement
+            ? parseInt(component.settings.score_encouragement)
+            : undefined,
         };
       } else if (component.component_type === "OpenQuestionComponent") {
         return {
           id: component.id,
           type: "free",
-          text: component.component.question || "",
-          answer: component.component.answer || "",
-          hint: component.component.hint || "",
-          difficulty: component.settings.group,
-          points: parseInt(component.settings.score_encouragement || "0"),
+          text: component.question || "",
+          answer: component.answer || "",
+          hint: component.hint || undefined,
+          difficulty: component.settings?.group,
+          points: component.settings?.score_encouragement
+            ? parseInt(component.settings.score_encouragement)
+            : undefined,
         };
       }
       return {
         id: component.id,
         type: "test",
-        text: component.component.question || "",
-        difficulty: component.settings.group,
-        points: parseInt(component.settings.score_encouragement || "0"),
+        text: component.question || "",
+        hint: component.hint || undefined,
+        difficulty: component.settings?.group,
+        points: component.settings?.score_encouragement
+          ? parseInt(component.settings.score_encouragement)
+          : undefined,
       };
     }
   );
@@ -218,7 +219,7 @@ export default function LibraryQuestionsForm({ onAdd, onCancel }: Props) {
 
             {question.type === "free" && question.answer && (
               <div className="mt-2 p-2 bg-gray-100 rounded-md">
-                <p className="text-sm text-gray-600">Правильный ответ:</p>
+                <p className="text-sm text-gray-600">Ответ</p>
                 <p className="text-sm">{question.answer}</p>
               </div>
             )}

@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+"use client";
+
+import React, { useEffect, useState } from "react";
 import {
   Accordion,
   AccordionContent,
@@ -17,27 +19,21 @@ import { ApiQuizResponse, Question, QuestionType } from "@/types/quizQuestion";
 
 type Props = {
   initialQuiz?: ApiQuizResponse;
+  isEditing?: boolean;
 };
 
-export default function CreateQuizComponent({ initialQuiz }: Props) {
+export default function CreateQuizComponent({
+  initialQuiz,
+  isEditing = false,
+}: Props) {
   const [quizName, setQuizName] = useState(initialQuiz?.entity?.name || "");
   const [quizDescription, setQuizDescription] = useState(
     initialQuiz?.entity?.description || ""
   );
-  const [searchTerm, setSearchTerm] = useState("");
-  const [difficulty, setDifficulty] = useState("");
-  const [variant, setVariant] = useState("");
-  const [sortOrder, setSortOrder] = useState("");
-
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
-  const [isLibraryModalOpen, setIsLibraryModalOpen] = useState(false);
-  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
-
-  const remainingChars = 200 - quizDescription.length;
 
   const [questions, setQuestions] = useState<Question[]>(() => {
     if (initialQuiz?.entity?.components) {
-      return initialQuiz.entity.components.map((component, index) => {
+      return initialQuiz.entity.components.map((component) => {
         const baseQuestion: Question = {
           id: `q-${component.id}`,
           type: mapApiComponentTypeToQuestionType(component.component_type),
@@ -51,6 +47,17 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
     return [];
   });
 
+  const [searchTerm, setSearchTerm] = useState("");
+  const [difficulty, setDifficulty] = useState("");
+  const [variant, setVariant] = useState("");
+  const [sortOrder, setSortOrder] = useState("");
+
+  const [isPanelOpen, setIsPanelOpen] = useState(true);
+  const [isLibraryModalOpen, setIsLibraryModalOpen] = useState(false);
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+
+  const remainingChars = 200 - quizDescription.length;
+
   const quizQuestionTypes = [
     { type: "test", name: "Тестовый вопрос", icon: "❓" },
     { type: "free", name: "Открытый вопрос", icon: "💬" },
@@ -60,9 +67,17 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
     { type: "library", name: "Выбрать из библиотеки", icon: "📚" },
   ];
 
-  const mapApiComponentTypeToQuestionType = (
+  // В начале CreateQuizComponent.tsx, после useState hooks:
+
+  useEffect(() => {
+    if (isEditing && !initialQuiz) {
+      console.warn("Режим редактирования, но initialQuiz не предоставлен");
+    }
+  }, [isEditing, initialQuiz]);
+
+  function mapApiComponentTypeToQuestionType(
     componentType: string
-  ): QuestionType => {
+  ): QuestionType {
     switch (componentType) {
       case "FreeQuestionComponent":
         return "test";
@@ -75,14 +90,14 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
       default:
         return "test";
     }
-  };
+  }
 
-  const convertApiComponentToContent = (component: any): any => {
+  function convertApiComponentToContent(component: any): any {
     switch (component.component_type) {
       case "FreeQuestionComponent":
         return {
           text: component.component.question || "",
-          allowMultipleAnswers: false,
+          allowMultipleAnswers: component.component.is_multiple === 1,
           options: component.component.options?.map((opt: any) => ({
             id: opt.id.toString(),
             text: opt.answer || "",
@@ -104,7 +119,7 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
       default:
         return {};
     }
-  };
+  }
 
   const getInitialContentForType = (type: QuestionType) => {
     switch (type) {
@@ -121,6 +136,8 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
         return {
           text: "",
           answer: "",
+          hint: "",
+          feedback: "",
         };
       case "fill-blanks":
         return {
@@ -138,12 +155,6 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
           backgroundImage: null,
           elements: [],
         };
-      case "import":
-        return {
-          filename: "",
-          size: 0,
-        };
-
       default:
         return {};
     }
@@ -151,13 +162,11 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
 
   const handleAddQuestion = (questionType: QuestionType) => {
     if (questionType === "library") {
-      // Открываем модальное окно библиотеки
       setIsLibraryModalOpen(true);
       return;
     }
 
     if (questionType === "import") {
-      // Открываем модальное окно импорта
       setIsImportModalOpen(true);
       return;
     }
@@ -169,8 +178,8 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
       type: questionType,
       content: initialContent,
       settings: {
-        score_encouragement: "10", // Значение по умолчанию
-        score_penalty: "5", // Значение по умолчанию
+        score_encouragement: "10",
+        score_penalty: "5",
       },
     };
     setQuestions((prev) => [...prev, newQuestion]);
@@ -185,7 +194,7 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
     );
   };
 
-  const handleCancelQuestion = (id: string) => {
+  const handleDeleteQuestion = (id: string) => {
     setQuestions((prev) => prev.filter((q) => q.id !== id));
   };
 
@@ -194,7 +203,6 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
   };
 
   const handleAddFromLibrary = (libraryQuestion: any) => {
-    // Здесь создаем новый вопрос из выбранного из библиотеки
     const newQuestion: Question = {
       id: `q-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
       type: mapApiComponentTypeToQuestionType(libraryQuestion.component_type),
@@ -209,14 +217,11 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
   };
 
   const handleImportFromFile = (importedData: any) => {
-    // Здесь обрабатываем импортированные данные
-    // Для примера создаем один вопрос из импорта
     const newQuestion: Question = {
       id: `q-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      type: "test", // или другой тип в зависимости от импорта
+      type: "test",
       content: {
         text: importedData.filename || "Импортированный вопрос",
-        // Добавьте остальные поля в зависимости от формата импорта
       },
       settings: {
         score_encouragement: "10",
@@ -231,7 +236,7 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
     const commonProps = {
       onAdd: (data: Omit<Question, "id">) =>
         handleSaveQuestion(question.id, data),
-      onCancel: () => handleCancelQuestion(question.id),
+      onCancel: () => handleDeleteQuestion(question.id),
     };
 
     switch (question.type) {
@@ -253,10 +258,6 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
         return <FillBlanksForm {...commonProps} />;
       case "drag-drop":
         return <DragNDropForm {...commonProps} />;
-      case "library":
-        return <LibraryQuestionsForm {...commonProps} />;
-      case "import":
-        return <ImportFromFileForm {...commonProps} />;
       default:
         return null;
     }
@@ -266,14 +267,12 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
     const quizData = {
       name: quizName,
       description: quizDescription,
-      components: questions.map((question, index) => {
-        return {
-          position: index,
-          component_type: mapQuestionTypeToApiComponentType(question.type),
-          settings: question.settings || {},
-          content: question.content,
-        };
-      }),
+      components: questions.map((question, index) => ({
+        position: index,
+        component_type: mapQuestionTypeToApiComponentType(question.type),
+        settings: question.settings || {},
+        content: question.content,
+      })),
     };
     return quizData;
   };
@@ -293,15 +292,42 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
     }
   };
 
-  // Функция для получения баллов за правильный ответ
   const getScoreEncouragement = (question: Question): string => {
     return question.settings?.score_encouragement || "0";
+  };
+
+  const handleSaveQuiz = async () => {
+    const quizData = prepareQuizForSave();
+
+    try {
+      if (isEditing && initialQuiz?.entity?.id) {
+        // Редактирование существующего теста
+        // await fetch(`/api/quiz/${initialQuiz.entity.id}`, {
+        //   method: 'PUT',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(quizData)
+        // });
+        console.log("Редактирование теста:", quizData);
+      } else {
+        // Создание нового теста
+        // await fetch('/api/quiz', {
+        //   method: 'POST',
+        //   headers: { 'Content-Type': 'application/json' },
+        //   body: JSON.stringify(quizData)
+        // });
+        console.log("Создание нового теста:", quizData);
+      }
+    } catch (error) {
+      console.error("Ошибка сохранения теста:", error);
+    }
   };
 
   return (
     <div>
       <div className="mt-6 p-6 border border-gray-200 rounded-md bg-white">
-        <h1 className="text-2xl text-gray-900">Новый тест</h1>
+        <h1 className="text-2xl text-gray-900">
+          {isEditing ? "Редактирование теста" : "Новый тест"}
+        </h1>
         <Accordion type="multiple" className="w-full mt-4 space-y-2">
           {/* Основная информация */}
           <AccordionItem
@@ -350,7 +376,6 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
             <AccordionTrigger>Фильтры</AccordionTrigger>
             <AccordionContent>
               <div className="space-y-4">
-                {/* Поиск */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Поиск
@@ -364,7 +389,6 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
                   />
                 </div>
 
-                {/* Сложность */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Сложность
@@ -381,7 +405,6 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
                   </select>
                 </div>
 
-                {/* Вариант */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Вариант
@@ -398,7 +421,6 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
                   </select>
                 </div>
 
-                {/* Сортировка */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
                     Сортировка
@@ -458,15 +480,22 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
                   </span>
                 </div>
               </div>
-              <div className="flex items-center text-sm text-gray-600">
-                <span className="mr-1">Баллы:</span>
-                <span className="font-medium">
-                  {getScoreEncouragement(question)}
-                </span>
+              <div className="flex items-center space-x-4">
+                <div className="flex items-center text-sm text-gray-600">
+                  <span className="mr-1">Баллы:</span>
+                  <span className="font-medium">
+                    {getScoreEncouragement(question)}
+                  </span>
+                </div>
+                <button
+                  onClick={() => handleDeleteQuestion(question.id)}
+                  className="text-red-500 hover:text-red-700 text-sm"
+                >
+                  Удалить
+                </button>
               </div>
             </div>
 
-            {/* Форма редактирования */}
             <div className="p-6">{renderQuestionForm(question)}</div>
           </div>
         ))}
@@ -486,7 +515,7 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
               {quizQuestionTypes
                 .filter(
                   (btn) => btn.type !== "library" && btn.type !== "import"
-                ) // Убираем библиотеку и импорт из панели
+                )
                 .map((btn) => (
                   <button
                     key={btn.type}
@@ -499,7 +528,6 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
                     </span>
                   </button>
                 ))}
-              {/* Отдельные кнопки для библиотеки и импорта */}
               <button
                 onClick={() => handleAddQuestion("library")}
                 className="flex flex-col items-center group hover:bg-gray-100 p-3 rounded-md transition min-w-[120px]"
@@ -522,9 +550,8 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
           </div>
         )}
 
-        {/* Модальное окно библиотеки */}
         {isLibraryModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -547,9 +574,8 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
           </div>
         )}
 
-        {/* Модальное окно импорта */}
         {isImportModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
             <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
               <div className="p-6">
                 <div className="flex justify-between items-center mb-4">
@@ -572,17 +598,12 @@ export default function CreateQuizComponent({ initialQuiz }: Props) {
           </div>
         )}
 
-        {/* Кнопка сохранения */}
         <div className="mt-8 flex justify-end">
           <button
-            onClick={() => {
-              const quizData = prepareQuizForSave();
-              console.log("Подготовленные данные для сохранения:", quizData);
-              // Здесь будет вызов API для сохранения
-            }}
+            onClick={handleSaveQuiz}
             className="px-6 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
           >
-            Сохранить тест
+            {isEditing ? "Обновить тест" : "Сохранить тест"}
           </button>
         </div>
       </div>

@@ -10,7 +10,7 @@ import { brandHeader } from "@/app/demo/[name]/components/brand-header";
 import { brandSidebar } from "@/app/demo/[name]/components/brand-sidebar";
 import { hero } from "@/app/demo/[name]/components/hero";
 import { login } from "@/app/demo/[name]/components/login";
-import { logo } from "@/app/demo/[name]/components/logo";
+import Logo from "@/app/demo/[name]/components/logo";
 import { productGrid } from "@/app/demo/[name]/components/product-grid";
 import { promo } from "@/app/demo/[name]/components/promo";
 

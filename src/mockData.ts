@@ -399,7 +399,7 @@ export const mockClasses: Class[] = [
     id: 1,
     name: "Математический анализ",
     description:
-      "Изучение дифференциального и интегрального исчисления, пределов, рядов и их приложений в науке и инженерии",
+      "Изучение дифференциального и интегрального исчисления, пределов, рядов и их приложений в науке и инженерии науке и инженерии науке и инженерии науке и инженерии науке и инженерии науке и инженерии науке и инженерии",
     createdAt: "2024-01-15",
     studentCount: 4,
     teacherCount: 2,
@@ -490,6 +490,28 @@ export const mockTeachers = [
     subject: "Педагогика",
   },
 ];
+
+export const mockTimezones = {
+  status: "success",
+  status_code: "0000",
+  entities: [
+    {
+      id: 1,
+      region: "Asia/Almaty",
+      utc: "UTC+6",
+    },
+    {
+      id: 2,
+      region: "Europe/Moscow",
+      utc: "UTC+3",
+    },
+    {
+      id: 3,
+      region: "Asia/Tashkent",
+      utc: "UTC+5",
+    },
+  ],
+};
 
 // Для списка действий используем твой класс
 const mockActionList = {
