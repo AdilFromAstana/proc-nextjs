@@ -13,12 +13,9 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Calendar, Clock } from "lucide-react";
 import { format } from "date-fns";
+import { Student } from "@/types/students";
 
 interface Assignment {
-  id: number;
-}
-
-interface Student {
   id: number;
 }
 

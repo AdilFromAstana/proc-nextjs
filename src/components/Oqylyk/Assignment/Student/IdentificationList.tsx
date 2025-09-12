@@ -8,51 +8,63 @@ interface Identification {
   id: number;
   screenshot?: string;
   screenshots?: string[];
-  getTime: () => string;
+  created_at: string;
 }
 
-interface AssignmentActionList {
-  models: Identification[];
+interface IdentificationList {
+  identities: Identification[];
 }
 
-interface IdentificationListProps {
-  identities: AssignmentActionList;
-}
+const IdentificationList: React.FC<IdentificationList> = ({ identities }) => {
+  function formatCreatedAt(dateStr: string): string {
+    const date = new Date(dateStr);
 
-const IdentificationList: React.FC<IdentificationListProps> = ({
-  identities,
-}) => {
+    const days = [
+      "воскресенье",
+      "понедельник",
+      "вторник",
+      "среда",
+      "четверг",
+      "пятница",
+      "суббота",
+    ];
+
+    const day = days[date.getDay()];
+    const hours = date.getHours().toString();
+    const minutes = date.getMinutes().toString().padStart(2, "0");
+
+    return `Во ${day}, в ${hours}:${minutes}`;
+  }
+
   return (
     <div className="max-h-[250px] text-center -mx-5 -mb-4 overflow-y-auto">
-      {identities.models.length === 0 ? (
+      {!identities ? (
         <div className="text-muted-foreground py-8">
           Нет идентификационных фотографий
         </div>
       ) : (
         <div className="flex flex-wrap justify-center gap-2 p-2">
-          {identities.models.map((identification, index) => (
+          {identities.map((identification, index) => (
             <React.Fragment key={`${identification.id}-${index}`}>
               {/* SINGLE PHOTO */}
               {identification.screenshot && (
-                <Card className="identification-item w-[100px] inline-block align-top m-1">
-                  <CardContent className="p-2">
+                <Card className="identification-item w-[100px] inline-block align-top m-0 p-0 border-none relative">
+                  <CheckCircle className="absolute -top-2 -left-2 text-green-500 bg-white rounded-full w-5 h-5 z-10" />
+                  <CardContent className="p-0">
                     <a
                       href={identification.screenshot.trim()}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="block relative w-full h-[80px] rounded-sm overflow-hidden shadow-sm hover:shadow-md transition-shadow"
+                      className="block w-full h-[80px] rounded-sm overflow-hidden shadow-sm hover:shadow-md transition-shadow"
                     >
-                      <CheckCircle className="absolute -top-2 -left-2 text-green-500 bg-white rounded-full w-5 h-5" />
                       <img
                         src={identification.screenshot.trim()}
                         className="w-full h-full object-cover"
                         alt="Идентификация"
                       />
                     </a>
-                    <div className="mt-2">
-                      <Badge variant="secondary" className="text-xs">
-                        {identification.getTime()}
-                      </Badge>
+                    <div className="mt-2 text-xs">
+                      {formatCreatedAt(identification.created_at)}
                     </div>
                   </CardContent>
                 </Card>
@@ -63,9 +75,9 @@ const IdentificationList: React.FC<IdentificationListProps> = ({
                 identification.screenshots.map((photo, photoIndex) => (
                   <Card
                     key={`${identification.id}-${index}-${photoIndex}`}
-                    className="identification-item w-[100px] inline-block align-top m-1"
+                    className="identification-item w-[100px] inline-block align-top m-0 p-0 border-none"
                   >
-                    <CardContent className="p-2">
+                    <CardContent className="p-0">
                       <a
                         href={photo.trim()}
                         target="_blank"
@@ -78,10 +90,8 @@ const IdentificationList: React.FC<IdentificationListProps> = ({
                           alt="Идентификация"
                         />
                       </a>
-                      <div className="mt-2">
-                        <Badge variant="secondary" className="text-xs">
-                          {identification.getTime()}
-                        </Badge>
+                      <div className="mt-2 text-xs">
+                        {formatCreatedAt(identification.created_at)}
                       </div>
                     </CardContent>
                   </Card>

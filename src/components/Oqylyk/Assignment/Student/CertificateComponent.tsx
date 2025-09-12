@@ -1,6 +1,7 @@
 import React, { useState, useRef, useCallback } from "react";
 import { Download, Upload } from "lucide-react";
 import CertificateInfoComponent from "../../Certificate/CertificateInfoComponent";
+import { Student } from "@/types/students";
 
 // Локальный Toast интерфейс
 interface Toast {
@@ -28,11 +29,6 @@ interface UserCertificate {
   is_active: number;
   certificate_number?: string;
   placeholders?: Record<string, any>;
-}
-
-interface Student {
-  id: number;
-  user?: any;
 }
 
 interface ConfirmModalRef {

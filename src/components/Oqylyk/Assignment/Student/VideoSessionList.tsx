@@ -8,12 +8,9 @@ import {
   VideoOff,
   MonitorPlay,
 } from "lucide-react";
+import { Student } from "@/types/students";
 
 interface Assignment {
-  id: number;
-}
-
-interface Student {
   id: number;
 }
 
@@ -212,43 +209,41 @@ const VideoSessionListComponent: React.FC<VideoSessionListComponentProps> = ({
   }
 
   return (
-    <div className="max-h-[250px] overflow-auto">
-      <div className="flex flex-wrap gap-4 justify-center">
-        {groups.map((group, index) => {
-          const session = group.isVideoExists()
-            ? group.getFirstConvertedSession()
-            : group.first();
+    <div className="max-h-[250px] flex flex-wrap gap-0 justify-center  overflow-auto w-full">
+      {groups.map((group, index) => {
+        const session = group.isVideoExists()
+          ? group.getFirstConvertedSession()
+          : group.first();
 
-          return (
-            <Card
-              key={`session-collection-${index}`}
-              className={`w-32 cursor-pointer hover:shadow-md transition-shadow ${
-                group.isVideoExists() ? "" : "opacity-70"
-              }`}
-              onClick={() => group.isVideoExists() && onGroupSelected(group)}
-            >
-              <CardContent className="p-3">
-                <div className="relative w-full h-24 rounded-md overflow-hidden mb-2">
-                  <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-                    {getIconForSession(session)}
-                  </div>
-                  {session.record?.thumb_url && (
-                    <img
-                      src={session.record.thumb_url}
-                      alt="Session thumbnail"
-                      className="w-full h-full object-cover"
-                    />
-                  )}
+        return (
+          <Card
+            key={`session-collection-${index}`}
+            className={`w-32 cursor-pointer hover:shadow-md transition-shadow border-none p-0 gap-0 ${
+              group.isVideoExists() ? "" : "opacity-70"
+            }`}
+            onClick={() => group.isVideoExists() && onGroupSelected(group)}
+          >
+            <CardContent className="p-0 border-none gap-0">
+              <div className="relative w-full h-24 rounded-md overflow-hidden mb-2">
+                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                  {getIconForSession(session)}
                 </div>
+                {session.record?.thumb_url && (
+                  <img
+                    src={session.record.thumb_url}
+                    alt="Session thumbnail"
+                    className="w-full h-full object-cover"
+                  />
+                )}
+              </div>
 
-                <div className="text-center text-xs text-muted-foreground">
-                  {getDurationText(group, session)}
-                </div>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </div>
+              <div className="text-center text-xs text-muted-foreground">
+                {getDurationText(group, session)}
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
     </div>
   );
 };

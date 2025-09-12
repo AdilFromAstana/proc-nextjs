@@ -98,9 +98,9 @@ export function RegistrySidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b">
+      <SidebarHeader className="border-b bg-gray-400">
         <div className="flex items-center justify-between px-2 py-2">
-          <Link href="/" className="flex min-w-0 items-center gap-2">
+          <Link href="/" className="flex min-w-0 items-center">
             <Logo />
           </Link>
 

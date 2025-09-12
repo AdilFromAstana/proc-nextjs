@@ -52,7 +52,7 @@ function ConditionalLayout({
         <SidebarProvider>
           <MobileSidebarTrigger />
           <RegistrySidebar />
-          <main className="flex w-full justify-center">{children}</main>
+          <main className="flex w-full justify-center h-full">{children}</main>
         </SidebarProvider>
       ) : (
         <main className="w-full">{children}</main>
@@ -88,7 +88,7 @@ export default function RootLayout({
         name="robots"
         content="noindex, nofollow, noarchive, nosnippet, noimageindex"
       />
-      <body>
+      <body className="h-full">
         <Providers>
           <ConditionalLayout showSidebar={showSidebar}>
             {children}

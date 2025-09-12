@@ -90,7 +90,7 @@ const AssignmentActions: React.FC<Props> = ({
 
   return (
     <div
-      className="assignment-actions-component"
+      className="assignment-actions-component w-full"
       style={{ position: "relative" }}
     >
       {canShowPreviousActions && (

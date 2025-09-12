@@ -23,7 +23,7 @@ import AssignmentExportModalComponent, {
   AssignmentExportModalRef,
 } from "@/components/Assignment/ExportModalComponent";
 
-import { Assignment, mockAssignments } from "@/types/assignment";
+import { Assignment } from "@/types/assignment";
 import IdentificationList from "@/components/Oqylyk/Assignment/Student/IdentificationList";
 import TimeStatesComponent from "@/components/Oqylyk/Assignment/Student/TimeStatesComponent";
 import QuizResultListComponent from "@/components/Oqylyk/Assignment/Student/QuizResultList";
@@ -116,7 +116,7 @@ export default function AssignmentsClientPage({
       assignmentListRef.current?.showLoader();
 
       // Здесь должен быть реальный API вызов
-      const mockData: Assignment[] = mockAssignments; // Используем мок данные
+      const mockData: Assignment[] = []; // Используем мок данные
 
       // Симуляция API вызова
       await new Promise((resolve) => setTimeout(resolve, 500));

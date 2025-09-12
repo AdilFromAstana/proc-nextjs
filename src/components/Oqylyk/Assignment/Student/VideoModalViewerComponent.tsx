@@ -2,6 +2,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import AssignmentViolationsComponent from "./ViolationsComponent";
+import { Student } from "@/types/students";
 
 // Mock VideoPlayerComponent
 const VideoPlayerComponent = ({
@@ -80,10 +81,6 @@ interface Violation {
 }
 
 interface Assignment {
-  id: number;
-}
-
-interface Student {
   id: number;
 }
 
@@ -323,7 +320,11 @@ const VideoModalViewerComponent: React.FC<VideoModalViewerComponentProps> = ({
   };
 
   const mockAssignment: Assignment = { id: 123 };
-  const mockStudent: Student = { id: 456 };
+  const mockStudent: Student = {
+    id: 456,
+    user_id: 0,
+    user: {},
+  };
 
   // Компонент для тестирования с управлением через state
   const TestVideoModalViewer = () => {

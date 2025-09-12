@@ -1,3 +1,5 @@
+import { Student } from "./types/students";
+
 // types.ts
 export type AssignmentModel = {
   id: number;
@@ -52,7 +54,7 @@ export type StudentModel = {
 
 export type AttemptModel = {
   id: number;
-  status: "active" | "closed";
+  status: string;
   points: number;
   results: {
     models: ResultModel[];
@@ -75,25 +77,6 @@ export type ReviewerResultModel = {
   id: number;
   points: number | null;
   getClassName(): string;
-};
-
-export type AssignmentActionList = {
-  replace: (data: any[]) => void;
-  length: number;
-  models: any[];
-  fetch?: (params: any) => Promise<void>;
-};
-
-export type AssignmentComponentList = {
-  length: number;
-  models: any[];
-};
-
-export type ScoreList = {
-  getScore: () => number;
-  findScore: () => any;
-  push: (score: any) => void;
-  replace: (scores: any[]) => void;
 };
 
 export type ReviewerScoreList = {
@@ -130,35 +113,9 @@ export type AssignmentStudentListProps = {
   ) => void;
 };
 
-// ----------------
-
-export type Student = {
-  id: number;
-  points: number;
-  credibility: number;
-  results: {
-    models: Result[];
-  };
-  attempts: {
-    length: number;
-    models: Attempt[];
-  };
-  user: {
-    id: number;
-    firstname: string;
-    lastname: string;
-    photo: string;
-    color: string;
-    is_online: boolean;
-  };
-  getReviewerResult(result: Result): ReviewerResult;
-  getActiveAttempt(): Attempt | null;
-  getScore(): number;
-};
-
 export type Attempt = {
   id: number;
-  status: "active" | "closed";
+  status: string;
   points: number;
   results: {
     models: Result[];

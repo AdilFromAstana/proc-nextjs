@@ -1,16 +1,15 @@
 import { notFound } from "next/navigation";
-import { AssignmentViewClientPage } from "./components/client-page";
-import { AssignmentData } from "@/types/assignment";
+import AssignmentPage from "./components/AssignmentPage";
 
 // Серверная функция для получения данных задания
-async function getAssignment(id: string): Promise<AssignmentData | null> {
+async function getAssignment(id: string): Promise<any> {
   try {
     // Здесь должен быть реальный API вызов
     // const response = await fetch(`/api/assignments/${id}`);
     // const data = await response.json();
 
     // Пока используем моковые данные - только данные, без функций
-    const mockAssignment: AssignmentData = {
+    const mockAssignment = {
       id,
       name: `Задание ${id}`,
       type: "quiz",
@@ -43,5 +42,5 @@ export default async function AssignmentViewPage({
   }
 
   // Передаем только данные, без функций
-  return <AssignmentViewClientPage assignment={assignment} />;
+  return <AssignmentPage />;
 }

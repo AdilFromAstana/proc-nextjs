@@ -296,9 +296,9 @@ const QuizResultListComponent: React.FC<QuizResultListComponentProps> = ({
   if (results.length <= 0 || components.length <= 0) return null;
 
   return (
-    <div className="w-full space-y-4">
+    <div className="w-full space-y-4 p-0 m-0 gap-4 flex flex-col">
       {assessmentList.map((assessment, index) => (
-        <Card key={assessment.assessment_id} className="shadow-sm">
+        <Card key={assessment.assessment_id} className="shadow-sm m-0 p-0">
           <CardContent className="p-4 space-y-4">
             <Badge variant="secondary" className="text-sm font-semibold">
               {assessment.assessment_name}
@@ -351,10 +351,6 @@ const QuizResultListComponent: React.FC<QuizResultListComponentProps> = ({
                     })}
                   </div>
                 </ScrollArea>
-
-                <Separator />
-
-                {/* Здесь можно вызвать renderReviewerResults / renderAveragePoints / renderSumPoints в отдельные компоненты */}
               </div>
             )}
           </CardContent>
