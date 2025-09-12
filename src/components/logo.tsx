@@ -79,13 +79,13 @@ const Logo: React.FC<LogoComponentProps> = ({
       {/* TEXT PART 8 */}
       <path
         d="M109.181 47.6038V20.883H116.92V25.5892H117.338C117.826 23.7765 118.558 22.5041 119.534 21.772C120.545 21.0051 122.062 20.6216 124.084 20.6216H125.025V28.3084H121.417C118.419 28.3084 116.92 30.0514 116.92 33.5375V47.6038H109.181Z"
-        fill={isLightTheme ? "white" : "black"}
+        fill={!isLightTheme ? "white" : "black"}
       />
 
       {/* TEXT PART 9 */}
       <path
         d="M95.8183 47.6037H87.6609V18.373H76V11H107.479V18.373H95.8183V47.6037Z"
-        fill={isLightTheme ? "white" : "black"}
+        fill={!isLightTheme ? "white" : "black"}
       />
     </svg>
   );

@@ -29,6 +29,9 @@ import {
 } from "@/components/ui/sidebar";
 import { getBlocks, getComponents, getUIPrimitives } from "@/lib/registry";
 import Logo from "../logo";
+import { GroupsIcon } from "./icons/GroupsIcon";
+import { LibraryIcon } from "./icons/LibraryIcon";
+import { InfoIcon } from "./icons/InfoIcon";
 
 const uiItems = getUIPrimitives();
 const componentItems = getComponents();
@@ -121,7 +124,7 @@ export function RegistrySidebar() {
               <CollapsibleTrigger className="w-full">
                 <SidebarGroupLabel className="flex cursor-pointer items-center justify-between">
                   <div className="flex min-w-0 items-center">
-                    <Home className="size-4 flex-shrink-0" />
+                    <LibraryIcon className="w-5 h-5" />
                     <span className="ml-2 opacity-100 transition-all duration-200">
                       Библиотека
                     </span>
@@ -148,6 +151,80 @@ export function RegistrySidebar() {
                         </SidebarMenuButton>
                       </SidebarMenuItem>
                     ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+
+          <Collapsible defaultOpen={true} className="group/collapsible">
+            <SidebarGroup>
+              <CollapsibleTrigger className="w-full">
+                <SidebarGroupLabel className="flex cursor-pointer items-center justify-between">
+                  <div className="flex min-w-0 items-center">
+                    <GroupsIcon className="w-5 h-5" />
+                    <span className="ml-2 opacity-100 transition-all duration-200">
+                      Группы
+                    </span>
+                  </div>
+                  <ChevronDown className="size-4 flex-shrink-0 opacity-100 transition-all duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {groupsItems.map((item) => (
+                      <SidebarMenuItem key={item.path}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={pathname === item.path}
+                        >
+                          <Link
+                            onClick={() => setOpenMobile(false)}
+                            href={item.path}
+                          >
+                            {item.title}
+                          </Link>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    ))}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </CollapsibleContent>
+            </SidebarGroup>
+          </Collapsible>
+
+          <Collapsible defaultOpen={true} className="group/collapsible">
+            <SidebarGroup>
+              <CollapsibleTrigger className="w-full">
+                <SidebarGroupLabel className="flex cursor-pointer items-center justify-between">
+                  <div className="flex min-w-0 items-center">
+                    <InfoIcon className="w-5 h-5" />
+                    <span className="ml-2 opacity-100 transition-all duration-200">
+                      Ресурсы
+                    </span>
+                  </div>
+                  <ChevronDown className="size-4 flex-shrink-0 opacity-100 transition-all duration-200 group-data-[state=open]/collapsible:rotate-180" />
+                </SidebarGroupLabel>
+              </CollapsibleTrigger>
+
+              <CollapsibleContent>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    <SidebarMenuItem key={"/resources"}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={pathname === "/resources"}
+                      >
+                        <Link
+                          onClick={() => setOpenMobile(false)}
+                          href={"/resources"}
+                        >
+                          Цифровые библиотеки
+                        </Link>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
                   </SidebarMenu>
                 </SidebarGroupContent>
               </CollapsibleContent>

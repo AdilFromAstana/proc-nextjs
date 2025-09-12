@@ -17,8 +17,18 @@ import {
   hideBasket,
   showTaskList,
   hideTaskList,
+  showChat,
+  hideChat,
+  showSwitchOrg,
+  hideSwitchOrg,
 } from "@/store/pageSlice";
 import { fetchCurrentUser } from "@/store/authSlice";
+import { IconForum } from "./IconForum";
+import { IconSwap } from "./IconSwap";
+
+import { IconCart } from "./IconCart";
+import BasketModalComponent from "./BasketModalComponent";
+import SwitchOrgComponent from "./SwitchOrgComponent";
 
 export default function Header() {
   const dispatch = useDispatch<AppDispatch>();
@@ -42,6 +52,10 @@ export default function Header() {
     (state: RootState) => state.page.basketShowedState
   );
 
+  const switchOrgShowedState = useSelector(
+    (state: RootState) => state.page.switchOrgShowedState
+  );
+
   // Загружаем пользователя при монтировании
   useEffect(() => {
     if (!user) {
@@ -50,6 +64,15 @@ export default function Header() {
   }, [dispatch, user]);
 
   // Отслеживание изменений состояний модальных окон
+
+  useEffect(() => {
+    if (switchOrgShowedState && schoolSelectComponentRef.current) {
+      schoolSelectComponentRef.current.open();
+    } else if (schoolSelectComponentRef.current) {
+      schoolSelectComponentRef.current.close();
+    }
+  }, [switchOrgShowedState]);
+
   useEffect(() => {
     if (taskListState && taskListComponentRef.current) {
       taskListComponentRef.current.open();
@@ -75,9 +98,7 @@ export default function Header() {
     <header className="w-full p-5 relative">
       <div className="flex flex-row justify-start items-center">
         {/* LANGUAGES */}
-        <div className="header-lang">
-          {/* <LanguageSwitcherComponent /> */}
-        </div>
+        <div className="header-lang">{/* <LanguageSwitcherComponent /> */}</div>
 
         {/* TOOLBAR */}
         <div className="header-toolbar flex flex-nowrap flex-row justify-between items-center ml-auto">
@@ -85,14 +106,13 @@ export default function Header() {
           <div className="toolbar-item ml-7.5 sm:ml-6">
             <a
               href="#"
-              className="toolbar-chat-item block"
+              className="toolbar-chat-item block text-[#7c8da7] hover:text-blue-600 transition-colors"
               onClick={(e) => {
                 e.preventDefault();
-                schoolSelectComponentRef.current?.open();
+                dispatch(showSwitchOrg()); // Открываем через Redux
               }}
             >
-              {/* <IconSwap className="text-[#7c8da7] text-lg sm:text-base" /> */}
-              СВайп
+              <IconSwap className="text-lg sm:text-base w-6 h-6" />
             </a>
           </div>
 
@@ -106,8 +126,7 @@ export default function Header() {
                 chatComponentRef.current?.open();
               }}
             >
-              {/* <IconForum className="text-[#7c8da7] text-lg sm:text-base" /> */}
-              Форум
+              <IconForum className="text-[#7c8da7] text-lg sm:text-base w-6 h-6" />
             </a>
           </div>
 
@@ -117,26 +136,32 @@ export default function Header() {
               href="#"
               className="toolbar-basket-item block relative"
               onClick={(e) => {
+                console.log("click basket");
                 e.preventDefault();
                 basketComponentRef.current?.open();
               }}
             >
-              {/* <IconCart className="text-[#7c8da7] text-lg sm:text-base" /> */}
-              Телега
+              <IconCart className="text-[#7c8da7] text-lg sm:text-base w-6 h-6" />
             </a>
           </div>
         </div>
       </div>
 
       {/* Модальные компоненты */}
-      {/* <SchoolSelectModalComponent ref={schoolSelectComponentRef} />
-      <ChatComponent ref={chatComponentRef} />
+      {/* 
+      
+      <TaskListComponent ref={taskListComponentRef} /> */}
+
+      <SwitchOrgComponent
+        ref={schoolSelectComponentRef}
+        onOpened={() => dispatch(showSwitchOrg())}
+        onClosed={() => dispatch(hideSwitchOrg())}
+      />
       <BasketModalComponent
         ref={basketComponentRef}
         onOpened={() => dispatch(showBasket())}
         onClosed={() => dispatch(hideBasket())}
       />
-      <TaskListComponent ref={taskListComponentRef} /> */}
     </header>
   );
 }

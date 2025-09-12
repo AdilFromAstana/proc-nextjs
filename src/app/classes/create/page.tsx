@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { mockClasses, mockStudents, mockTeachers } from "@/mockData";
+import { mockStudents, mockTeachers } from "@/mockData";
 
 import {
   Collapsible,
@@ -9,63 +9,56 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 
-export default function ClassItemPage({
-  params,
-}: {
-  params: { classId: number };
-}) {
-  const classData = mockClasses.find((cls) => cls.id == params.classId);
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [className, setClassName] = React.useState(classData?.name || "");
-  const [description, setDescription] = React.useState(
-    classData?.description || ""
-  );
+export default function CreateClassPage() {
+  const [isEditing] = React.useState(true); // Всегда в режиме редактирования
+  const [className, setClassName] = React.useState("");
+  const [description, setDescription] = React.useState("");
   const [selectedStudents, setSelectedStudents] = React.useState<number[]>([]);
   const [activeTab, setActiveTab] = React.useState<"students" | "teachers">(
     "students"
   );
 
-  // Получаем студентов и учителей для текущего класса
-  const classStudents = mockStudents.filter((student) =>
-    classData?.studentIds.includes(student.id)
-  );
-
-  const classTeachers = mockTeachers.filter((teacher) =>
-    classData?.teacherIds.includes(teacher.id)
-  );
-
-  if (!classData) {
-    return <div>Класс не найден</div>;
-  }
+  const allStudents = mockStudents;
+  const allTeachers = mockTeachers;
 
   return (
     <div className="p-6 bg-gray-50 min-h-screen w-full">
-      {/* Основная информация */}
-      <div className="bg-white rounded-lg shadow-sm border mb-6 p-4">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-sm font-medium text-gray-500">
-            Основная информация
-          </h2>
-          <button
-            onClick={() => setIsEditing(!isEditing)}
-            className="text-blue-600 hover:text-blue-800 text-sm"
-          >
-            {isEditing ? "Сохранить" : "Редактировать"}
-          </button>
-        </div>
+      {/* Заголовок */}
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-900">Создание класса</h1>
+        <p className="text-gray-600">Заполните информацию о новом классе</p>
+      </div>
 
-        {isEditing ? (
-          <>
+      {/* Основная информация */}
+      <Accordion type="single" collapsible className="mb-6">
+        <AccordionItem
+          value="basic-info"
+          className="bg-white rounded-lg shadow-sm border"
+        >
+          <AccordionTrigger className="px-4 py-3 [&[data-state=open]]:rounded-b-none">
+            <h2 className="text-sm font-medium text-gray-500">
+              Основная информация
+            </h2>
+          </AccordionTrigger>
+          <AccordionContent className="px-4 pb-4 rounded-b-lg">
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Название группы
+                Название группы *
               </label>
               <input
                 type="text"
                 value={className}
                 onChange={(e) => setClassName(e.target.value)}
+                placeholder="Введите название группы"
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                required
               />
             </div>
 
@@ -85,29 +78,22 @@ export default function ClassItemPage({
                 Осталось {200 - description.length} символа(-ов)
               </p>
             </div>
-          </>
-        ) : (
-          <>
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Название группы
-              </label>
-              <div className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-                {className}
-              </div>
-            </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-1">
-                Описание
-              </label>
-              <div className="px-3 py-2 border border-gray-300 rounded-md bg-gray-50">
-                {description || "Описание отсутствует"}
-              </div>
+            {/* Кнопка сохранения */}
+            <div className="flex justify-end">
+              <button
+                onClick={() => {
+                  // Здесь будет логика сохранения
+                  console.log("Сохранить класс:", { className, description });
+                }}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+              >
+                Сохранить
+              </button>
             </div>
-          </>
-        )}
-      </div>
+          </AccordionContent>
+        </AccordionItem>
+      </Accordion>
 
       {/* Табы */}
       <div className="bg-white rounded-lg shadow-sm border mb-6 p-4">
@@ -124,9 +110,7 @@ export default function ClassItemPage({
               <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
             </svg>
             Студенты
-            <span className="text-sm text-gray-500">
-              {classData.studentCount}
-            </span>
+            <span className="text-sm text-gray-500">{allStudents.length}</span>
           </button>
           <button
             onClick={() => setActiveTab("teachers")}
@@ -140,9 +124,7 @@ export default function ClassItemPage({
               <path d="M10 2a8 8 0 100 16 8 8 0 000-16zm0 14a6 6 0 110-12 6 6 0 010 12z" />
             </svg>
             Преподаватели
-            <span className="text-sm text-gray-500">
-              {classData.teacherCount}
-            </span>
+            <span className="text-sm text-gray-500">{allTeachers.length}</span>
           </button>
         </div>
 
@@ -212,21 +194,21 @@ export default function ClassItemPage({
         {/* Список */}
         <div className="space-y-2">
           {activeTab === "students"
-            ? classStudents.map((student) => (
+            ? allStudents.map((student) => (
                 <CollapsibleCard
                   key={student.id}
                   item={student}
                   itemType={activeTab}
                   title="Имя студента"
-                ></CollapsibleCard>
+                />
               ))
-            : classTeachers.map((teacher) => (
+            : allTeachers.map((teacher) => (
                 <CollapsibleCard
                   key={teacher.id}
                   item={teacher}
                   itemType={activeTab}
                   title="Имя преподавателя"
-                ></CollapsibleCard>
+                />
               ))}
         </div>
       </div>
