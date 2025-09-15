@@ -17,10 +17,11 @@ const ViolationsSection: React.FC<ViolationsSectionProps> = ({
   violations,
   onViolationSelected,
 }) => {
-  const shouldShow =
-    isManager ||
-    !assignment.isHideUsersEnabled?.() ||
-    assignment.isCompletedStatus?.();
+  const shouldShow = isManager;
+  console.log("violations: ", violations);
+  // isManager ||
+  // !assignment.isHideUsersEnabled?.() ||
+  // assignment.isCompletedStatus?.();
 
   return (
     <SectionWrapper
@@ -30,7 +31,7 @@ const ViolationsSection: React.FC<ViolationsSectionProps> = ({
       hint="Подсказка по нарушениям"
       showSection={shouldShow}
     >
-      {violations && violations.models && violations.models.length > 0 ? (
+      {violations && violations.length > 0 ? (
         <ViolationsComponent />
       ) : (
         <div className="empty--WSectionWrapperlist text-gray-500 italic">

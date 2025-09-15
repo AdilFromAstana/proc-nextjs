@@ -228,7 +228,7 @@ const StudentListComponent = forwardRef<StudentListRef, StudentListNotReqProps>(
                   transition={{ duration: 0.3 }}
                   className="border-t border-gray-100 overflow-hidden"
                 >
-                  <div className="p-4">{renderAdditional(student)}</div>
+                  {renderAdditional(student)}
                 </motion.div>
               )}
           </motion.div>
@@ -291,10 +291,8 @@ const StudentListComponent = forwardRef<StudentListRef, StudentListNotReqProps>(
       <div
         className={`student-list-component space-y-0 ${className} p-0 gap-0`}
       >
-        {/* Убираем AnimatePresence с mode="wait" для списка */}
         <div className="space-y-0">{studentItems}</div>
 
-        {/* PAGINATION */}
         {pagination && totalPages > 1 && (
           <div className="pagination-wrapper mt-6 flex justify-center">
             <div className="flex items-center space-x-2">

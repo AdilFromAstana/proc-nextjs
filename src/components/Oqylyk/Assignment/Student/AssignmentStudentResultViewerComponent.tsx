@@ -1,247 +1,283 @@
-import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Assignment } from "@/types/assignment";
-import OverlayLoaderComponent from "@/components/Chunks/OverlayLoaderComponent";
+// components/Assignment/AssignmentStudentResultViewer.tsx
 
-import { useAssignmentStudentResults } from "@/hooks/useAssignmentStudentResults";
-import { useAssignmentStudentActions } from "@/hooks/useAssignmentStudentActions";
-import AttemptSelector from "./Sections/AttemptSelector";
+"use client";
+import React, { useState, useCallback, useEffect } from "react";
+import {
+  Loader2,
+  Camera,
+  AlertTriangle,
+  Video,
+  CheckCircle,
+  List,
+  Star,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
+import { format } from "date-fns";
+import { useAssignmentStudentData } from "@/hooks/useAssignmentStudentData";
 import IdentitySection from "./Sections/IdentitySection";
 import ViolationsSection from "./Sections/ViolationsSection";
-import VideoRecordsSection from "./Sections/VideoRecordsSection";
 import ResultsSection from "./Sections/ResultsSection";
-import ActionsSection from "./Sections/ActionsSection";
-import ScoringSection from "./Sections/ScoringSection";
-import CertificateSection from "./Sections/CertificateSection";
 import SettingsSection from "./Sections/SettingsSection";
-import ModalsContainer from "./Sections/ModalsContainer";
-import { Student } from "@/types/students";
-import { mockObj } from "@/apiMockData";
+import ActionsSection from "./Sections/ActionsSection";
 
 interface AssignmentStudentResultViewerProps {
-  viewer: "owner" | "reviewer" | "proctor";
-  assignment: Assignment;
-  student: Student;
-  progress: {
-    total: number;
-  };
-  fetchResults: boolean;
-  disabled: boolean;
-  fetchScores: boolean;
-  onAttemptSelected: () => null;
-  onAttemptUpdated: () => null;
+  assignment: any;
+  student: any;
+  attempt?: any;
+  accessKey?: string;
+  disabled?: boolean;
+  fetchResults?: boolean;
+  fetchScores?: boolean;
+  onAttemptSelected?: (attempt: any) => void;
+  onAttemptUpdated?: (student: any) => void;
+  onViolationItemSelected?: (violation: any) => void;
+  onSessionGroupSelected?: (session: any) => void;
 }
 
-const AssignmentStudentResultViewerComponent: React.FC<
+const AssignmentStudentResultViewer: React.FC<
   AssignmentStudentResultViewerProps
 > = ({
-  viewer = "owner",
   assignment,
-  student = mockObj.apiAssignmentsIdContextAssignmentAttemptId.entity,
-  progress = { total: 0 },
+  student,
+  attempt,
+  accessKey,
+  disabled = false,
   fetchResults = false,
   fetchScores = false,
-  disabled = false,
   onAttemptSelected,
   onAttemptUpdated,
+  onViolationItemSelected,
+  onSessionGroupSelected,
 }) => {
-  const loaderRef = useRef<any>(null);
-  const [isOpen, setIsOpen] = useState(false);
+  // ✅ Все хуки в начале
+  const [currentAttempt, setCurrentAttempt] = useState(attempt);
+  const [actionsPage, setActionsPage] = useState(1);
+  const [violationsPage, setViolationsPage] = useState(1);
 
-  // Основной хук для управления данными
-  const {
-    currentAttempt,
-    setCurrentAttempt,
-    progressStudent,
-    components,
-    violations,
-    identities,
-    actions,
-    studentResults,
-    studentScores,
-    assessments,
-    certificate,
-    resultsChart,
-    available_time,
-    credibility,
-    is_started,
-    is_finished,
-    webinarSessionsApiUrl,
-    isManager,
-    isOwner,
-    isReviewer,
-    results = [],
-    scores,
-    reviewerScores,
-    currentScore,
-    fetchTotal,
-    loading,
-  } = useAssignmentStudentResults({
-    assignment,
-    student,
-    progress,
+  // ✅ Используем обновлённый хук
+  const { data, isLoading, isError, error } = useAssignmentStudentData(
+    assignment.id,
+    student.id,
+    currentAttempt?.id,
     fetchResults,
-    fetchScores,
-    loaderRef,
-  });
+    fetchScores
+  );
 
-  // Хук для управления действиями
-  const {
-    handleAttemptSelected,
-    handleAttemptResultUpdated,
-    handleSessionGroupSelected,
-    handleViolationItemSelected,
-    updateScore,
-  } = useAssignmentStudentActions({
-    assignment,
-    student,
-    currentAttempt,
-    setCurrentAttempt,
-    onAttemptSelected,
-    onAttemptUpdated,
-    fetchTotal,
-    loaderRef,
-    isReviewer,
-    reviewerScores,
-    scores,
-    disabled,
-  });
+  // ✅ Обработчики
+  const handleAttemptSelected = useCallback(
+    (selectedAttempt: any) => {
+      setCurrentAttempt(selectedAttempt);
+      onAttemptSelected?.(selectedAttempt);
+    },
+    [onAttemptSelected]
+  );
 
-  // Watch для currentAttempt
-  useEffect(() => {
-    if (student?.attempts) {
-      student.attempts.forEach((attempt) => {
-        if (attempt.status === "active") {
-          setCurrentAttempt(
-            mockObj.apiAssignmentsIdContextAssignmentAttemptId.entity
-              .attempts[0]
-          );
-        }
-      });
-    }
+  const handleViolationItemSelected = useCallback(
+    (violation: any) => {
+      onViolationItemSelected?.(violation);
+    },
+    [onViolationItemSelected]
+  );
 
-    fetchTotal();
+  const handleSessionGroupSelected = useCallback(
+    (session: any) => {
+      onSessionGroupSelected?.(session);
+    },
+    [onSessionGroupSelected]
+  );
 
-    const interval = setInterval(() => {
-      // Watch logic
-    }, 2000);
+  const handleAttemptResultUpdated = useCallback(
+    (updatedStudent: any) => {
+      onAttemptUpdated?.(updatedStudent);
+    },
+    [onAttemptUpdated]
+  );
 
-    return () => {
-      clearInterval(interval);
-    };
-  }, [student, fetchTotal]);
-
-  const handleOpenChange = useCallback((open: boolean) => {
-    setIsOpen(open);
-  }, []);
-
-  if (!assignment || !student) {
+  // ✅ Показываем лоадер
+  if (isLoading) {
     return (
-      <div className="p-4 text-center text-gray-500">
-        Нет данных для отображения
+      <div className="flex items-center justify-center p-8">
+        <Loader2 className="h-8 w-8 animate-spin mr-2" />
+        Загрузка данных студента...
       </div>
     );
   }
 
-  return (
-    <div className="student-result-component space-y-6 relative">
-      {/* <OverlayLoaderComponent /> */}
+  // ✅ Показываем ошибку
+  if (isError) {
+    return (
+      <div className="p-4 text-red-500 bg-red-50 rounded">
+        Ошибка загрузки данных: {error.message}
+      </div>
+    );
+  }
 
-      {student?.attempts && (
-        <AttemptSelector
-          attempts={student.attempts}
-          currentAttempt={currentAttempt}
-          onAttemptSelected={handleAttemptSelected}
-        />
+  // ✅ Если данных нет
+  if (!data) {
+    return <div>Данные не найдены</div>;
+  }
+
+  // ✅ Деструктуризация данных
+  const {
+    student_assessments,
+    attempts,
+    actions,
+    violations,
+    identities,
+    credibility,
+    progress,
+    quiz_components,
+  } = data;
+
+  // ✅ Логика отображения разделов
+  const showUserContent = true; // В реальном приложении: isManager || (!assignment.isHideUsersEnabled() || assignment.isCompletedStatus())
+  const showResults = quiz_components.length > 0;
+
+  return (
+    <div className="space-y-6 p-4">
+      {/* Попытки */}
+      {attempts.length > 1 && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <List className="h-5 w-5" />
+              Попытки ({attempts.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="flex flex-wrap gap-2">
+              {attempts.map((attempt) => (
+                <Button
+                  key={attempt.id}
+                  variant={
+                    currentAttempt?.id === attempt.id ? "default" : "outline"
+                  }
+                  size="sm"
+                  onClick={() => handleAttemptSelected(attempt)}
+                  className="rounded-full"
+                >
+                  №{attempt.attempt + 1} ({attempt.status}) — {attempt.points}{" "}
+                  баллов
+                </Button>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Прогресс */}
+      {progress && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Прогресс выполнения</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-2">
+              <div className="flex justify-between">
+                <span>Общий прогресс</span>
+                <span>{progress.total}%</span>
+              </div>
+              <Progress value={progress.total} className="w-full" />
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       <IdentitySection
-        assignment={assessments}
-        isManager={isManager}
-        identities={student.identities}
+        assignment={assignment}
+        identities={identities}
+        isManager={true}
       />
 
       <ViolationsSection
         assignment={assignment}
-        isManager={isManager}
-        violations={violations}
-        onViolationSelected={handleViolationItemSelected}
+        isManager={true}
+        onViolationSelected={() => window.open(violation.screenshot!, "_blank")}
+        violations={actions.data}
       />
 
-      <VideoRecordsSection
-        assignment={assignment}
-        student={student}
-        isManager={isManager}
-        webinarSessionsApiUrl={webinarSessionsApiUrl}
-        onSessionSelected={handleSessionGroupSelected}
-      />
+      <ActionsSection assignment={assignment} currentAttempt={currentAttempt} />
 
-      <ResultsSection
-        assignment={assignment}
-        student={student}
-        isOwner={isOwner}
-        isReviewer={isReviewer}
-        results={results || []}
-        components={components}
-        resultsChart={resultsChart}
-        currentAttempt={currentAttempt}
-        disabled={disabled}
-        onResultUpdated={handleAttemptResultUpdated}
-      />
+      {/* Результаты */}
+      {/* {showResults && ( 
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              Результаты теста
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {quiz_components.map((component) => {
+                const question = component.component;
+                console.log("question: ", question);
+                const userAttempt = question.attempts.find(
+                  (a) => a.assignment_attempt_id === currentAttempt?.id
+                );
+                const selectedOption = question.options.find(
+                  (o) => o.id === userAttempt?.option_id
+                );
+                const isCorrect = selectedOption?.is_true === 1;
 
-      {/*<ActionsSection
-        assignment={assignment}
-        student={student}
-        currentAttempt={currentAttempt}
-        actions={actions}
-      />
+                return (
+                  <div
+                    key={component.id}
+                    className={`p-4 rounded border ${
+                      isCorrect
+                        ? "border-green-200 bg-green-50"
+                        : "border-red-200 bg-red-50"
+                    }`}
+                  >
+                    <h4 className="font-medium mb-2">{question.question}</h4>
+                    <div className="mb-2">
+                      <strong>Ваш ответ:</strong>{" "}
+                      {selectedOption?.answer || "Не ответил"}
+                    </div>
+                    <div
+                      className={`text-sm ${
+                        isCorrect ? "text-green-600" : "text-red-600"
+                      }`}
+                    >
+                      {isCorrect ? "✅ Правильно" : "❌ Неправильно"}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
+      )} */}
 
-      <ScoringSection
-        assignment={assignment}
-        student={student}
-        isOwner={isOwner}
-        currentAttempt={currentAttempt}
-        currentScore={currentScore}
-        disabled={disabled}
-        updateScore={updateScore}
-        scores={scores}
-        reviewerScores={reviewerScores}
-        isReviewer={isReviewer}
-      />
+      {/* Баллы и надёжность */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Star className="h-5 w-5 text-yellow-500" />
+            Статистика
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <div className="text-sm text-gray-500">Баллы</div>
+              <div className="text-2xl font-bold">
+                {currentAttempt?.points || 0}
+              </div>
+            </div>
+            <div>
+              <div className="text-sm text-gray-500">Надёжность</div>
+              <div className="text-2xl font-bold">{credibility}%</div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {assignment.certificate_id && (
-        <CertificateSection
-          assignment={assignment}
-          student={student}
-          certificate={certificate}
-          disabled={disabled}
-          isFinished={is_finished}
-          onCertificateChange={fetchTotal}
-        />
-      )}
-
-      {!disabled && (
-        <SettingsSection
-          assignment={assignment}
-          student={student}
-          available_time={available_time}
-          is_started={is_started}
-          is_finished={is_finished}
-          onSettingsChange={fetchTotal}
-        />
-      )}
-
-      <ModalsContainer
-        viewer={viewer}
-        assignment={assignment}
-        student={student}
-        currentContext="owner"
-        disabled={disabled}
-        isOpen={isOpen}
-        onOpenChange={handleOpenChange}
-        onResultUpdated={handleAttemptResultUpdated}
-      /> */}
+      {/* <SettingsSection assignment={assignment} /> */}
     </div>
   );
 };
 
-export default AssignmentStudentResultViewerComponent;
+export default AssignmentStudentResultViewer;

@@ -54,6 +54,7 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
   onFilterUpdate,
   onPageChange,
 }) => {
+  // ✅ 1. ВСЕ useState — в самом начале
   const [sortBy, setSortBy] = useState<string>("lastname");
   const [students, setStudents] = useState<StudentList>([]);
   const [filter, setFilter] = useState<StudentFilter>({
@@ -65,7 +66,7 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
   );
   const [currentPage, setCurrentPage] = useState<number>(page);
 
-  // perPageOptions как в Vue
+  // ✅ 2. ВСЕ useMemo — сразу после useState
   const perPageOptions = useMemo(() => {
     if (!chunks || chunks.length <= 0) {
       return [];
@@ -77,7 +78,7 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
     }));
   }, [chunks]);
 
-  // Функция загрузки студентов
+  // ✅ 3. ВСЕ useCallback — сразу после useMemo
   const fetchStudents = useCallback(async () => {
     if (!fetching) {
       return;
@@ -86,16 +87,14 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
     onLoading?.();
 
     try {
-      // Merge params - теперь включаем sortBy
       const queryParams: Record<string, any> = {
         page: currentPage,
         limit: filter.limit,
-        sortBy: sortBy, // Добавляем сортировку
+        sortBy: sortBy,
         ...(filter.query ? { query: filter.query } : {}),
         ...params,
       };
 
-      // Filter undefined/null values
       const cleanParams: Record<string, any> = {};
       for (const property in queryParams) {
         if (
@@ -106,21 +105,9 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
         }
       }
 
-      console.log("Fetching students with params:", cleanParams);
-
-      // Здесь будет реальный API вызов
-      // const response = await fetch(`/api/students?${new URLSearchParams(cleanParams)}`, {
-      //   headers: {
-      //     'X-Requested-Fields': fields.join(',')
-      //   }
-      // });
-      // const data = await response.json();
-
-      // Пока используем мок-данные
       let mockStudents: StudentList = mockObj.apiStudents.entities
         .data as unknown as StudentList;
 
-      // Эмулируем сортировку и фильтрацию на клиенте для демонстрации
       if (filter.query) {
         mockStudents = mockStudents.filter(
           (student) =>
@@ -133,7 +120,6 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
         );
       }
 
-      // Эмулируем сортировку
       if (sortBy === "lastname") {
         mockStudents = [...mockStudents].sort((a, b) =>
           (a.user.lastname || "").localeCompare(b.user.lastname || "")
@@ -143,7 +129,8 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
           (a, b) => (b.points || 0) - (a.points || 0)
         );
       }
-      setStudents(mockObj.apiStudents.entities.data);
+
+      setStudents(mockStudents); // ✅ Исправлено: устанавливался мок вместо отфильтрованных данных
       onLoaded?.(mockStudents);
     } catch (error) {
       console.error("Error fetching students:", error);
@@ -159,59 +146,6 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
     onLoaded,
   ]);
 
-  // Watch params (как в Vue)
-  useEffect(() => {
-    onFilterUpdate?.();
-    setCurrentPage(1);
-    onPageChange?.(1);
-
-    if (filterInterval) {
-      clearTimeout(filterInterval);
-    }
-
-    const timer = setTimeout(() => {
-      fetchStudents();
-    }, 1000);
-
-    setFilterInterval(timer);
-
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [params, onFilterUpdate, onPageChange, fetchStudents]); // Добавил fetchStudents
-
-  // Watch filter (как в Vue) - теперь включает sortBy
-  useEffect(() => {
-    onFilterUpdate?.();
-    setCurrentPage(1);
-    onPageChange?.(1);
-
-    if (filterInterval) {
-      clearTimeout(filterInterval);
-    }
-
-    const timer = setTimeout(() => {
-      fetchStudents();
-    }, 1000);
-
-    setFilterInterval(timer);
-
-    return () => {
-      if (timer) clearTimeout(timer);
-    };
-  }, [filter, sortBy, onFilterUpdate, onPageChange, fetchStudents]); // Добавил sortBy и fetchStudents
-
-  // Watch page (как в Vue)
-  useEffect(() => {
-    setCurrentPage(page);
-    fetchStudents();
-  }, [page, fetchStudents]); // Добавил fetchStudents
-
-  // Initial fetch
-  useEffect(() => {
-    fetchStudents();
-  }, [fetchStudents]); // Добавил fetchStudents
-
   const handleFilterChange = useCallback(
     <K extends keyof StudentFilter>(key: K, value: StudentFilter[K]) => {
       setFilter((prev) => ({
@@ -222,15 +156,66 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
     []
   );
 
-  // Обработчик изменения сортировки
   const handleSortChange = useCallback((value: string) => {
     setSortBy(value);
   }, []);
 
+  // ✅ 4. ВСЕ useEffect — сразу после useCallback
+  useEffect(() => {
+    onFilterUpdate?.();
+    setCurrentPage(1);
+    onPageChange?.(1);
+
+    if (filterInterval) {
+      clearTimeout(filterInterval);
+    }
+
+    const timer = setTimeout(() => {
+      fetchStudents();
+    }, 1000);
+
+    setFilterInterval(timer);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [params, onFilterUpdate, onPageChange, fetchStudents]);
+
+  useEffect(() => {
+    onFilterUpdate?.();
+    setCurrentPage(1);
+    onPageChange?.(1);
+
+    if (filterInterval) {
+      clearTimeout(filterInterval);
+    }
+
+    const timer = setTimeout(() => {
+      fetchStudents();
+    }, 1000);
+
+    setFilterInterval(timer);
+
+    return () => {
+      if (timer) clearTimeout(timer);
+    };
+  }, [filter, sortBy, onFilterUpdate, onPageChange, fetchStudents]);
+
+  useEffect(() => {
+    setCurrentPage(page);
+    fetchStudents();
+  }, [page, fetchStudents]);
+
+  useEffect(() => {
+    fetchStudents();
+  }, [fetchStudents]);
+
+  console.log("students: ", students);
+
+  // ✅ 5. Только СЕЙЧАС — после всех хуков — можно рендерить JSX
   return (
     <div className="student-filter-component">
       <div className="student-filter-toolbar grid grid-cols-12 gap-2 mb-4">
-        {/* SEARCH QUERY - 8 колонок */}
         <div className="toolbar-item col-span-8">
           <Input
             value={filter.query || ""}
@@ -242,7 +227,6 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
           />
         </div>
 
-        {/* PER PAGE - 2 колонки */}
         {perPageOptions.length > 0 && (
           <div className="toolbar-item col-span-2">
             <Select
@@ -265,7 +249,6 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
           </div>
         )}
 
-        {/* SORT BY - 2 колонки */}
         <div className="toolbar-item col-span-2">
           <Select value={sortBy} onValueChange={handleSortChange}>
             <SelectTrigger className="w-full">
@@ -282,7 +265,6 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
         </div>
       </div>
 
-      {/* Default slot - передаем студентов и фильтр */}
       {children({ students, filter })}
     </div>
   );

@@ -1,224 +1,246 @@
-import React, {
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  useCallback,
-} from "react";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+// components/Assignment/AssignmentActionsComponent.tsx
+
+"use client";
+import React, { useState, useCallback, useEffect } from "react";
+import { format } from "date-fns";
+import { Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Separator } from "@/components/ui/separator";
 import {
-  faUserShield,
-  faExclamationCircle,
-  faInfoCircle,
-} from "@fortawesome/free-solid-svg-icons";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { useAssignmentStudentActions } from "@/hooks/useAssignmentStudentActions";
 
-interface Action {
-  id: number;
-  user: { firstname: string; lastname: string };
-  action_type: string;
-  description?: string;
-  is_warning?: boolean;
-  is_archived?: boolean;
-  initiator_id?: number;
-  created_at: Date;
-}
-
-interface Props {
+interface AssignmentActionsComponentProps {
+  assignmentId: number;
+  studentId?: number;
+  attemptId?: number;
   clickable?: boolean;
-  onSelected?: (action: Action) => void;
+  live?: boolean;
+  refreshing?: boolean;
+  interval?: number;
+  onActionSelected?: (action: any) => void;
 }
 
-const AssignmentActions: React.FC<Props> = ({
+const AssignmentActionsComponent: React.FC<AssignmentActionsComponentProps> = ({
+  assignmentId,
+  studentId,
+  attemptId,
   clickable = true,
-  onSelected,
+  live = false,
+  refreshing = false,
+  interval = 20000,
+  onActionSelected,
 }) => {
-  const [actions, setActions] = useState<Action[]>([
-    {
-      id: 1,
-      user: { firstname: "Иван", lastname: "Иванов" },
-      action_type: "created",
-      description: "Задание создано",
-      initiator_id: 1,
-      created_at: new Date(),
-    },
-    {
-      id: 2,
-      user: { firstname: "Петр", lastname: "Петров" },
-      action_type: "updated",
-      description: "Добавлен комментарий",
-      is_warning: true,
-      created_at: new Date(),
-    },
-    {
-      id: 3,
-      user: { firstname: "Сидор", lastname: "Сидоров" },
-      action_type: "deleted",
-      description: "Удален файл",
-      is_archived: true,
-      created_at: new Date(),
-    },
-  ]);
+  const [page, setPage] = useState(1);
+  const [selectedScreenshot, setSelectedScreenshot] = useState<string | null>(
+    null
+  );
 
-  const actionListRef = useRef<HTMLDivElement | null>(null);
+  const {
+    data: actionsData,
+    isLoading,
+    isError,
+    refetch,
+  } = useAssignmentStudentActions(assignmentId, studentId, attemptId, page);
 
-  const scrollToBottom = useCallback(() => {
-    if (actionListRef.current) {
-      actionListRef.current.scrollTop = actionListRef.current.scrollHeight;
-    }
+  // Автообновление
+  useEffect(() => {
+    if (!refreshing || interval <= 0) return;
+
+    const timer = setInterval(() => {
+      refetch();
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [refreshing, interval, refetch]);
+
+  // Реальное время (заглушка)
+  useEffect(() => {
+    if (!live || !assignmentId) return;
+    console.log(
+      "Подписка на события в реальном времени для задания",
+      assignmentId
+    );
+    return () => {
+      console.log("Отписка от событий в реальном времени");
+    };
+  }, [live, assignmentId]);
+
+  const handleShowPrevious = useCallback(() => {
+    setPage((prev) => prev + 1);
   }, []);
 
-  useEffect(() => {
-    setTimeout(scrollToBottom, 500);
-  }, [actions, scrollToBottom]);
-
-  const canShowPreviousActions = useMemo(() => {
-    return actions.length >= 10; // условие для кнопки "показать предыдущие"
-  }, [actions]);
-
-  const getActionTypeName = (type: string) => {
-    switch (type) {
-      case "created":
-        return "Создано";
-      case "updated":
-        return "Обновлено";
-      case "deleted":
-        return "Удалено";
-      default:
-        return "Неизвестное действие";
-    }
+  const getActionTypeName = (type: string): string => {
+    const map: Record<string, string> = {
+      finished: "Завершено",
+      noise_detect: "Обнаружен шум",
+      head_rotated: "Поворот головы",
+      head_empty: "Голова не обнаружена",
+      head_restored: "Голова восстановлена",
+      head_identity: "Идентификация",
+    };
+    return map[type] || type;
   };
 
-  return (
-    <div
-      className="assignment-actions-component w-full"
-      style={{ position: "relative" }}
-    >
-      {canShowPreviousActions && (
-        <div
-          className="show-previous-actions-btn"
-          style={{
-            cursor: "pointer",
-            padding: "10px",
-            background: "#fff",
-            boxShadow: "0px 1px 3px rgba(0,0,0,0.2)",
-            borderRadius: "0 0 3px 3px",
-            position: "absolute",
-            left: "50%",
-            transform: "translateX(-50%)",
-          }}
-        >
-          Показать предыдущие действия
-        </div>
-      )}
+  const getActionIcon = (action: any) => {
+    if (action.initiator_id) return "🛡️";
+    if (action.is_warning) return "⚠️";
+    return "ℹ️";
+  };
 
-      {actions.length > 0 ? (
-        <div
-          className="assignment-action-list"
-          ref={actionListRef}
-          style={{
-            width: "100%",
-            maxHeight: "300px",
-            overflow: "auto",
-            border: "1px solid #ddd",
-          }}
-        >
-          {actions.map((action, index) => (
-            <div
-              key={action.id}
-              className={`assignment-action-item ${
-                clickable ? "clickable" : ""
-              } ${action.is_archived ? "is-archived" : ""}`}
-              style={{
-                display: "flex",
-                padding: "8px",
-                background: index % 2 === 0 ? "#FEFEFE" : "#F5F5F5",
-                cursor: clickable ? "pointer" : "default",
-                opacity: action.is_archived ? 0.3 : 1,
-              }}
-              onClick={() => onSelected?.(action)}
-            >
+  const getActionColor = (action: any) => {
+    if (action.initiator_id) return "bg-blue-100 text-blue-800";
+    if (action.is_warning) return "bg-yellow-100 text-yellow-800";
+    return "bg-gray-100 text-gray-800";
+  };
+
+  if (isLoading && page === 1) {
+    return (
+      <Card>
+        <CardContent className="flex items-center justify-center p-6">
+          <Loader2 className="h-6 w-6 animate-spin mr-2" />
+          <span>Загрузка действий...</span>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Card>
+        <CardContent className="p-4 text-red-500 bg-red-50 rounded">
+          Ошибка загрузки действий
+        </CardContent>
+      </Card>
+    );
+  }
+
+  const actions = actionsData?.entities.data || [];
+  const hasMore = actionsData?.entities.next_page_url !== null;
+
+  return (
+    <Card className="w-full">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+        <CardTitle className="text-lg font-semibold">
+          Действия студента
+        </CardTitle>
+        {hasMore && actions.length > 0 && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleShowPrevious}
+            className="rounded-full"
+          >
+            Показать предыдущие
+          </Button>
+        )}
+      </CardHeader>
+
+      <CardContent>
+        {actions.length > 0 ? (
+          <div className="space-y-4">
+            {actions.map((action) => (
               <div
-                className="action-item-time"
-                style={{
-                  minWidth: "100px",
-                  textAlign: "center",
-                  fontSize: "0.7rem",
-                  fontWeight: 500,
-                  background: "rgba(150,150,150,0.1)",
-                  marginRight: "10px",
-                }}
+                key={action.id}
+                className={`p-4 rounded-lg border transition-colors ${
+                  action.is_archived
+                    ? "opacity-50 bg-gray-50"
+                    : "bg-white hover:bg-gray-50"
+                } ${clickable ? "cursor-pointer" : ""}`}
+                onClick={() => clickable && onActionSelected?.(action)}
               >
-                <span>{action.created_at.toLocaleTimeString()}</span>
-              </div>
-              <div
-                className="action-item-user"
-                style={{
-                  minWidth: "100px",
-                  textAlign: "center",
-                  fontSize: "0.8rem",
-                  fontWeight: 600,
-                  marginRight: "10px",
-                }}
-              >
-                {action.user.firstname} {action.user.lastname}
-              </div>
-              <div
-                className="action-item-action"
-                style={{ fontSize: "0.8rem" }}
-              >
-                <div
-                  className="action-icon"
-                  style={{ display: "inline-block", width: "20px" }}
-                >
-                  {action.initiator_id ? (
-                    <FontAwesomeIcon icon={faUserShield} color="#1a73e8" />
-                  ) : action.is_warning ? (
-                    <FontAwesomeIcon
-                      icon={faExclamationCircle}
-                      color="#fcba03"
-                    />
-                  ) : (
-                    <FontAwesomeIcon icon={faInfoCircle} color="#999" />
-                  )}
+                <div className="flex items-start gap-4">
+                  {/* Иконка/Аватар */}
+                  <div className="flex-shrink-0">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage
+                        src={action.user?.photo || undefined}
+                        alt={`${action.user?.firstname} ${action.user?.lastname}`}
+                      />
+                      <AvatarFallback>
+                        {action.user?.firstname?.[0]}
+                        {action.user?.lastname?.[0]}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+
+                  {/* Основной контент */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-1">
+                      <Badge
+                        variant="secondary"
+                        className={getActionColor(action)}
+                      >
+                        {getActionIcon(action)}{" "}
+                        {getActionTypeName(action.action_type)}
+                      </Badge>
+                      <span className="text-xs text-gray-500">
+                        {format(
+                          new Date(action.created_at),
+                          "dd.MM.yyyy HH:mm:ss"
+                        )}
+                      </span>
+                    </div>
+
+                    {/* Описание */}
+                    {action.description && (
+                      <p className="text-sm text-gray-700 mt-1">
+                        {action.description}
+                      </p>
+                    )}
+
+                    {/* Скриншот */}
+                    {action.screenshot && (
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="mt-2 h-8 px-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50"
+                            onClick={(e) => {
+                              if (!clickable) e.stopPropagation();
+                              setSelectedScreenshot(action.screenshot);
+                            }}
+                          >
+                            📷 Просмотреть скриншот
+                          </Button>
+                        </DialogTrigger>
+                        <DialogContent className="max-w-4xl">
+                          <DialogHeader>
+                            <DialogTitle>Скриншот действия</DialogTitle>
+                          </DialogHeader>
+                          <div className="flex justify-center">
+                            <img    
+                              src={action.screenshot}
+                              alt="Скриншот действия"
+                              className="max-w-full h-auto rounded-lg border"
+                            />
+                          </div>
+                        </DialogContent>
+                      </Dialog>
+                    )}
+                  </div>
                 </div>
-                <div
-                  className="action-action"
-                  style={{ display: "inline-block", marginLeft: "10px" }}
-                >
-                  <span>{getActionTypeName(action.action_type)}</span>
-                  {action.description && <span> — {action.description}</span>}
-                </div>
-                <div
-                  className="action-diff"
-                  style={{
-                    display: "inline-block",
-                    marginLeft: "10px",
-                    color: "#aaa",
-                  }}
-                >
-                  • после 5 минут
-                </div>
               </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div
-          className="assignment-empty-action-list"
-          style={{
-            color: "#fff",
-            fontSize: "1rem",
-            fontWeight: 600,
-            padding: "20px",
-            textAlign: "center",
-            background: "rgba(0,0,0,0.2)",
-          }}
-        >
-          Список действий пуст
-        </div>
-      )}
-    </div>
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-8 text-gray-500">
+            <div className="text-4xl mb-2">📋</div>
+            <p>Список действий пуст</p>
+          </div>
+        )}
+      </CardContent>
+    </Card>
   );
 };
 
-export default AssignmentActions;
+export default AssignmentActionsComponent;

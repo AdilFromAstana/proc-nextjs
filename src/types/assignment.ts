@@ -1,6 +1,8 @@
-// types/assignment.ts (обновленная версия)
-
-import { Student } from "./students";
+import {
+  AssignmentDetail,
+  AssignmentStudent,
+  Student,
+} from "@/api/assignmentDetailApi";
 
 // Базовые интерфейсы из API данных
 export interface AssignmentOwner {
@@ -198,9 +200,6 @@ export interface AssignmentEntity {
   getName?: () => string; // Добавляем метод для совместимости
 }
 
-// Адаптируем под существующие интерфейсы
-export interface Assignment extends AssignmentEntity {}
-
 // Создаем хелпер для адаптации API данных
 export const adaptStudentListFromApi = (apiData: any): StudentList => {
   const entities = apiData.entities || apiData;
@@ -301,15 +300,17 @@ export type StudentList = Student[] & {
 };
 
 // Функции-хелперы
-export const isPointSystemEnabled = (assignment: Assignment): boolean => {
+export const isPointSystemEnabled = (assignment: AssignmentDetail): boolean => {
   return assignment.is_points_method === 1;
 };
 
-export const isProctoringEnabled = (assignment: Assignment): boolean => {
+export const isProctoringEnabled = (assignment: AssignmentDetail): boolean => {
   return assignment.is_proctoring === 1;
 };
 
-export const isAssignmentCompleted = (assignment: Assignment): boolean => {
+export const isAssignmentCompleted = (
+  assignment: AssignmentDetail
+): boolean => {
   return assignment.status === "completed";
 };
 
@@ -351,8 +352,8 @@ export type ViewerType = "owner" | "reviewer" | "proctor" | null;
 
 // Основной интерфейс для AssignmentStudentListComponent
 export interface AssignmentStudentListComponentProps {
-  assignment: Assignment;
-  students?: StudentList;
+  assignment: AssignmentDetail;
+  students?: Student[];
   page?: number;
   totalPages?: number;
   loading?: boolean;
@@ -394,7 +395,9 @@ export const studentSortByOptions: SortOption[] = [
 ];
 
 // Хелперы для фильтрации
-export const getStudentFilterFields = (assignment: Assignment): string[] => {
+export const getStudentFilterFields = (
+  assignment: AssignmentDetail
+): string[] => {
   const fields = [
     "id",
     "user_id",
@@ -437,7 +440,7 @@ export const getStudentFilterParams = (
 };
 
 export const getViewerType = (
-  assignment: Assignment,
+  assignment: AssignmentDetail,
   currentUser: User,
   isManager: boolean,
   isProctor: boolean

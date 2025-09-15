@@ -67,11 +67,7 @@ export default function RootLayout({
 }: Readonly<{
   children: ReactNode;
 }>) {
-  // Определяем страницы без сайдбара статически (на сервере)
   const noSidebarPages = ["/assignments", "/login", "/register"];
-
-  // По умолчанию показываем сайдбар
-  // Точное определение будет в Client Component
   const showSidebar = true;
 
   return (

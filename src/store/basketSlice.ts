@@ -35,6 +35,7 @@ const initialState: BasketState = {
   isNeedRefresh: false,
   loading: false,
   error: null,
+  isBasketVisible: false,
 };
 
 const basketSlice = createSlice({
@@ -43,6 +44,10 @@ const basketSlice = createSlice({
   reducers: {
     setRefreshNeedState: (state, action) => {
       state.isNeedRefresh = action.payload;
+    },
+    setBasketVisible: (state, action) => {
+      // ← ДОБАВЛЯЕМ
+      state.isBasketVisible = action.payload;
     },
     clearError: (state) => {
       state.error = null;
@@ -85,5 +90,6 @@ const basketSlice = createSlice({
   },
 });
 
-export const { setRefreshNeedState, clearError } = basketSlice.actions;
+export const { setRefreshNeedState, clearError, setBasketVisible } =
+  basketSlice.actions;
 export default basketSlice.reducer;

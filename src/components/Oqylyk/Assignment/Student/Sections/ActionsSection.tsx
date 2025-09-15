@@ -6,16 +6,12 @@ import SectionWrapper from "../../UI/SectionWrapper";
 
 interface ActionsSectionProps {
   assignment: any;
-  student: any;
   currentAttempt: any;
-  actions: any;
 }
 
 const ActionsSection: React.FC<ActionsSectionProps> = ({
   assignment,
-  student,
   currentAttempt,
-  actions,
 }) => {
   return (
     <SectionWrapper
@@ -24,7 +20,10 @@ const ActionsSection: React.FC<ActionsSectionProps> = ({
       title="Лог"
       hint="Список действий пользователя"
     >
-      <AssignmentActionsComponent />
+      <AssignmentActionsComponent
+        assignmentId={assignment.id}
+        attemptId={currentAttempt?.id}
+      />
     </SectionWrapper>
   );
 };

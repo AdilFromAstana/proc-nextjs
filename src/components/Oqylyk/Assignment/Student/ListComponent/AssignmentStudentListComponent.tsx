@@ -14,19 +14,11 @@ import {
 import {
   AssignmentStudentListComponentProps,
   getStudentFilterFields,
-  getStudentFilterParams,
   isPointSystemEnabled,
   isProctoringEnabled,
-  studentSortByOptions,
 } from "@/types/assignment";
 import StudentFilterComponent from "@/components/Oqylyk/Student/StudentFilterComponent";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+
 import AssignmentStudentResultViewerComponent from "../AssignmentStudentResultViewerComponent";
 
 const AssignmentStudentListComponent: React.FC<
@@ -40,7 +32,7 @@ const AssignmentStudentListComponent: React.FC<
   viewer = null,
   page = 1,
   totalPages = 1,
-  students = [], // Вместо mockObj
+  students = [],
   loading = false,
   onStudentSelected,
   onSetStudentListPage,
@@ -111,7 +103,6 @@ const AssignmentStudentListComponent: React.FC<
         );
       }
 
-      // OLD VIEW, WITHOUT ATTEMPTS
       return (
         <div className="assignment-student-attempt-list">
           <div className="assignment-result-list active">
@@ -277,14 +268,11 @@ const AssignmentStudentListComponent: React.FC<
                     {/* <ResultViewerComponent /> */}
                     <AssignmentStudentResultViewerComponent
                       assignment={assignment}
-                      viewer={"owner"}
                       student={student}
-                      progress={{
-                        total: 0,
-                      }}
                       fetchResults={false}
                       disabled={false}
                       fetchScores={false}
+                      accessKey={"194800"}
                       onAttemptSelected={function (): null {
                         throw new Error("Function not implemented.");
                       }}
@@ -300,7 +288,6 @@ const AssignmentStudentListComponent: React.FC<
         )}
       </StudentFilterComponent>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="pagination-wrapper mt-6 flex justify-center">
           <div className="flex items-center space-x-2">
