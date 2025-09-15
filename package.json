@@ -4,11 +4,13 @@
   "private": true,
   "scripts": {
     "dev": "npm run registry:build && next dev --turbopack",
+    "dev:mac": "npm run registry:build:mac && next dev --turbopack",
     "build": "npm run registry:build && next build",
     "start": "next start",
     "lint": "biome check",
     "lint:fix": "biome check --write",
-    "registry:build": "npx shadcn@latest build && copy registry.json public\\r\\registry.json"
+    "registry:build": "npx shadcn@latest build && copy registry.json public\\r\\registry.json",
+    "registry:build:mac": "npx shadcn@latest build && cp registry.json public/r/registry.json"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.0.1",
