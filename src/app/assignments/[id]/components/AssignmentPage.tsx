@@ -1,83 +1,80 @@
+// app/assignments/[id]/page.tsx или где у тебя AssignmentPage
+
 "use client";
-import React, { useState, useCallback, useMemo } from "react";
-import { mockObj } from "@/apiMockData";
-import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import {
-  Monitor,
-  Video,
-  Pause,
-  Play,
-  Timer,
-  DatabaseBackup,
-  Save,
-  Copy,
-  Trash2,
-  X,
-} from "lucide-react";
+import React, { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useQuery } from "@tanstack/react-query";
+import { User } from "@/types/assignment";
+
+// ✅ Импортируем новые компоненты
+import AssignmentToolbar from "./AssignmentToolbar";
+import AssignmentHeader from "./AssignmentHeader";
+import AssignmentStudentSection from "./AssignmentStudentSection";
+
+// ✅ Вспомогательные функции (если они есть)
+import { getViewerType } from "@/types/assignment";
+import { AssignmentDetailResponse } from "@/types/assignment/detail";
 import {
-  getStudentFilterFields,
-  getStudentFilterParams,
-  getViewerType,
-  isAssignmentCompleted,
-  studentSortByOptions,
-  User,
-} from "@/types/assignment";
-import AssignmentStudentListComponent from "@/components/Oqylyk/Assignment/Student/ListComponent/AssignmentStudentListComponent";
+  fetchAssignmentActions,
+  fetchAssignmentComments,
+  fetchAssignmentDetail,
+  fetchAssignmentStudents,
+} from "@/api/assignmentDetail";
+import { AssignmentStudentsResponse } from "@/types/assignment/students";
+import { AssignmentCommentsResponse } from "@/types/assignment/comments";
+import { AssignmentActionsResponse } from "@/types/assignment/actions";
 
-// Мок-данные для assignment
-const apiAssignmentData = mockObj.apiAssignmentId.entity;
-
-// Мок-данные для пользователя
-const mockCurrentUser = {
-  id: "user1",
-  group: "teacher",
-};
-
-const AssignmentPage: React.FC = () => {
+const AssignmentPage: React.FC<{
+  assignmentId: number;
+}> = ({ assignmentId }) => {
   const { toast } = useToast();
+
+  // ✅ Состояния
   const [sortBy, setSortBy] = useState<string>("lastname");
   const [page, setPage] = useState<number>(1);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
 
-  // Адаптируем данные из API
-  const assignment = useMemo(() => {
-    return apiAssignmentData;
-  }, []);
+  const {
+    data: assignmentData,
+    isLoading: isLoadingAssignment,
+    isError: isErrorAssignment,
+  } = useQuery<AssignmentDetailResponse>({
+    queryKey: ["assignment", assignmentId],
+    queryFn: () => fetchAssignmentDetail(assignmentId),
+    enabled: !!assignmentId,
+  });
 
-  // Текущий пользователь (можно брать из контекста или хранилища)
-  const currentUser: User = {
-    id: "2747436",
-    firstname: "Меридиан",
-    lastname: "Капитал",
-    group: "manager",
-    is_online: true,
-  };
+  const {
+    data: studentsData,
+    isLoading: isLoadingStudents,
+    isError: isErrorStudents,
+  } = useQuery<AssignmentStudentsResponse>({
+    queryKey: ["assignment-students", assignmentId, page, sortBy],
+    queryFn: () => fetchAssignmentStudents(assignmentId, page, 10, sortBy),
+    enabled: !!assignmentId,
+  });
 
-  // Вычисляемые свойства
-  const isManager = currentUser.group === "manager";
-  const isProctor = currentUser.group === "proctor";
-  const isOwner =
-    assignment.owner_id.toString() === currentUser.id || isManager;
-  const viewer = getViewerType(assignment, currentUser, isManager, isProctor);
+  const {
+    data: commentsData,
+    isLoading: isLoadingComments,
+    isError: isErrorComments,
+  } = useQuery<AssignmentCommentsResponse>({
+    queryKey: ["assignment-comments", assignmentId],
+    queryFn: () => fetchAssignmentComments(assignmentId),
+    enabled: !!assignmentId,
+  });
 
-  // Поля фильтрации
-  const studentFilterFields = getStudentFilterFields(assignment);
-  const studentFilterParams = getStudentFilterParams(
-    assignment.id.toString(),
-    sortBy
-  );
+  const {
+    data: actionsData,
+    isLoading: isLoadingActions,
+    isError: isErrorActions,
+  } = useQuery<AssignmentActionsResponse>({
+    queryKey: ["assignment-actions", assignmentId],
+    queryFn: () => fetchAssignmentActions(assignmentId),
+    enabled: !!assignmentId,
+  });
 
-  // Обработчики событий
+  // ✅ Обработчики — до return
   const handleStudentSelected = useCallback((student: any) => {
     setSelectedStudent(student);
   }, []);
@@ -99,7 +96,6 @@ const AssignmentPage: React.FC = () => {
 
   const showStudentSettings = useCallback(
     (student: any) => {
-      console.log("Show student settings:", student);
       toast({
         title: "Настройки студента",
         description: `Открытие настроек для ${student.user?.firstname} ${student.user?.lastname}`,
@@ -110,7 +106,6 @@ const AssignmentPage: React.FC = () => {
 
   const copyReportUrl = useCallback(
     (student: any) => {
-      console.log("Copy report URL for student:", student);
       toast({
         title: "Ссылка скопирована",
         description: "Ссылка на отчет скопирована в буфер обмена",
@@ -120,167 +115,99 @@ const AssignmentPage: React.FC = () => {
   );
 
   const showLoader = useCallback(() => console.log("Show loader"), []);
-
   const hideLoader = useCallback(() => console.log("Hide loader"), []);
 
-  // Toolbar actions
-  const toolbarActions = [
-    {
-      name: "Прокторинг",
-      icon: <Monitor className="h-4 w-4" />,
-      disabled: !assignment.id || !assignment.is_proctoring,
-      visible: true,
-      action: () => console.log("Прокторинг"),
+  const handleToolbarAction = useCallback(
+    (action: string) => {
+      console.log("Toolbar action:", action);
+      // Здесь можно добавить логику для каждого действия
+      switch (action) {
+        case "close":
+          window.history.back();
+          break;
+        case "delete":
+          if (window.confirm("Удалить задание?")) {
+            // API call
+          }
+          break;
+        default:
+          toast({
+            title: "Функция в разработке",
+            description: `Действие "${action}" пока не реализовано`,
+          });
+      }
     },
-    {
-      name: "Вебинар",
-      icon: <Video className="h-4 w-4" />,
-      disabled: !assignment.id || !assignment.is_webinar,
-      visible: true,
-      action: () => console.log("Вебинар"),
-    },
-    {
-      name: "Приостановить",
-      icon: <Pause className="h-4 w-4" />,
-      disabled: !assignment.id || assignment.status === "suspended",
-      visible: isOwner && assignment.status === "process",
-      action: () => console.log("Приостановить"),
-    },
-    {
-      name: "Возобновить",
-      icon: <Play className="h-4 w-4" />,
-      disabled: !assignment.id || assignment.status === "process",
-      visible: isOwner && assignment.status === "suspended",
-      action: () => console.log("Возобновить"),
-    },
-    {
-      name: "Завершить",
-      icon: <Timer className="h-4 w-4" />,
-      disabled: !assignment.id || isAssignmentCompleted(assignment),
-      visible: isOwner && assignment.status === "suspended",
-      action: () => console.log("Завершить"),
-    },
-    {
-      name: "Экспорт",
-      icon: <DatabaseBackup className="h-4 w-4" />,
-      disabled: !assignment.id,
-      visible: isOwner && !!assignment.id,
-      action: () => console.log("Экспорт"),
-    },
-    {
-      name: "Сохранить",
-      icon: <Save className="h-4 w-4" />,
-      disabled: isAssignmentCompleted(assignment),
-      visible: isOwner,
-      action: () => console.log("Сохранить"),
-    },
-    {
-      name: "Клонировать",
-      icon: <Copy className="h-4 w-4" />,
-      visible: isOwner,
-      action: () => console.log("Клонировать"),
-    },
-    {
-      name: "Удалить",
-      icon: <Trash2 className="h-4 w-4" />,
-      disabled: !assignment.id || !isAssignmentCompleted(assignment),
-      visible: isOwner,
-      action: () => console.log("Удалить"),
-    },
-    {
-      name: "Закрыть",
-      icon: <X className="h-4 w-4" />,
-      action: () => console.log("Закрыть"),
-    },
-  ];
-
-  // Фильтруем видимые действия
-  const visibleToolbarActions = toolbarActions.filter(
-    (action) => action.visible
+    [toast]
   );
 
+  // ✅ Проверки — после хуков
+  if (
+    isErrorAssignment ||
+    isErrorStudents ||
+    isErrorComments ||
+    isErrorActions
+  ) {
+    return (
+      <div className="p-8">
+        <div className="text-red-500">Ошибка загрузки данных</div>
+      </div>
+    );
+  }
+
+  if (isLoadingAssignment) {
+    return (
+      <div className="p-8">
+        <div className="space-y-4">
+          <div className="h-8 bg-gray-200 rounded animate-pulse w-1/3"></div>
+          <div className="h-4 bg-gray-200 rounded animate-pulse w-full"></div>
+        </div>
+      </div>
+    );
+  }
+
+  const assignment = assignmentData?.entity;
+  if (!assignment) {
+    return <div className="p-8">Задание не найдено</div>;
+  }
+
+  // ✅ Логика
+  const currentUser: User = {
+    id: "2747436",
+    firstname: "Меридиан",
+    lastname: "Капитал",
+    group: "manager",
+    is_online: true,
+  };
+
+  const isManager = currentUser.group === "manager";
+  const isProctor = currentUser.group === "proctor";
+  const isOwner =
+    assignment.owner_id.toString() === currentUser.id || isManager;
+  const viewer = getViewerType(assignment, currentUser, isManager, isProctor);
+
+  // ✅ Рендер
   return (
     <div className="oqylyq-page assignment-page p-8 w-full">
-      {/* Toolbar */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        {visibleToolbarActions.map((action, index) => (
-          <Button
-            key={index}
-            variant="outline"
-            size="sm"
-            disabled={action.disabled}
-            onClick={action.action}
-            className="flex items-center gap-2"
-          >
-            {action.icon}
-            <span className="hidden sm:inline">{action.name}</span>
-          </Button>
-        ))}
-      </div>
+      <AssignmentToolbar
+        assignment={assignment}
+        isOwner={isOwner}
+        onAction={handleToolbarAction}
+      />
 
       <div className="space-y-6">
-        {/* Progress and Actions */}
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex-1">
-                <h1 className="text-2xl font-bold mb-2">{assignment.name}</h1>
-                <div className="text-sm text-gray-600 mb-4">
-                  Статус:{" "}
-                  <span className="font-medium capitalize">
-                    {assignment.status}
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-4">
-                {assignment.progress && (
-                  <div className="min-w-[200px]">
-                    <div className="flex justify-between text-sm mb-1">
-                      <span>Прогресс</span>
-                      <span>{assignment.progress.total}%</span>
-                    </div>
-                    <Progress
-                      value={assignment.progress.total}
-                      className="w-full"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Sort */}
-            <div className="mt-6">
-              <label className="text-sm font-medium mb-2 block">
-                Сортировка студентов
-              </label>
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-[200px]">
-                  <SelectValue placeholder="Выберите сортировку" />
-                </SelectTrigger>
-                <SelectContent>
-                  {studentSortByOptions.map((option) => (
-                    <SelectItem key={option.id} value={option.id}>
-                      {option.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Student List */}
-        <AssignmentStudentListComponent
-          // students={mockObj.apiStudents.entities.data}
+        <AssignmentHeader
           assignment={assignment}
+          sortBy={sortBy}
+          onSortByChange={setSortBy}
+        />
+
+        <AssignmentStudentSection
+          assignment={assignment}
+          students={studentsData?.entities.data || []}
           page={page}
-          totalPages={Math.ceil(
-            (mockObj.apiStudents.entities.data?.length || 0) / 10
-          )}
+          totalPages={studentsData?.entities.last_page || 1}
           viewer={viewer}
           isOwner={isOwner}
-          isReviewer={false}
           isProctor={isProctor}
           isManager={isManager}
           onStudentSelected={handleStudentSelected}

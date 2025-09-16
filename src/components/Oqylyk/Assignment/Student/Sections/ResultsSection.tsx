@@ -30,9 +30,6 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
   disabled,
   onResultUpdated,
 }) => {
-  console.log("results: ", results);
-  console.log("components: ", components);
-  console.log("resultsChart: ", resultsChart);
   const shouldShow =
     results.length > 0 &&
     (isOwner || isReviewer) &&

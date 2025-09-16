@@ -1,12 +1,11 @@
 // hooks/useAssignmentStudentResults.ts
 import { useState, useEffect, useCallback } from "react";
-import { Assignment } from "@/types/assignment";
-import { Student } from "@/types/students";
 import { mockObj } from "@/apiMockData";
+import { AssignmentDetail } from "@/types/assignment/detail";
 
 interface UseAssignmentStudentResultsProps {
-  assignment: Assignment;
-  student: Student | null;
+  assignment: AssignmentDetail;
+  student: Student;
   progress: { total: number };
   fetchResults: boolean;
   fetchScores: boolean;

@@ -2,6 +2,7 @@ export interface BasketState {
   isNeedRefresh: boolean;
   loading: boolean;
   error: string | null;
+  isBasketVisible: boolean;
 }
 
 export interface AddProductPayload {

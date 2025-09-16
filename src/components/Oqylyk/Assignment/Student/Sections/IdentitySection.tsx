@@ -15,10 +15,11 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({
   isManager,
   identities,
 }) => {
-  const shouldShow =
-    isManager ||
-    !assignment.isHideUsersEnabled?.() ||
-    assignment.isCompletedStatus?.();
+  const shouldShow = isManager;
+  console.log("identities: ", identities);
+  // isManager ||
+  // !assignment.isHideUsersEnabled?.() ||
+  // assignment.isCompletedStatus?.();
 
   return (
     <SectionWrapper

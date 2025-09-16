@@ -30,30 +30,5 @@ export default async function AssignmentsPage({
   // ✅ Используем await
   const initialData = await getInitialData(searchParams);
 
-  // Опции для селектов
-  const sortTypeOptions = [
-    { id: "all", name: "option-all-assessments" },
-    { id: "lessons", name: "option-only-lessons" },
-    { id: "quiz", name: "option-only-quiz" },
-  ];
-
-  const sortOrderOptions = [
-    { id: "desc", name: "option-before-new" },
-    { id: "asc", name: "option-before-old" },
-  ];
-
-  const sortStatusOptions = [
-    { id: "process", name: "label-assignment-process" },
-    { id: "completed", name: "label-assignment-completed" },
-    { id: "remaining", name: "label-assignment-remaining" },
-  ];
-
-  return (
-    <AssignmentsClientPage
-      initialData={initialData}
-      sortTypeOptions={sortTypeOptions}
-      sortOrderOptions={sortOrderOptions}
-      sortStatusOptions={sortStatusOptions}
-    />
-  );
+  return <AssignmentsClientPage initialData={initialData} />;
 }
