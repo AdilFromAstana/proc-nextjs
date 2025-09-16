@@ -1,15 +1,18 @@
-import { CourseItem } from "@/mockData";
+import { MediaFile } from "@/types/media";
 
-export function filterCourses(
-  courses: CourseItem[],
+export function filterMediafiles(
+  mediafiles: MediaFile[],
   {
     searchQuery,
     statusFilter,
     typeFilter,
   }: { searchQuery: string; statusFilter: string; typeFilter: string }
 ) {
-  return courses.filter((course) => {
-    if (searchQuery && !course.title.toLowerCase().includes(searchQuery.toLowerCase())) {
+  return mediafiles.filter((course) => {
+    if (
+      searchQuery &&
+      !course.name.toLowerCase().includes(searchQuery.toLowerCase())
+    ) {
       return false;
     }
     if (statusFilter !== "all" && course.status !== statusFilter) {

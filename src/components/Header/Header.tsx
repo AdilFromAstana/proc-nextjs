@@ -23,10 +23,10 @@ import {
   hideSwitchOrg,
 } from "@/store/pageSlice";
 import { fetchCurrentUser } from "@/store/authSlice";
-import { IconForum } from "./IconForum";
-import { IconSwap } from "./IconSwap";
+import { IconForum } from "../../app/icons/IconForum";
+import { IconSwap } from "../../app/icons/IconSwap";
 
-import { IconCart } from "./IconCart";
+import { IconCart } from "../../app/icons/IconCart";
 import BasketModalComponent from "./BasketModalComponent";
 import SwitchOrgComponent from "./SwitchOrgComponent";
 
@@ -95,7 +95,7 @@ export default function Header() {
   }
 
   return (
-    <header className="w-full p-5 relative">
+    <header className="w-full p-5 relative bg-gray-50">
       <div className="flex flex-row justify-start items-center">
         {/* LANGUAGES */}
         <div className="header-lang">{/* <LanguageSwitcherComponent /> */}</div>

@@ -1,13 +1,11 @@
-import CoursesPageClient from "@/components/Media/CoursesPageClient";
-import { mockCourses } from "@/mockData";
+import MediafilesPageClient from "@/components/Media/MediafilesPageClient";
 
-export default async function MediaPage() {
+export default async function MediafilesPage() {
   return (
-    <div className="min-h-screen bg-gray-50 py-8 w-full">
-      <div className="max-w-7xl mx-auto sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 w-full">
+      <div className="mx-auto sm:px-6 lg:px-8">
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Медиафайлы</h1>
-
-        <CoursesPageClient initialCourses={mockCourses} />
+        <MediafilesPageClient />
       </div>
     </div>
   );
