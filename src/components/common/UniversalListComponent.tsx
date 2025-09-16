@@ -76,7 +76,7 @@ export default function UniversalListComponent<T extends BaseItem>({
   // Загрузочное состояние
   if (isLoading || loading) {
     return (
-      <div className="mb-4 rounded-lg border bg-card p-6 w-full h-full">
+      <div className="mb-4 rounded-lg border bg-card p-6 w-full">
         <div className="flex justify-between items-center mb-4">
           <div className="flex items-center gap-2">
             {icon && <div className="text-xl">{icon}</div>}
@@ -107,7 +107,7 @@ export default function UniversalListComponent<T extends BaseItem>({
   }
 
   return (
-    <div className="mb-4 rounded-lg border bg-card p-6 w-full h-full">
+    <div className="mb-4 rounded-lg border bg-card p-6 w-full">
       <div className="flex justify-between items-center mb-4">
         <div className="flex items-center gap-2">
           {icon && <div className="text-xl">{icon}</div>}
