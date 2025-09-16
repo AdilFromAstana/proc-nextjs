@@ -32,7 +32,7 @@ const ViolationsSection: React.FC<ViolationsSectionProps> = ({
       showSection={shouldShow}
     >
       {violations && violations.length > 0 ? (
-        <ViolationsComponent />
+        <ViolationsComponent assignmentId={assignment.id} />
       ) : (
         <div className="empty--WSectionWrapperlist text-gray-500 italic">
           Нет нарушений

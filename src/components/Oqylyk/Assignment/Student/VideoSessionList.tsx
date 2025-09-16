@@ -1,53 +1,16 @@
+// components/Assignment/VideoSessionListComponent.tsx
+
 import React, { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import {
-  Camera,
-  Monitor,
-  Smartphone,
-  Video,
-  VideoOff,
-  MonitorPlay,
-} from "lucide-react";
+import { Camera, Monitor, Smartphone } from "lucide-react";
+import { useWebinarSessions } from "@/hooks/useWebinarSessions";
 import { Student } from "@/types/students";
+import {
+  WebinarSession,
+  WebinarSessionGroup,
+} from "@/types/assignment/webinar";
 
 interface Assignment {
   id: number;
-}
-
-interface WebinarSession {
-  id: number;
-  type: string;
-  status: string;
-  state: string;
-  session_type: string;
-  record: {
-    thumb_url: string;
-    video_duration: number;
-  } | null;
-  created_at: string;
-  isMainCamera: () => boolean;
-  isScreen: () => boolean;
-  isSecondCamera: () => boolean;
-  isRecordingType: () => boolean;
-  isStreamingType: () => boolean;
-  isStartedStatus: () => boolean;
-  isFinishedStatus: () => boolean;
-  getThumbImage: () => string;
-}
-
-interface WebinarSessionGroup {
-  models: WebinarSession[];
-  first: () => WebinarSession;
-  getFirstConvertedSession: () => WebinarSession;
-  isVideoExists: () => boolean;
-  getTotalDuration: () => number;
-  getTotalDurationTermType: () => string;
-}
-
-interface WebinarSessionList {
-  fetch: (params: any) => Promise<any>;
-  groupByTypes: (types: string[]) => WebinarSessionGroup[];
-  length: number;
 }
 
 interface VideoSessionListComponentProps {
@@ -57,193 +20,284 @@ interface VideoSessionListComponentProps {
   onSelected?: (group: WebinarSessionGroup) => void;
 }
 
+// Вспомогательные функции для работы с сессиями
+const createWebinarSessionGroup = (
+  sessions: WebinarSession[]
+): WebinarSessionGroup => {
+  return {
+    models: sessions,
+    first: function () {
+      return this.models[0];
+    },
+    getFirstConvertedSession: function () {
+      return (
+        this.models.find((session) => session.state === "converted") ||
+        this.models[0]
+      );
+    },
+    isVideoExists: function () {
+      return this.models.some(
+        (session) => session.state === "converted" && session.record
+      );
+    },
+    getTotalDuration: function () {
+      const session = this.getFirstConvertedSession();
+      return session.record?.video_duration || 0;
+    },
+    getTotalDurationTermType: function () {
+      return "мин";
+    },
+  };
+};
+
+const groupSessionsByTypes = (
+  sessions: WebinarSession[]
+): WebinarSessionGroup[] => {
+  // Группируем по session_type: main-camera, second-camera
+  const grouped: Record<string, WebinarSession[]> = {};
+
+  sessions.forEach((session) => {
+    const type = session.session_type;
+    if (!grouped[type]) {
+      grouped[type] = [];
+    }
+    grouped[type].push(session);
+  });
+
+  // Преобразуем в группы и сортируем по дате создания
+  return Object.values(grouped).map((sessions) => {
+    const sortedSessions = sessions.sort(
+      (a, b) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+    );
+    return createWebinarSessionGroup(sortedSessions);
+  });
+};
+
 const VideoSessionListComponent: React.FC<VideoSessionListComponentProps> = ({
   assignment,
   student,
-  endpoint = "/api/webinar-sessions",
   onSelected,
 }) => {
-  const [sessions, setSessions] = useState<WebinarSessionList>(
-    {} as WebinarSessionList
-  );
+  const {
+    data: sessionsData,
+    isLoading,
+    isError,
+  } = useWebinarSessions(assignment.id, student.id);
+
   const [groups, setGroups] = useState<WebinarSessionGroup[] | null>(null);
-  const [loading, setLoading] = useState(true);
 
-  // Mock WebinarSessionList для демонстрации
-  const mockSessions: WebinarSessionList = {
-    length: 3,
-    fetch: async (params: any) => {
-      // Имитация API вызова
-      setLoading(true);
-      return new Promise((resolve) => {
-        setTimeout(() => {
-          setLoading(false);
-          resolve({});
-        }, 1000);
-      });
-    },
-    groupByTypes: (types: string[]) => {
-      // Mock группы сессий
-      return [
-        {
-          models: [
-            {
-              id: 1,
-              type: "main-camera",
-              status: "converted",
-              state: "active",
-              session_type: "recording",
-              record: {
-                thumb_url: "https://example.com/thumb1.jpg",
-                video_duration: 120,
-              },
-              created_at: "2023-01-01T10:00:00Z",
-              isMainCamera: () => true,
-              isScreen: () => false,
-              isSecondCamera: () => false,
-              isRecordingType: () => true,
-              isStreamingType: () => false,
-              isStartedStatus: () => false,
-              isFinishedStatus: () => true,
-              getThumbImage: () => "https://example.com/thumb1.jpg",
-            },
-          ],
-          first: function () {
-            return this.models[0];
-          },
-          getFirstConvertedSession: function () {
-            return this.models[0];
-          },
-          isVideoExists: () => true,
-          getTotalDuration: () => 120,
-          getTotalDurationTermType: () => "minutes",
-        },
-      ];
-    },
-  };
-
-  const fetchSessions = async () => {
-    try {
-      await mockSessions.fetch({
-        url: endpoint,
-        headers: {
-          "X-Requested-Fields": [
-            "id",
-            "webinar_id",
-            "user_id",
-            "type",
-            "status",
-            "state",
-            "session_type",
-            "record",
-            "created_at",
-          ].join(","),
-        },
-        params: {
-          assignment_id: assignment.id,
-          student_id: student.id,
-          limit: 99,
-        },
-      });
-
-      const groupedSessions = mockSessions.groupByTypes([
-        "main-camera",
-        "second-camera",
-        "screen",
-      ]);
-      setGroups(groupedSessions);
-    } catch (error) {
-      console.error("Error fetching sessions:", error);
-    }
-  };
-
+  // Группируем сессии при получении данных
   useEffect(() => {
-    fetchSessions();
-  }, [assignment.id, student.id, endpoint]);
+    if (sessionsData) {
+      const groupedSessions = groupSessionsByTypes(sessionsData.entities.data);
+      setGroups(groupedSessions);
+    }
+  }, [sessionsData]);
 
   const onGroupSelected = (group: WebinarSessionGroup) => {
-    if (onSelected) {
+    if (onSelected && group.isVideoExists()) {
       onSelected(group);
     }
   };
 
   const getIconForSession = (session: WebinarSession) => {
-    if (session.isMainCamera())
-      return <Camera className="w-8 h-8 text-white" />;
-    if (session.isScreen()) return <Monitor className="w-8 h-8 text-white" />;
-    if (session.isSecondCamera())
-      return <Smartphone className="w-8 h-8 text-white" />;
-    return <Video className="w-8 h-8 text-white" />;
+    if (session.session_type === "main-camera")
+      return (
+        <Camera className="w-8 h-8 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10" />
+      );
+    if (session.session_type === "screen")
+      return (
+        <Monitor className="w-8 h-8 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10" />
+      );
+    if (session.session_type === "second-camera")
+      return (
+        <Smartphone className="w-8 h-8 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10" />
+      );
+    return (
+      <Camera className="w-8 h-8 text-white absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10" />
+    );
   };
 
-  const getDurationText = (
-    group: WebinarSessionGroup,
-    session: WebinarSession
-  ) => {
-    if (session.isRecordingType() && !session.isFinishedStatus()) {
+  const getDurationText = (group: WebinarSessionGroup) => {
+    const session = group.getFirstConvertedSession();
+
+    if (session.session_type === "recording" && session.status !== "finished") {
       return "Запись вебинара";
-    } else if (session.isStreamingType()) {
-      return `${group.getTotalDuration()} ${group.getTotalDurationTermType()}-мин`;
-    } else if (session.isStartedStatus()) {
+    } else if (session.session_type === "streaming") {
+      return `${group.getTotalDuration()} ${group.getTotalDurationTermType()}`;
+    } else if (session.status === "started") {
       return "Запись вебинара";
-    } else if (session.isFinishedStatus()) {
+    } else if (session.status === "finished") {
       return "Вебинар завершен";
     }
     return "";
   };
 
-  if (loading) {
+  if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-32">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+      <div className="flex items-center justify-center p-6">
+        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-900 mr-2"></div>
+        <span>Загрузка записей...</span>
+      </div>
+    );
+  }
+
+  if (isError) {
+    return (
+      <div className="p-4 text-red-500 bg-red-50 rounded">
+        Ошибка загрузки записей
       </div>
     );
   }
 
   if (!groups || groups.length === 0) {
     return (
-      <Card className="text-center py-8">
-        <p className="text-muted-foreground">Нет записей вебинара</p>
-      </Card>
+      <div className="empty-session-list text-gray-500 text-base text-center">
+        Нет записей вебинара
+      </div>
     );
   }
 
   return (
-    <div className="max-h-[250px] flex flex-wrap gap-0 justify-center  overflow-auto w-full">
+    <div className="video-session-list max-h-[250px] ml-[-20px] mr-[-20px] mb-[-15px] text-center whitespace-nowrap overflow-auto">
       {groups.map((group, index) => {
         const session = group.isVideoExists()
           ? group.getFirstConvertedSession()
           : group.first();
 
         return (
-          <Card
+          <div
             key={`session-collection-${index}`}
-            className={`w-32 cursor-pointer hover:shadow-md transition-shadow border-none p-0 gap-0 ${
-              group.isVideoExists() ? "" : "opacity-70"
-            }`}
-            onClick={() => group.isVideoExists() && onGroupSelected(group)}
+            className="video-session-item w-[120px] h-auto inline-block align-top ml-[10px] mr-[10px] mb-[15px]"
           >
-            <CardContent className="p-0 border-none gap-0">
-              <div className="relative w-full h-24 rounded-md overflow-hidden mb-2">
-                <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            {group.isVideoExists() ? (
+              <div
+                className={`video-record-item ${
+                  group.isVideoExists() ? "cursor-pointer" : ""
+                }`}
+                onClick={() => group.isVideoExists() && onGroupSelected(group)}
+              >
+                <div className="video-record-thumb w-full h-[90px] rounded-[3px] block overflow-hidden relative">
+                  <div className="absolute inset-0 bg-black bg-opacity-50"></div>
                   {getIconForSession(session)}
+                  {session.record?.thumb_url && (
+                    <img
+                      src={session.record.thumb_url}
+                      className="w-full h-full rounded-[inherit] border-none block object-cover"
+                      alt="Session thumbnail"
+                    />
+                  )}
                 </div>
-                {session.record?.thumb_url && (
-                  <img
-                    src={session.record.thumb_url}
-                    alt="Session thumbnail"
-                    className="w-full h-full object-cover"
-                  />
-                )}
+                <div className="video-record-duration text-gray-500 font-normal text-xs mt-2 text-center">
+                  {session.session_type === "streaming" ? (
+                    <>
+                      <span>{group.getTotalDuration()}</span>
+                      <span> {group.getTotalDurationTermType()}</span>
+                    </>
+                  ) : (
+                    <span>
+                      {session.status === "started"
+                        ? "Запись вебинара"
+                        : session.status === "finished"
+                        ? "Вебинар завершен"
+                        : "Запись вебинара"}
+                    </span>
+                  )}
+                </div>
               </div>
-
-              <div className="text-center text-xs text-muted-foreground">
-                {getDurationText(group, session)}
+            ) : group.models.length > 0 ? (
+              <div className="video-record-item">
+                <div className="video-record-thumb w-full h-[90px] rounded-[3px] block overflow-hidden relative">
+                  <div className="absolute inset-0 bg-black bg-opacity-50"></div>
+                  {getIconForSession(group.first())}
+                </div>
+                <div className="video-record-duration text-gray-500 font-normal text-xs mt-2 text-center">
+                  <span>
+                    {group.first().status === "started"
+                      ? "Запись вебинара"
+                      : group.first().status === "finished"
+                      ? "Вебинар завершен"
+                      : "Запись вебинара"}
+                  </span>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+            ) : null}
+          </div>
         );
       })}
+
+      <style jsx>{`
+        .video-session-list {
+          max-height: 250px;
+          margin-left: -20px;
+          margin-right: -20px;
+          margin-bottom: -15px;
+          text-align: center;
+          white-space: nowrap;
+          overflow: auto;
+        }
+
+        .video-session-item {
+          width: 120px;
+          height: auto;
+          display: inline-block;
+          vertical-align: top;
+          margin-left: 10px;
+          margin-right: 10px;
+          margin-bottom: 15px;
+        }
+
+        .video-record-item {
+          cursor: pointer;
+        }
+
+        .video-record-thumb {
+          width: 100%;
+          height: 90px;
+          border-radius: 3px;
+          display: block;
+          overflow: hidden;
+          position: relative;
+        }
+
+        .video-record-thumb:before {
+          content: "";
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          position: absolute;
+          top: 0;
+          left: 0;
+        }
+
+        .video-record-thumb img {
+          width: 100%;
+          height: 100%;
+          border-radius: inherit;
+          border: none;
+          display: block;
+          object-fit: cover;
+        }
+
+        .video-record-duration {
+          color: #999;
+          font-weight: 400;
+          font-size: 0.75rem;
+          margin-top: 8px;
+          text-align: center;
+        }
+
+        .video-record-duration span:first-child {
+          margin-right: 2px;
+        }
+
+        .empty-session-list {
+          color: #999;
+          font-size: 1rem;
+          text-align: center;
+        }
+      `}</style>
     </div>
   );
 };

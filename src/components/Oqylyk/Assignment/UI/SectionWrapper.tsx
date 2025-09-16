@@ -43,7 +43,7 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
           <div className="result-data-hint text-sm text-gray-500">{hint}</div>
         </div>
       </div>
-      <div className="result-data-content flex justify-center w-full relative p-4 overflow-hidden">
+      <div className="result-data-content flex justify-center w-full relative overflow-hidden">
         <div className="absolute top-0 left-0 w-full h-[1px] shadow-[0_0_5px_0_rgba(0,0,0,0.7)] z-10"></div>
         {children}
       </div>

@@ -21,6 +21,7 @@ import ViolationsSection from "./Sections/ViolationsSection";
 import ResultsSection from "./Sections/ResultsSection";
 import SettingsSection from "./Sections/SettingsSection";
 import ActionsSection from "./Sections/ActionsSection";
+import VideoRecordsSection from "./Sections/VideoRecordsSection";
 
 interface AssignmentStudentResultViewerProps {
   assignment: any;
@@ -195,87 +196,19 @@ const AssignmentStudentResultViewer: React.FC<
         assignment={assignment}
         isManager={true}
         onViolationSelected={() => window.open(violation.screenshot!, "_blank")}
-        violations={actions.data}
+        violations={violations.data}
+      />
+
+      <VideoRecordsSection
+        assignment={assignment}
+        student={student}
+        isManager={true}
+        onViolationSelected={(e) => console.log(e)}
       />
 
       <ActionsSection assignment={assignment} currentAttempt={currentAttempt} />
 
-      {/* Результаты */}
-      {/* {showResults && ( 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
-              Результаты теста
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {quiz_components.map((component) => {
-                const question = component.component;
-                console.log("question: ", question);
-                const userAttempt = question.attempts.find(
-                  (a) => a.assignment_attempt_id === currentAttempt?.id
-                );
-                const selectedOption = question.options.find(
-                  (o) => o.id === userAttempt?.option_id
-                );
-                const isCorrect = selectedOption?.is_true === 1;
-
-                return (
-                  <div
-                    key={component.id}
-                    className={`p-4 rounded border ${
-                      isCorrect
-                        ? "border-green-200 bg-green-50"
-                        : "border-red-200 bg-red-50"
-                    }`}
-                  >
-                    <h4 className="font-medium mb-2">{question.question}</h4>
-                    <div className="mb-2">
-                      <strong>Ваш ответ:</strong>{" "}
-                      {selectedOption?.answer || "Не ответил"}
-                    </div>
-                    <div
-                      className={`text-sm ${
-                        isCorrect ? "text-green-600" : "text-red-600"
-                      }`}
-                    >
-                      {isCorrect ? "✅ Правильно" : "❌ Неправильно"}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </CardContent>
-        </Card>
-      )} */}
-
-      {/* Баллы и надёжность */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Star className="h-5 w-5 text-yellow-500" />
-            Статистика
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <div className="text-sm text-gray-500">Баллы</div>
-              <div className="text-2xl font-bold">
-                {currentAttempt?.points || 0}
-              </div>
-            </div>
-            <div>
-              <div className="text-sm text-gray-500">Надёжность</div>
-              <div className="text-2xl font-bold">{credibility}%</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* <SettingsSection assignment={assignment} /> */}
+      <SettingsSection assignment={assignment} />
     </div>
   );
 };

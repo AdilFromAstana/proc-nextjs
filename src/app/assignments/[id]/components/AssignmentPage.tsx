@@ -64,15 +64,15 @@ const AssignmentPage: React.FC<{
     enabled: !!assignmentId,
   });
 
-  const {
-    data: actionsData,
-    isLoading: isLoadingActions,
-    isError: isErrorActions,
-  } = useQuery<AssignmentActionsResponse>({
-    queryKey: ["assignment-actions", assignmentId],
-    queryFn: () => fetchAssignmentActions(assignmentId),
-    enabled: !!assignmentId,
-  });
+  // const {
+  //   data: actionsData,
+  //   isLoading: isLoadingActions,
+  //   isError: isErrorActions,
+  // } = useQuery<AssignmentActionsResponse>({
+  //   queryKey: ["assignment-actions", assignmentId],
+  //   queryFn: () => fetchAssignmentActions(assignmentId),
+  //   enabled: !!assignmentId,
+  // });
 
   // ✅ Обработчики — до return
   const handleStudentSelected = useCallback((student: any) => {
@@ -141,12 +141,7 @@ const AssignmentPage: React.FC<{
   );
 
   // ✅ Проверки — после хуков
-  if (
-    isErrorAssignment ||
-    isErrorStudents ||
-    isErrorComments ||
-    isErrorActions
-  ) {
+  if (isErrorAssignment || isErrorStudents || isErrorComments) {
     return (
       <div className="p-8">
         <div className="text-red-500">Ошибка загрузки данных</div>
