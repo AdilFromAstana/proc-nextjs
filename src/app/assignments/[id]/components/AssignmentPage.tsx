@@ -182,7 +182,7 @@ const AssignmentPage: React.FC<{
 
   // ✅ Рендер
   return (
-    <div className="oqylyq-page assignment-page p-8 w-full">
+    <div className="oqylyq-page assignment-page p-6 w-full">
       <AssignmentToolbar
         assignment={assignment}
         isOwner={isOwner}

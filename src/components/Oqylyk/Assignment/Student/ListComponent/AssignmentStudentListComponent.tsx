@@ -20,6 +20,9 @@ import {
 import StudentFilterComponent from "@/components/Oqylyk/Student/StudentFilterComponent";
 
 import AssignmentStudentResultViewerComponent from "../AssignmentStudentResultViewerComponent";
+import StudentResultsDisplay from "./StudentRowResultsDisplay";
+import StudentPointsOrScoreDisplay from "./StudentPointsOrScoreDisplay";
+import StudentCredibilityDisplay from "./StudentCredibilityDisplay";
 
 const AssignmentStudentListComponent: React.FC<
   AssignmentStudentListComponentProps
@@ -32,7 +35,6 @@ const AssignmentStudentListComponent: React.FC<
   viewer = null,
   page = 1,
   totalPages = 1,
-  students = [],
   loading = false,
   onStudentSelected,
   onSetStudentListPage,
@@ -44,159 +46,19 @@ const AssignmentStudentListComponent: React.FC<
   hideLoader = () => null,
 }) => {
   const { toast } = useToast();
-  const [selectedStudentId, setSelectedStudentId] = useState<string | null>(
-    null
-  );
+  const [selectedStudentId, setSelectedStudentId] = useState<string>("1");
 
   const handleStudentClick = useCallback(
     (student: Student) => {
       // Toggle selection для показа деталей
       if (selectedStudentId === student.id.toString()) {
-        setSelectedStudentId(null);
+        setSelectedStudentId("null");
       } else {
         setSelectedStudentId(student.id.toString());
         onStudentSelected?.(student);
       }
     },
     [selectedStudentId, onStudentSelected]
-  );
-
-  const renderStudentResults = useCallback(
-    (student: Student) => {
-      // Логика отображения результатов как во Vue
-      const hasAttempts = student.attempts && student.attempts.length > 0;
-
-      if (hasAttempts) {
-        return (
-          <div className="assignment-student-attempt-list">
-            {student.attempts?.map((attempt) => (
-              <div
-                key={`attempt-${attempt.id}`}
-                className={`assignment-result-list ${
-                  attempt.status === "active" ? "active" : ""
-                }`}
-              >
-                {attempt.results?.map((result: any, index: number) => {
-                  let displayResult = result;
-                  if (isReviewer) {
-                    displayResult = getReviewerResult(student, result);
-                  }
-
-                  // Здесь должна быть логика getClassName()
-                  const className = displayResult.className || "default";
-                  const hasPoints =
-                    isPointSystemEnabled(assignment) &&
-                    displayResult.points !== undefined;
-
-                  return (
-                    <div
-                      key={`result-${index}`}
-                      className={`assignment-result-item ${className} ${
-                        hasPoints ? "info" : ""
-                      }`}
-                    />
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        );
-      }
-
-      return (
-        <div className="assignment-student-attempt-list">
-          <div className="assignment-result-list active">
-            {student.results?.map((result: any, index: number) => {
-              let displayResult = result;
-              if (isReviewer) {
-                displayResult = getReviewerResult(student, result);
-              }
-
-              const className = displayResult.className || "default";
-              const hasPoints =
-                isPointSystemEnabled(assignment) &&
-                displayResult.points !== undefined;
-
-              return (
-                <div
-                  key={`old-result-${index}`}
-                  className={`assignment-result-item ${className} ${
-                    hasPoints ? "info" : ""
-                  }`}
-                />
-              );
-            })}
-          </div>
-        </div>
-      );
-    },
-    [isReviewer, assignment]
-  );
-
-  const renderPointsOrScore = useCallback(
-    (student: Student) => {
-      if (isPointSystemEnabled(assignment)) {
-        const attempt = getActiveAttempt(student);
-        if (attempt && attempt.points !== undefined) {
-          return (
-            <div
-              className={`assignment-points-wrap ${
-                attempt.points > 0 ? "active" : ""
-              }`}
-            >
-              <div className="assignment-points-label">{attempt.points}</div>
-            </div>
-          );
-        }
-        return (
-          <div
-            className={`assignment-points-wrap ${
-              student.points && student.points > 0 ? "active" : ""
-            }`}
-          >
-            <div className="assignment-points-label">{student.points || 0}</div>
-          </div>
-        );
-      }
-
-      // SCORE
-      const score = getStudentScore(student);
-      return (
-        <div className={`assignment-score-wrap score-${score || "0"}`}>
-          <div className="assignment-score-label">{score || "0"}</div>
-        </div>
-      );
-    },
-    [assignment]
-  );
-
-  const renderCredibility = useCallback(
-    (student: Student) => {
-      if (
-        !isProctoringEnabled(assignment) ||
-        student.credibility === undefined
-      ) {
-        return null;
-      }
-
-      let credibilityClass = "credibility-empty";
-      if (student.credibility >= 0) {
-        if (student.credibility <= 10) credibilityClass = "credibility-5";
-        else if (student.credibility <= 30) credibilityClass = "credibility-4";
-        else if (student.credibility <= 60) credibilityClass = "credibility-3";
-        else if (student.credibility <= 70) credibilityClass = "credibility-2";
-        else credibilityClass = "credibility-1";
-      }
-
-      return (
-        <div className={`assignment-credibility-wrap ${credibilityClass}`}>
-          <div className="assignment-credibility-label">
-            {student.credibility === -1 ? "?" : student.credibility}
-          </div>
-        </div>
-      );
-    },
-    [assignment]
   );
 
   return (
@@ -228,9 +90,18 @@ const AssignmentStudentListComponent: React.FC<
                 <div className="flex items-center justify-between w-full">
                   {/* Student results как во Vue */}
                   <div className="flex items-center space-x-2">
-                    {renderStudentResults(student)}
-                    {renderPointsOrScore(student)}
-                    {renderCredibility(student)}
+                    {/* {renderStudentResults(student)} */}
+                    <StudentResultsDisplay results={student.results} />
+                    {/* {renderPointsOrScore(student)} */}
+                    <StudentPointsOrScoreDisplay
+                      assignment={assignment}
+                      student={student}
+                    />
+                    {/* {renderCredibility(student)} */}
+                    <StudentCredibilityDisplay
+                      student={student}
+                      assignment={assignment}
+                    />
                   </div>
 
                   {/* Toolbar */}
