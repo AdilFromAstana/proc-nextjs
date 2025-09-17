@@ -18,7 +18,6 @@ const ViolationsSection: React.FC<ViolationsSectionProps> = ({
   onViolationSelected,
 }) => {
   const shouldShow = isManager;
-  console.log("violations: ", violations);
   // isManager ||
   // !assignment.isHideUsersEnabled?.() ||
   // assignment.isCompletedStatus?.();
@@ -26,7 +25,6 @@ const ViolationsSection: React.FC<ViolationsSectionProps> = ({
   return (
     <SectionWrapper
       icon={faExclamationTriangle}
-      iconColor="yellow"
       title="Нарушения"
       hint="Подсказка по нарушениям"
       showSection={shouldShow}

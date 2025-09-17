@@ -8,8 +8,8 @@ interface SettingsSectionProps {
   assignment: any;
   student: any;
   available_time: any;
-  is_started: boolean | null;
-  is_finished: boolean | null;
+  is_started?: boolean;
+  is_finished?: boolean;
   onSettingsChange: () => void;
 }
 
@@ -24,7 +24,6 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({
   return (
     <SectionWrapper
       icon={faCog}
-      iconColor="gray"
       title="Настройки"
       hint="Подсказка по настройкам"
     >

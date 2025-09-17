@@ -16,7 +16,6 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({
   identities,
 }) => {
   const shouldShow = isManager;
-  console.log("identities: ", identities);
   // isManager ||
   // !assignment.isHideUsersEnabled?.() ||
   // assignment.isCompletedStatus?.();
@@ -24,8 +23,7 @@ const IdentitySection: React.FC<IdentitySectionProps> = ({
   return (
     <SectionWrapper
       icon={faCamera}
-      iconColor="blue"
-      title="Фото идентификации"
+      title="Идентификации"
       hint="Подсказка по фото"
       showSection={shouldShow}
     >

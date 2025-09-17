@@ -1,6 +1,6 @@
 // components/ViolationsSection.tsx
 import React from "react";
-import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
+import { faExclamationTriangle, faVideoCamera } from "@fortawesome/free-solid-svg-icons";
 import SectionWrapper from "../../UI/SectionWrapper";
 import VideoSessionListComponent from "../VideoSessionList";
 
@@ -24,7 +24,7 @@ const VideoRecordsSection: React.FC<VideoRecordsSectionProps> = ({
 
   return (
     <SectionWrapper
-      icon={faExclamationTriangle}
+      icon={faVideoCamera}
       title="Видео"
       hint="Видеозапись прохождения задания"
       showSection={shouldShow}

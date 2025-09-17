@@ -208,7 +208,7 @@ const AssignmentStudentListComponent: React.FC<
         onPageChange={onSetStudentListPage}
         onLoading={showLoader}
         onLoaded={hideLoader}
-        onFilterUpdate={() => console.log("Filter updated")}
+        onFilterUpdate={() => null}
       >
         {({ students, filter }) => (
           <>
@@ -273,9 +273,9 @@ const AssignmentStudentListComponent: React.FC<
                       disabled={false}
                       fetchScores={false}
                       accessKey={"194800"}
-                      onAttemptSelected={function (): null {
-                        throw new Error("Function not implemented.");
-                      }}
+                      // onAttemptSelected={function (): null {
+                      //   throw new Error("Function not implemented.");
+                      // }}
                       onAttemptUpdated={function (): null {
                         throw new Error("Function not implemented.");
                       }}

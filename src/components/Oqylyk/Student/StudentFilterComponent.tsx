@@ -210,8 +210,6 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
     fetchStudents();
   }, [fetchStudents]);
 
-  console.log("students: ", students);
-
   // ✅ 5. Только СЕЙЧАС — после всех хуков — можно рендерить JSX
   return (
     <div className="student-filter-component">

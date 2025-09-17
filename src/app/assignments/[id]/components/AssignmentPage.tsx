@@ -15,14 +15,12 @@ import AssignmentStudentSection from "./AssignmentStudentSection";
 import { getViewerType } from "@/types/assignment";
 import { AssignmentDetailResponse } from "@/types/assignment/detail";
 import {
-  fetchAssignmentActions,
   fetchAssignmentComments,
   fetchAssignmentDetail,
   fetchAssignmentStudents,
 } from "@/api/assignmentDetail";
 import { AssignmentStudentsResponse } from "@/types/assignment/students";
 import { AssignmentCommentsResponse } from "@/types/assignment/comments";
-import { AssignmentActionsResponse } from "@/types/assignment/actions";
 
 const AssignmentPage: React.FC<{
   assignmentId: number;
@@ -114,8 +112,10 @@ const AssignmentPage: React.FC<{
     [toast]
   );
 
-  const showLoader = useCallback(() => console.log("Show loader"), []);
-  const hideLoader = useCallback(() => console.log("Hide loader"), []);
+  console.log("assignmentData: ", assignmentData);
+
+  const showLoader = useCallback(() => null, []);
+  const hideLoader = useCallback(() => null, []);
 
   const handleToolbarAction = useCallback(
     (action: string) => {
