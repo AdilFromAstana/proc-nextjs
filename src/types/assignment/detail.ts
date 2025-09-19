@@ -118,8 +118,10 @@ export interface ProctoringSettings {
 }
 
 // Настройки сертификата
+export type CertificateIssueType = "auto-all" | "auto-conditions" | "manual";
+
 export interface CertificateSettings {
-  issue_type: string;
+  issue_type: CertificateIssueType;
   show_report: boolean;
 }
 
@@ -134,13 +136,20 @@ export interface ScenarioSettings {
 }
 
 // Настройки компонентов
+export interface ComponentSetting {
+  shuffle: number;
+  conditions: any[];
+  per_student: number;
+  variant_split: boolean;
+}
+
 export interface ComponentSettings {
-  all: {
-    shuffle: number;
-    conditions: any[];
-    per_student: number;
-    variant_split: boolean;
-  };
+  // Множественное число
+  [key: string]: ComponentSetting; // Ключ - это тип ('all', 'quiz_123' и т.д.), значение - настройки для этого типа
+  // Примеры конкретных ключей (опционально, если они заранее известны):
+  // all?: ComponentSetting;
+  // quiz_1?: ComponentSetting;
+  // lesson_5?: ComponentSetting;
 }
 
 // Основные настройки задания
@@ -172,8 +181,8 @@ export interface AssignmentDetail {
   access_type: "free" | "paid" | string;
   name: string;
   description: string | null;
-  complete_time: number;
-  max_attempts: number;
+  complete_time: number | string;
+  max_attempts: number | string;
   points_method_type: string;
   settings: Settings;
   starting_at: string;

@@ -1,25 +1,29 @@
 // components/ResultsSection.tsx
 import React from "react";
 import { faTasks } from "@fortawesome/free-solid-svg-icons";
-import QuizResultListComponent from "../QuizResultList";
+import QuizResultListComponent from "../QuizResult/QuizResultListComponent";
 import SectionWrapper from "../../UI/SectionWrapper";
 import ResultChartComponent from "../../UI/ResultChartComponent";
+import { Assessment, AssignmentResult } from "@/types/assignment/results";
+import { StudentAssessment } from "@/types/assignment/studentResult";
 
 interface ResultsSectionProps {
   assignment: any;
   student: any;
   isOwner: boolean;
   isReviewer: boolean;
-  results: any[];
+  results: AssignmentResult[];
   components: any;
-  resultsChart: any[];
+  resultsChart?: any[];
   currentAttempt: any;
   disabled: boolean;
   onResultUpdated: (component: any, result: any) => void;
+  assessments: StudentAssessment[];
 }
 
 const ResultsSection: React.FC<ResultsSectionProps> = ({
   assignment,
+  assessments,
   student,
   isOwner,
   isReviewer,
@@ -30,17 +34,16 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
   disabled,
   onResultUpdated,
 }) => {
-  const shouldShow =
-    results.length > 0 &&
-    (isOwner || isReviewer) &&
-    (assignment.isLessonType?.() ||
-      assignment.isQuizType?.() ||
-      assignment.isWebinarType?.());
+  const shouldShow = true;
+  // results.length > 0 &&
+  // (isOwner || isReviewer) &&
+  // (assignment.isLessonType?.() ||
+  //   assignment.isQuizType?.() ||
+  //   assignment.isWebinarType?.());
 
   return (
     <SectionWrapper
       icon={faTasks}
-      iconColor="green"
       title="Результаты"
       hint="Подсказка по результатам"
       showSection={shouldShow}
@@ -51,7 +54,14 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
         </div>
       ) : (
         <div className="space-y-6 w-full m-0 p-0">
-          <QuizResultListComponent />
+          <QuizResultListComponent
+            assessments={assessments}
+            student={student}
+            assignment={assignment}
+            attempt={currentAttempt}
+            components={components}
+            results={results}
+          />
 
           {resultsChart && resultsChart.length > 0 && (
             <div className="quiz-result-chart">

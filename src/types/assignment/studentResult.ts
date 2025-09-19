@@ -24,6 +24,7 @@ export interface StudentAttempt {
   points: number;
   credibility: number;
   spending_time: number;
+  results?: [];
 }
 
 // Действие студента
@@ -160,6 +161,7 @@ export interface AssignmentStudentData {
     total: number;
   };
   quiz_components: QuizComponent[];
+  results?: unknown[];
 }
 
 export interface AssignmentStudentDataResponse {

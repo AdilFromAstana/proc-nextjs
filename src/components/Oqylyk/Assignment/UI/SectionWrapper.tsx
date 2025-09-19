@@ -5,7 +5,6 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 
 interface SectionWrapperProps {
   icon: IconDefinition;
-  iconColor: string;
   title: string;
   hint: string;
   children: React.ReactNode;
@@ -15,7 +14,6 @@ interface SectionWrapperProps {
 
 const SectionWrapper: React.FC<SectionWrapperProps> = ({
   icon,
-  iconColor,
   title,
   hint,
   children,
@@ -24,19 +22,15 @@ const SectionWrapper: React.FC<SectionWrapperProps> = ({
 }) => {
   if (!showSection) return null;
 
-  // Определяем цвета на основе iconColor
-  const bgColorClass = `bg-${iconColor}-100`;
-  const textColorClass = `text-${iconColor}-600`;
-
   return (
     <div
       className={`result-data-item bg-white rounded-lg shadow ${className} border-t-1 border-[#ddd] rounded-none m-0`}
     >
       <div className="result-data-header flex items-center p-4">
         <div
-          className={`result-data-icon w-8 h-8 rounded-full ${bgColorClass} flex items-center justify-center mr-3`}
+          className={`result-data-icon w-8 h-8 rounded-full  flex items-center justify-center mr-3`}
         >
-          <FontAwesomeIcon icon={icon} className={textColorClass} />
+          <FontAwesomeIcon icon={icon} />
         </div>
         <div className="result-data-label">
           <div className="result-data-title font-semibold">{title}</div>

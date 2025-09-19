@@ -1,20 +1,11 @@
 // components/Assignment/AssignmentStudentResultViewer.tsx
 
 "use client";
-import React, { useState, useCallback, useEffect } from "react";
-import {
-  Loader2,
-  Camera,
-  AlertTriangle,
-  Video,
-  CheckCircle,
-  List,
-  Star,
-} from "lucide-react";
+import React, { useState, useCallback, useMemo, useEffect } from "react";
+import { Loader2, List } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { format } from "date-fns";
 import { useAssignmentStudentData } from "@/hooks/useAssignmentStudentData";
 import IdentitySection from "./Sections/IdentitySection";
 import ViolationsSection from "./Sections/ViolationsSection";
@@ -22,6 +13,7 @@ import ResultsSection from "./Sections/ResultsSection";
 import SettingsSection from "./Sections/SettingsSection";
 import ActionsSection from "./Sections/ActionsSection";
 import VideoRecordsSection from "./Sections/VideoRecordsSection";
+import StudentAttemptList from "./StudentAttemptList";
 
 interface AssignmentStudentResultViewerProps {
   assignment: any;
@@ -31,7 +23,6 @@ interface AssignmentStudentResultViewerProps {
   disabled?: boolean;
   fetchResults?: boolean;
   fetchScores?: boolean;
-  onAttemptSelected?: (attempt: any) => void;
   onAttemptUpdated?: (student: any) => void;
   onViolationItemSelected?: (violation: any) => void;
   onSessionGroupSelected?: (session: any) => void;
@@ -47,17 +38,12 @@ const AssignmentStudentResultViewer: React.FC<
   disabled = false,
   fetchResults = false,
   fetchScores = false,
-  onAttemptSelected,
   onAttemptUpdated,
   onViolationItemSelected,
   onSessionGroupSelected,
 }) => {
-  // ✅ Все хуки в начале
-  const [currentAttempt, setCurrentAttempt] = useState(attempt);
-  const [actionsPage, setActionsPage] = useState(1);
-  const [violationsPage, setViolationsPage] = useState(1);
+  const [currentAttempt, setCurrentAttempt] = useState<any>(null);
 
-  // ✅ Используем обновлённый хук
   const { data, isLoading, isError, error } = useAssignmentStudentData(
     assignment.id,
     student.id,
@@ -66,14 +52,27 @@ const AssignmentStudentResultViewer: React.FC<
     fetchScores
   );
 
-  // ✅ Обработчики
-  const handleAttemptSelected = useCallback(
-    (selectedAttempt: any) => {
-      setCurrentAttempt(selectedAttempt);
-      onAttemptSelected?.(selectedAttempt);
-    },
-    [onAttemptSelected]
-  );
+  useEffect(() => {
+    if (student?.attempts) {
+      student.attempts.forEach((attempt: any) => {
+        if (attempt.status === "active") {
+          setCurrentAttempt(attempt);
+        }
+      });
+    }
+
+    if (!currentAttempt && student?.attempts?.length > 0) {
+      const firstAttempt = student.attempts[0];
+      setCurrentAttempt(firstAttempt);
+    }
+  }, []);
+
+  const handleAttemptSelected = useCallback((selectedAttempt: any) => {
+    const needAttempt = student.attempts.find((attempt: any) => {
+      return attempt.id === selectedAttempt.id;
+    });
+    setCurrentAttempt(needAttempt);
+  }, []);
 
   const handleViolationItemSelected = useCallback(
     (violation: any) => {
@@ -96,7 +95,22 @@ const AssignmentStudentResultViewer: React.FC<
     [onAttemptUpdated]
   );
 
-  // ✅ Показываем лоадер
+  const results = useMemo(() => {
+    if (fetchResults && data?.results) {
+      return data.results;
+    }
+
+    if (currentAttempt?.results) {
+      return currentAttempt.results;
+    }
+
+    if (student?.results) {
+      return student.results;
+    }
+
+    return [];
+  }, [fetchResults, data?.results, currentAttempt, student?.results]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -106,21 +120,14 @@ const AssignmentStudentResultViewer: React.FC<
     );
   }
 
-  // ✅ Показываем ошибку
   if (isError) {
     return (
       <div className="p-4 text-red-500 bg-red-50 rounded">
-        Ошибка загрузки данных: {error.message}
+        Ошибка загрузки данных: {error?.message || "Неизвестная ошибка"}
       </div>
     );
   }
 
-  // ✅ Если данных нет
-  if (!data) {
-    return <div>Данные не найдены</div>;
-  }
-
-  // ✅ Деструктуризация данных
   const {
     student_assessments,
     attempts,
@@ -130,85 +137,95 @@ const AssignmentStudentResultViewer: React.FC<
     credibility,
     progress,
     quiz_components,
-  } = data;
+    available_time,
+    is_started,
+    is_finished,
+  } = data || {};
 
-  // ✅ Логика отображения разделов
-  const showUserContent = true; // В реальном приложении: isManager || (!assignment.isHideUsersEnabled() || assignment.isCompletedStatus())
-  const showResults = quiz_components.length > 0;
+  const showUserContent = true;
+  const showResults = quiz_components && quiz_components.length > 0;
 
   return (
-    <div className="space-y-6 p-4">
+    <div className="space-y-6 relative border-x-1">
       {/* Попытки */}
-      {attempts.length > 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <List className="h-5 w-5" />
-              Попытки ({attempts.length})
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              {attempts.map((attempt) => (
-                <Button
-                  key={attempt.id}
-                  variant={
-                    currentAttempt?.id === attempt.id ? "default" : "outline"
-                  }
-                  size="sm"
-                  onClick={() => handleAttemptSelected(attempt)}
-                  className="rounded-full"
-                >
-                  №{attempt.attempt + 1} ({attempt.status}) — {attempt.points}{" "}
-                  баллов
-                </Button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Прогресс */}
-      {progress && (
-        <Card>
-          <CardHeader>
-            <CardTitle>Прогресс выполнения</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              <div className="flex justify-between">
-                <span>Общий прогресс</span>
-                <span>{progress.total}%</span>
-              </div>
-              <Progress value={progress.total} className="w-full" />
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      <IdentitySection
-        assignment={assignment}
-        identities={identities}
-        isManager={true}
+      <StudentAttemptList
+        attempts={attempts}
+        currentAttempt={currentAttempt}
+        handleAttemptSelected={handleAttemptSelected}
       />
 
-      <ViolationsSection
-        assignment={assignment}
-        isManager={true}
-        onViolationSelected={() => window.open(violation.screenshot!, "_blank")}
-        violations={violations.data}
+      {/* Фото идентификации */}
+      {showUserContent && identities && identities.length > 0 && (
+        <IdentitySection
+          assignment={assignment}
+          identities={identities}
+          isManager={true}
+        />
+      )}
+
+      {/* Нарушения */}
+      {showUserContent &&
+        violations &&
+        violations.data &&
+        violations.data.length > 0 && (
+          <ViolationsSection
+            assignment={assignment}
+            isManager={true}
+            onViolationSelected={handleViolationItemSelected}
+            violations={violations.data}
+          />
+        )}
+
+      {/* Видеозаписи */}
+      {showUserContent && (
+        <VideoRecordsSection
+          assignment={assignment}
+          student={student}
+          isManager={true}
+          onViolationSelected={handleViolationItemSelected}
+        />
+      )}
+
+      {/* Результаты */}
+      {showResults && results && results.length > 0 && (
+        <ResultsSection
+          onResultUpdated={() => null}
+          assignment={assignment}
+          student={student}
+          currentAttempt={currentAttempt}
+          assessments={student_assessments || []}
+          components={quiz_components || []}
+          results={results}
+          disabled={disabled}
+          isOwner={true}
+          isReviewer={true}
+        />
+      )}
+
+      {/* Действия */}
+      <ActionsSection
+        assignmentId={assignment.id} // ID задания (обязательно)
+        studentId={student.id} // ID студента (обязательно)
+        attemptId={currentAttempt?.id} // ID попытки (опционально)
+        clickable={true} // Разрешить клик по нарушениям
+        refreshing={false} // Не обновлять автоматически (данные уже есть)
+        live={false} // Не использовать WebSocket (статичные данные)
+        interval={0} // Не нужен таймер
+        onViolationSelected={(violation) => {
+          // Обработка выбора нарушения (например, открытие модального окна)
+          handleViolationItemSelected(violation);
+        }}
       />
 
-      <VideoRecordsSection
+      {/* Настройки */}
+      <SettingsSection
         assignment={assignment}
         student={student}
-        isManager={true}
-        onViolationSelected={(e) => console.log(e)}
+        is_started={is_started}
+        is_finished={is_finished}
+        available_time={available_time}
+        onSettingsChange={() => null}
       />
-
-      <ActionsSection assignment={assignment} currentAttempt={currentAttempt} />
-
-      <SettingsSection assignment={assignment} />
     </div>
   );
 };

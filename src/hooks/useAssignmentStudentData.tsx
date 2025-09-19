@@ -1,5 +1,4 @@
 // hooks/useAssignmentStudentData.ts
-
 import { useQuery } from "@tanstack/react-query";
 import axiosClient from "@/api/axiosClient";
 import {
@@ -8,9 +7,9 @@ import {
 } from "@/types/assignment/studentResult";
 
 export const useAssignmentStudentData = (
-  assignmentId: number,
-  studentId: number,
-  attemptId?: number,
+  assignmentId: number | null,
+  studentId: number | null,
+  attemptId?: number | null,
   fetchResults: boolean = false,
   fetchScores: boolean = false
 ) => {
@@ -37,9 +36,12 @@ export const useAssignmentStudentData = (
       "results_chart",
       "is_started",
       "is_finished",
-      "progress",
-      "quiz_components",
+      "progress", // добавил
+      "quiz_components", // добавил
     ];
+
+    // Добавляем дополнительные поля
+    fields = fields.concat(["available_time"]);
 
     if (fetchResults) {
       fields.push("results");
@@ -48,6 +50,9 @@ export const useAssignmentStudentData = (
     if (fetchScores) {
       fields.push("scores");
     }
+
+    // Добавляем certificate field если нужно (предполагаем что assignmentId существует)
+    fields.push("student_certificate");
 
     const params: Record<string, any> = {
       context: studentId,
@@ -68,11 +73,11 @@ export const useAssignmentStudentData = (
     return response.data.entity;
   };
 
-  // ✅ Используем useQuery — запрос выполняется только при изменении queryKey
+  // ✅ Используем useQuery
   return useQuery<AssignmentStudentData>({
     queryKey,
     queryFn,
-    enabled: !!assignmentId && !!studentId, // ✅ Запрос не выполняется, пока нет assignmentId и studentId
-    staleTime: Infinity, // ✅ Данные никогда не устаревают — обновляются только при изменении ключа
+    enabled: !!assignmentId && !!studentId, // Запрос выполняется только когда есть оба ID
+    staleTime: 5 * 60 * 1000, // 5 минут кэширования
   });
 };

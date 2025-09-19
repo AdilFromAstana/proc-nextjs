@@ -1,3 +1,4 @@
+import { Assignment } from "./types/assignment/list";
 import { Student } from "./types/students";
 
 // types.ts
@@ -161,6 +162,11 @@ export type AssignmentStudentListComponentNotReqProps =
   Partial<AssignmentStudentListComponent>;
 
 export type StudentListProps = {
+  assignment?: Assignment; // Задание
+  isReviewer?: boolean; // Является ли пользователь рецензентом
+  isOwner?: boolean; // Является ли пользователь владельцем
+  onCopyReportUrl?: (student: Student) => void; // Обработчик копирования URL отчета
+  onShowSettings?: (student: Student) => void; // Обработчик показа настроек
   entities: any[];
   selectable: boolean;
   multiple: boolean;
@@ -172,6 +178,10 @@ export type StudentListProps = {
   renderData: (item: any) => React.ReactNode;
   renderAdditional?: (item: any) => React.ReactNode;
   className?: string;
+  extendedStudentId?: string | number;
+  onSelected: (value: any) => void;
+  totalPages: number;
+  renderMeta: any;
 };
 
 export type StudentListNotReqProps = Partial<StudentListProps>;

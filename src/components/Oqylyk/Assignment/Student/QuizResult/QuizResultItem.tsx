@@ -170,9 +170,48 @@ const QuizResultItem: React.FC<QuizResultItemProps> = ({
   // Get result class name
   const resultClassName = result.getClassName ? result.getClassName() : "";
 
+  // Determine colors based on result class
+  const getColors = () => {
+    const colors = {
+      backgroundColor: "#EEE",
+      borderColor: "#CCC",
+      textColor: "#CCC",
+    };
+
+    if (resultClassName.includes("true")) {
+      if (isPointSystemEnabled && result.points !== null) {
+        colors.backgroundColor = "#d5e4ed";
+        colors.borderColor = "#0277bd";
+        colors.textColor = "#0277bd";
+      } else {
+        colors.textColor = "#bfe05c";
+      }
+    } else if (resultClassName.includes("false")) {
+      if (isPointSystemEnabled && result.points !== null) {
+        colors.backgroundColor = "#edd5d5";
+        colors.borderColor = "#e05c67";
+        colors.textColor = "#e05c67";
+      } else {
+        colors.textColor = "#e05c67";
+      }
+    } else if (resultClassName.includes("answered")) {
+      if (isPointSystemEnabled && result.points !== null) {
+        colors.backgroundColor = "#f8e6d8";
+        colors.borderColor = "#ebcf34";
+        colors.textColor = "#ebcf34";
+      } else {
+        colors.textColor = "#ebcf34";
+      }
+    }
+
+    return colors;
+  };
+
+  const colors = getColors();
+
   return (
     <div
-      className="relative inline-block w-[70px] cursor-pointer bg-[#F7F7F7] align-top text-center hover:bg-[#F4F4F4]"
+      className="quiz-result-item relative inline-block w-[70px] cursor-pointer bg-[#F7F7F7] align-top text-center hover:bg-[#F4F4F4]"
       onClick={onClick}
     >
       <style>{`
@@ -185,34 +224,46 @@ const QuizResultItem: React.FC<QuizResultItemProps> = ({
       `}</style>
 
       {/* Component index */}
-      <div className="w-full py-2 px-0 bg-[#E5E5E5] text-center text-[#666] text-sm font-semibold">
+      <div className="component-index w-full py-2 px-0 bg-[#E5E5E5] text-center text-[#666] text-sm font-semibold">
         В{index + 1}
       </div>
 
       {/* Component icon */}
-      <div className="absolute top-[1px] right-[5px]">
+      <div className="component-icon absolute top-[1px] right-[5px]">
         <IconComponent width={12} height={12} color="#000" opacity={0.1} />
       </div>
 
       {/* Component result */}
-      <div className="h-[50px] leading-[50px] text-center relative">
+      <div className="component-result h-[50px] flex items-center justify-center text-center">
         <div
-          className={`inline-block align-middle w-8 h-8 rounded-full bg-[#EEE] overflow-hidden ${resultClassName} ${
-            isPointSystemEnabled && result.points !== null ? "info" : ""
-          }`}
+          className="result-wrap relative inline-flex items-center justify-center align-middle rounded-full overflow-hidden"
+          style={{
+            width: "30px",
+            height: "30px",
+            backgroundColor: colors.backgroundColor,
+            border: `1px solid ${colors.borderColor}`,
+          }}
         >
           {isPointSystemEnabled && result.points !== null ? (
-            <div className="text-xs font-semibold leading-[31px]">
+            <div
+              className="result-points text-xs font-semibold"
+              style={{
+                lineHeight: "30px",
+                color: colors.textColor,
+              }}
+            >
               {result.points}
             </div>
           ) : (
-            <ResultIcon width={16} height={16} color="#CCC" />
+            <div className="flex items-center justify-center w-full h-full">
+              <ResultIcon width={28} height={28} color={colors.textColor} />
+            </div>
           )}
         </div>
       </div>
 
       {/* Component name */}
-      <div className="hidden mt-[10px] text-[#9077ba] text-xs font-medium">
+      <div className="component-name hidden mt-[10px] text-[#9077ba] text-xs font-medium">
         {componentName}
       </div>
     </div>

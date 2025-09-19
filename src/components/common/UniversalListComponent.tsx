@@ -47,7 +47,6 @@ export default function UniversalListComponent<T extends BaseItem>({
   const [activeFilter, setActiveFilter] = useState(defaultFilter);
   const [hideItems, setHideItems] = useState(false);
 
-  // Обработка загрузки
   useEffect(() => {
     if (!loading) {
       const timer = setTimeout(() => {
@@ -57,7 +56,6 @@ export default function UniversalListComponent<T extends BaseItem>({
     }
   }, [loading]);
 
-  // Фильтрация элементов
   const filteredItems = (() => {
     if (hideItems) return [];
 
