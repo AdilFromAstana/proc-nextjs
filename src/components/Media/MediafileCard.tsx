@@ -44,8 +44,11 @@ const MediafileCard = ({
   const handleDoubleClick = () => {
     if (mediafile.type === "folder") {
       onOpenFolder(mediafile.id);
-    } else if (mediafile.type === "image" && mediafile.path) {
-      openInNewTab(mediafile.path);
+    } else if (
+      mediafile.type === "image" ||
+      (mediafile.type === "video" && mediafile.path)
+    ) {
+      openInNewTab(mediafile.path!);
     }
   };
 

@@ -1,24 +1,26 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-import { QuizDetailResponse } from "@/types/quiz/quiz";
-import { fetchQuizById } from "@/api/quiz";
-import QuizEditor from "@/components/Quiz/QuizEditor";
+import { useParams } from "next/navigation";
+import { fetchLessonById } from "@/api/lessons/listApi";
+import LessonItemComponent from "@/components/Lessons/LessonItemComponent";
+import { LessonDetailResponse } from "@/types/lessons/lessonQuestions";
 
-export default function QuizItemPage() {
+export default function LessonItemPage() {
   const params = useParams();
-  const router = useRouter();
-  const [quizData, setQuizData] = useState<QuizDetailResponse | null>(null);
+  const [lessonData, setLessonData] = useState<LessonDetailResponse | null>(
+    null
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const loadQuiz = async () => {
+    console.log("params: ", params);
+    const loadLesson = async () => {
       try {
         setLoading(true);
-        const response = await fetchQuizById(Number(params.id));
-        setQuizData(response);
+        const response = await fetchLessonById(Number(params.id));
+        setLessonData(response);
         setError(null);
       } catch (err) {
         setError("Не удалось загрузить тест");
@@ -29,17 +31,9 @@ export default function QuizItemPage() {
     };
 
     if (params.id) {
-      loadQuiz();
+      loadLesson();
     }
   }, [params.id]);
-
-  const handleUpdateQuiz = (updatedQuiz: QuizDetailResponse) => {
-    setQuizData(updatedQuiz);
-  };
-
-  const handleClose = () => {
-    router.push("/quiz");
-  };
 
   if (loading) {
     return (
@@ -60,12 +54,5 @@ export default function QuizItemPage() {
     );
   }
 
-  return (
-    <QuizEditor
-      quiz={quizData}
-      quizId={Number(params.id)}
-      onUpdateQuiz={handleUpdateQuiz}
-      onClose={handleClose}
-    />
-  );
+  return <LessonItemComponent lesson={lessonData} />;
 }

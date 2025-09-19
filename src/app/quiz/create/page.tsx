@@ -1,13 +1,8 @@
+// app/quiz/create/page.tsx
 "use client";
-import CreateQuizComponent from "@/components/Quiz/CreateQuizComponent";
-import React from "react";
 
-type Props = {};
+import QuizEditor from "@/components/Quiz/QuizEditor";
 
-export default function QuizCreatePage({}: Props) {
-  return (
-    <div className="w-full m-8">
-      <CreateQuizComponent />
-    </div>
-  );
+export default function CreateQuizPage() {
+  return <QuizEditor />;
 }

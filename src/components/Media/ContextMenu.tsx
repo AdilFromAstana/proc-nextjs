@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { MediaFile } from "@/types/media";
-import { renameMediaFile, deleteMediaFile } from "@/api/mediafilesApi";
+import { renameMediaFile, deleteMediaFile } from "@/api/media/mediafilesApi";
 import { EyeIcon } from "@/app/icons/EyeIcon";
 import { CutIcon } from "@/app/icons/CutIcon";
 import { RenameIcon } from "@/app/icons/RenameIcon";

@@ -3,7 +3,7 @@ import { getBlocks, getComponents, getUIPrimitives } from "@/lib/registry";
 import NewsComponent from "@/components/News/NewsComponent";
 import { mockLessons, mockNews, mockTasks } from "@/mockData";
 import TasksListComponent from "@/components/Tasks/TaskListComponent";
-import LessonsListComponent from "@/components/Lessons/LessonsListComponent";
+import LessonsListComponent from "@/components/Lessons/LessonsList";
 
 export default function Home() {
   return (

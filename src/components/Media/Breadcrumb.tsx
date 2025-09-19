@@ -8,10 +8,10 @@ type BreadcrumbItem = {
 
 type Props = {
   path: BreadcrumbItem[];
-  onBack?: () => void;
+  onNavigate: (folderId: number) => void;
 };
 
-export default function Breadcrumb({ path, onBack }: Props) {
+export default function Breadcrumb({ path, onNavigate }: Props) {
   if (path.length === 0) return null;
 
   return (
@@ -30,16 +30,10 @@ export default function Breadcrumb({ path, onBack }: Props) {
                 ? "text-gray-900"
                 : "text-blue-600 hover:text-blue-800 cursor-pointer"
             }`}
-            onClick={
-              index === path.length - 1
-                ? undefined
-                : () => {
-                    // Обработка клика на папку (кроме последней)
-                    if (onBack && index < path.length - 1) {
-                      onBack();
-                    }
-                  }
-            }
+            onClick={() => {
+              // Переходим к конкретной папке по её ID
+              onNavigate(item.id);
+            }}
           >
             {item.name}
           </span>

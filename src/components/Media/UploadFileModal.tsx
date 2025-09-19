@@ -1,4 +1,4 @@
-import { uploadMediaFile } from "@/api/mediafilesApi";
+import { uploadMediaFile } from "@/api/media/mediafilesApi";
 import { CloseButtonIcon } from "@/app/icons/CloseButtonIcon";
 import { UploadIcon } from "@/app/icons/UploadIcon";
 import { MediaFile } from "@/types/media";

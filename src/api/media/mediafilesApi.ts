@@ -1,4 +1,4 @@
-import axiosClient from "./axiosClient";
+import axiosClient from "../axiosClient";
 
 // Типы для медиафайлов
 export interface MediaFile {

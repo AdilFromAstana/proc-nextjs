@@ -6,8 +6,8 @@ import { sortMediafiles } from "@/lib/mediafiles/sorting";
 import Toolbar from "./Toolbar";
 import MediafilesList from "./MediafilesList";
 import { MediaFile } from "@/types/media";
-import { fetchMediaFiles, openFolderById } from "@/api/mediafilesApi";
-import { createFolder } from "@/api/mediafilesApi";
+import { fetchMediaFiles, openFolderById } from "@/api/media/mediafilesApi";
+import { createFolder } from "@/api/media/mediafilesApi";
 import Breadcrumb from "./Breadcrumb";
 import UploadFileModal from "./UploadFileModal";
 
@@ -62,16 +62,6 @@ export default function MediafilesPageClient() {
     loadMediaFiles();
   }, [currentFolderId]);
 
-  const updateBreadcrumbPath = (id: number, name: string) => {
-    if (id === 0) {
-      // Корень
-      setBreadcrumbPath([{ id: 0, name: "Главная" }]);
-    } else {
-      // Добавляем новую папку в путь
-      setBreadcrumbPath((prev) => [...prev, { id, name }]);
-    }
-  };
-
   // Добавляем функцию для обновления списка файлов
   const reloadMediaFiles = async () => {
     try {
@@ -98,29 +88,84 @@ export default function MediafilesPageClient() {
     setMediafiles((prev) => [...prev, newFile]);
   };
 
+  // Новая функция для обновления пути крошек
+  const updateBreadcrumbPath = (id: number, name: string) => {
+    setBreadcrumbPath((prev) => {
+      // Находим индекс текущей папки в пути
+      const existingIndex = prev.findIndex((item) => item.id === id);
+
+      if (existingIndex !== -1) {
+        // Если папка уже есть в пути, обрезаем путь до этой папки
+        return [...prev.slice(0, existingIndex + 1)];
+      } else {
+        // Если новая папка, добавляем её в конец
+        return [...prev, { id, name }];
+      }
+    });
+  };
+
+  // Функция для навигации по breadcrumb
+  const handleBreadcrumbNavigate = (folderId: number) => {
+    if (folderId === 0) {
+      // Переход в корень
+      setCurrentFolderId(null);
+      setFolderHistory([]);
+      setBreadcrumbPath([{ id: 0, name: "Главная" }]);
+    } else {
+      // Переход к конкретной папке
+      const folderIndex = breadcrumbPath.findIndex(
+        (item) => item.id === folderId
+      );
+
+      if (folderIndex !== -1) {
+        // Обновляем путь
+        const newPath = breadcrumbPath.slice(0, folderIndex + 1);
+        setBreadcrumbPath(newPath);
+
+        // Обновляем историю
+        const newHistory = newPath
+          .slice(1, -1) // исключаем корень и текущую папку
+          .map((item) => item.id);
+        setFolderHistory(newHistory);
+
+        // Устанавливаем текущую папку
+        setCurrentFolderId(folderId);
+      }
+    }
+  };
+
   const handleOpenFolder = (folderId: number) => {
-    // Находим папку по ID
     const folder = mediafiles.find((f) => f.id === folderId);
 
     if (folder) {
-      // Обновляем путь хлебных крошек
-      updateBreadcrumbPath(folderId, folder.name);
-
       // Сохраняем текущую папку в историю
       if (currentFolderId !== null) {
         setFolderHistory((prev) => [...prev, currentFolderId]);
       }
+
+      // Обновляем путь хлебных крошек
+      updateBreadcrumbPath(folderId, folder.name);
+
       setCurrentFolderId(folderId);
     }
   };
 
+  // Исправленная функция возврата назад
   const handleBack = () => {
     if (folderHistory.length > 0) {
       // Берем последнюю папку из истории
       const previousFolderId = folderHistory[folderHistory.length - 1];
-      setCurrentFolderId(previousFolderId);
-      // Удаляем последнюю папку из истории
-      setFolderHistory((prev) => prev.slice(0, -1));
+      const previousFolder = [...mediafiles, ...breadcrumbPath].find(
+        (f) => f.id === previousFolderId
+      );
+
+      if (previousFolder) {
+        setCurrentFolderId(previousFolderId);
+        // Удаляем последнюю папку из истории
+        setFolderHistory((prev) => prev.slice(0, -1));
+        // Обновляем breadcrumb
+        handleBreadcrumbNavigate(previousFolderId);
+      }
     } else {
       // Если история пуста, возвращаемся в корень
       setCurrentFolderId(null);
@@ -180,7 +225,7 @@ export default function MediafilesPageClient() {
         onNewFolder={handleNewFolder}
       />
 
-      <Breadcrumb path={breadcrumbPath} onBack={handleBack} />
+      <Breadcrumb path={breadcrumbPath} onNavigate={handleBreadcrumbNavigate} />
       {uploadModalOpen && (
         <UploadFileModal
           onClose={() => setUploadModalOpen(false)}
