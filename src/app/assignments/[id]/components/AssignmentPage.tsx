@@ -1,10 +1,10 @@
-// app/assignments/[id]/page.tsx или где у тебя AssignmentPage
-
+// app  [id]/page.tsx
 "use client";
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "@/types/assignment";
+import { AssignmentDetail } from "@/types/assignment/detail"; // Импортируем AssignmentDetail
 
 // ✅ Импортируем новые компоненты
 import AssignmentToolbar from "./AssignmentToolbar";
@@ -18,19 +18,33 @@ import {
   fetchAssignmentComments,
   fetchAssignmentDetail,
   fetchAssignmentStudents,
+  // Импортируем функцию для обновления задания (замените на вашу)
+  // updateAssignmentDetail,
 } from "@/api/assignmentDetail";
 import { AssignmentStudentsResponse } from "@/types/assignment/students";
 import { AssignmentCommentsResponse } from "@/types/assignment/comments";
+import AssignmentCommentBlockComponent from "@/components/Oqylyk/Assignment/CommentBlockComponent";
+import AssignmentAccessTypeComponent from "./AssignmentAccessTypeComponen/AssignmentAccessTypeComponen";
+import AssignmentTeacherReviewerComponent from "./AssignmentTeacherComponent";
+import AssignmentPlanComponent from "./AssignmentPlanComponent";
+import AssignmentMiscSettingsComponent from "./AssignmentMiscSettingsComponent";
+import AssignmentScenarioSettingsComponent from "./AssignmentScenarioSettingsComponent";
+import AssignmentComponentSettingsComponent from "./AssignmentComponentSettingsComponent";
+import AssignmentCertificateComponent from "./AssignmentCertificateComponent";
 
 const AssignmentPage: React.FC<{
   assignmentId: number;
 }> = ({ assignmentId }) => {
   const { toast } = useToast();
+  const queryClient = useQueryClient(); // Для инвалидации кэша
 
   // ✅ Состояния
   const [sortBy, setSortBy] = useState<string>("lastname");
   const [page, setPage] = useState<number>(1);
   const [selectedStudent, setSelectedStudent] = useState<any>(null);
+  // --- Новое состояние для assignment ---
+  const [assignment, setAssignment] = useState<AssignmentDetail | null>(null);
+  // -------------------------------------
 
   const {
     data: assignmentData,
@@ -42,6 +56,14 @@ const AssignmentPage: React.FC<{
     enabled: !!assignmentId,
   });
 
+  // --- Инициализируем локальное состояние assignment данными из запроса ---
+  useEffect(() => {
+    if (assignmentData?.entity) {
+      setAssignment(assignmentData.entity);
+    }
+  }, [assignmentData]);
+  // -------------------------------------------------------------------------
+
   const {
     data: studentsData,
     isLoading: isLoadingStudents,
@@ -52,27 +74,35 @@ const AssignmentPage: React.FC<{
     enabled: !!assignmentId,
   });
 
-  const {
-    data: commentsData,
-    isLoading: isLoadingComments,
-    isError: isErrorComments,
-  } = useQuery<AssignmentCommentsResponse>({
-    queryKey: ["assignment-comments", assignmentId],
-    queryFn: () => fetchAssignmentComments(assignmentId),
-    enabled: !!assignmentId,
-  });
+  // --- Функция для обновления локального состояния assignment ---
+  const handleAssignmentChange = useCallback(
+    (updatedAssignment: AssignmentDetail) => {
+      console.log("Assignment updated locally:", updatedAssignment);
+      setAssignment(updatedAssignment);
+      // Здесь можно также вызвать API для сохранения изменений на сервере
+      // Например, с использованием useMutation
+      // updateAssignmentMutation.mutate(updatedAssignment);
+    },
+    []
+  );
+  // ----------------------------------------------------------------
 
-  // const {
-  //   data: actionsData,
-  //   isLoading: isLoadingActions,
-  //   isError: isErrorActions,
-  // } = useQuery<AssignmentActionsResponse>({
-  //   queryKey: ["assignment-actions", assignmentId],
-  //   queryFn: () => fetchAssignmentActions(assignmentId),
-  //   enabled: !!assignmentId,
+  // --- (Опционально) Мутация для сохранения на сервере ---
+  // const updateAssignmentMutation = useMutation({
+  //   mutationFn: (updatedAssignment: AssignmentDetail) => updateAssignmentDetail(assignmentId, updatedAssignment),
+  //   onSuccess: (data) => {
+  //     // Обновляем кэш react-query
+  //     queryClient.setQueryData(["assignment", assignmentId], data);
+  //     toast({ title: "Успешно", description: "Задание обновлено" });
+  //   },
+  //   onError: (error) => {
+  //     toast({ title: "Ошибка", description: "Не удалось обновить задание", variant: "destructive" });
+  //     // Откатываем локальное состояние в случае ошибки, если необходимо
+  //     // setAssignment(prev => prev); // или какая-то другая логика
+  //   },
   // });
+  // ---------------------------------------------------------
 
-  // ✅ Обработчики — до return
   const handleStudentSelected = useCallback((student: any) => {
     setSelectedStudent(student);
   }, []);
@@ -112,8 +142,6 @@ const AssignmentPage: React.FC<{
     [toast]
   );
 
-  console.log("assignmentData: ", assignmentData);
-
   const showLoader = useCallback(() => null, []);
   const hideLoader = useCallback(() => null, []);
 
@@ -141,7 +169,7 @@ const AssignmentPage: React.FC<{
   );
 
   // ✅ Проверки — после хуков
-  if (isErrorAssignment || isErrorStudents || isErrorComments) {
+  if (isErrorAssignment || isErrorStudents) {
     return (
       <div className="p-8">
         <div className="text-red-500">Ошибка загрузки данных</div>
@@ -160,8 +188,9 @@ const AssignmentPage: React.FC<{
     );
   }
 
-  const assignment = assignmentData?.entity;
+  // const assignment = assignmentData?.entity; // Убираем это, так как используем локальное состояние
   if (!assignment) {
+    // Проверяем локальное состояние
     return <div className="p-8">Задание не найдено</div>;
   }
 
@@ -215,6 +244,38 @@ const AssignmentPage: React.FC<{
           hideLoader={hideLoader}
           sortBy={sortBy}
           onSortByChange={setSortBy}
+        />
+        <AssignmentCommentBlockComponent assignment={assignment} />
+        <AssignmentAccessTypeComponent
+          assignment={assignment}
+          onAssignmentChange={handleAssignmentChange} // Передаем реальную функцию
+        />
+        <AssignmentTeacherReviewerComponent
+          assignment={assignment}
+          isManager={isManager}
+          onAssignmentChange={handleAssignmentChange} // Передаем реальную функцию
+        />
+        <AssignmentPlanComponent
+          assignment={assignment}
+          onAssignmentChange={handleAssignmentChange} // Передаем реальную функцию
+        />
+        <AssignmentMiscSettingsComponent
+          assignment={assignment}
+          onAssignmentChange={handleAssignmentChange}
+        />
+        <AssignmentScenarioSettingsComponent
+          assignment={assignment}
+          onAssignmentChange={handleAssignmentChange}
+        />
+
+        <AssignmentComponentSettingsComponent
+          assignment={assignment}
+          onAssignmentChange={handleAssignmentChange}
+        />
+
+        <AssignmentCertificateComponent
+          assignment={assignment}
+          onAssignmentChange={handleAssignmentChange}
         />
       </div>
     </div>

@@ -1,6 +1,7 @@
 // components/Student/StudentPointsOrScoreDisplay.tsx
 import { AssignmentDetail } from "@/types/assignment/detail";
 import { Student } from "@/types/students";
+import { isPointSystemEnabled } from "@/utils/assignmentHelpers";
 import React from "react";
 
 interface StudentPointsOrScoreDisplayProps {
@@ -11,13 +12,8 @@ interface StudentPointsOrScoreDisplayProps {
 const StudentPointsOrScoreDisplay: React.FC<
   StudentPointsOrScoreDisplayProps
 > = ({ student, assignment }) => {
-  // Проверка включена ли система баллов
-  const isPointSystemEnabled = (assignment: any) => {
-    return assignment?.isPointSystemEnabled || false;
-  };
-
   // Получение активной попытки
-  const getActiveAttempt = (student: Student) => {
+  const getActiveAttempt = () => {
     if (student.attempts && student.attempts.length > 0) {
       return (
         student.attempts.find((attempt: any) => attempt.status === "active") ||
@@ -28,7 +24,13 @@ const StudentPointsOrScoreDisplay: React.FC<
   };
 
   // Получение оценки студента
-  const getStudentScore = (student: Student) => {
+  const getStudentScore = () => {
+    // Используем существующую функцию getScore если она есть
+    if (typeof (student as any).getScore === "function") {
+      return (student as any).getScore();
+    }
+
+    // Или старую логику
     if (student.scores && student.scores.length > 0) {
       const score = student.scores[0];
       return score.score || 0;
@@ -37,8 +39,10 @@ const StudentPointsOrScoreDisplay: React.FC<
   };
 
   if (isPointSystemEnabled(assignment)) {
-    const attempt = getActiveAttempt(student);
-    if (attempt && attempt.points !== undefined) {
+    const attempt = getActiveAttempt();
+
+    // NEW, IF ATTEMPT EXISTS
+    if (attempt) {
       return (
         <div
           className={`
@@ -47,18 +51,20 @@ const StudentPointsOrScoreDisplay: React.FC<
             w-[25px] h-[25px] leading-[20px]
             rounded-full border-[3px] border-solid text-center
             ${
-              attempt.points > 0
+              attempt.points && attempt.points > 0
                 ? "active text-[#0277bd] border-[#0277bd]"
                 : "text-[#EEE] border-[#EEE]"
             }
           `}
         >
           <div className="assignment-points-label text-[0.6rem] font-bold text-inherit">
-            {attempt.points}
+            {attempt.points || 0}
           </div>
         </div>
       );
     }
+
+    // OLD, WITHOUT ATTEMPTS
     return (
       <div
         className={`
@@ -81,11 +87,12 @@ const StudentPointsOrScoreDisplay: React.FC<
   }
 
   // SCORE
-  const score = getStudentScore(student);
+  const score = getStudentScore();
   return (
     <div
       className={`
         assignment-score-wrap
+        score-${score}
         inline-flex items-center justify-center
         w-[25px] h-[25px] leading-[20px]
         rounded-full border-[3px] border-solid text-center
@@ -105,7 +112,7 @@ const StudentPointsOrScoreDisplay: React.FC<
       `}
     >
       <div className="assignment-score-label text-[0.8rem] font-bold text-inherit">
-        {score || "0"}
+        {score ? score : "0"}
       </div>
     </div>
   );

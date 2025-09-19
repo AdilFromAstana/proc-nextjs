@@ -1,5 +1,6 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// components/AssignmentCommentBlockComponent.tsx
+import React, { useState, useEffect, useCallback } from "react";
+import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -14,20 +15,24 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Pencil, X, Send, User } from "lucide-react";
+import {
+  useAssignmentComments,
+  useCreateComment,
+  useUpdateComment,
+  useDeleteComment,
+} from "@/hooks/useAssignmentComments";
 
 // Интерфейсы для типов данных
 interface UserModel {
   id: number;
   firstname: string;
   lastname: string;
-  photo: string;
-  getFullName(): string;
-  getFirstName(): string;
+  photo: string | null;
 }
 
 interface AssignmentModel {
   id: number;
-  isProcessStatus(): boolean;
+  status: string;
 }
 
 interface ComponentModel {
@@ -47,17 +52,20 @@ interface AssignmentCommentModel {
   created_at?: string;
   updated_at?: string;
   user?: UserModel;
-  getCreatedAtDate(): string;
-  set(data: any): void;
-  save(options?: any): Promise<void>;
-  delete(): Promise<void>;
 }
 
-interface AssignmentCommentList {
-  length: number;
-  models: AssignmentCommentModel[];
-  fetch(params: any): Promise<void>;
-}
+// Вспомогательные функции
+const getFullName = (user: UserModel): string => {
+  return `${user.firstname} ${user.lastname}`;
+};
+
+const getFirstName = (user: UserModel): string => {
+  return user.firstname;
+};
+
+const getCreatedAtDate = (dateString: string | undefined): string => {
+  return new Date(dateString || Date.now()).toLocaleString("ru-RU");
+};
 
 // Props интерфейсы
 interface AssignmentCommentBlockProps {
@@ -73,95 +81,38 @@ const AssignmentCommentBlockComponent: React.FC<
   AssignmentCommentBlockProps
 > = ({
   viewer = "owner",
-  assignment = { id: 1, isProcessStatus: () => null },
-  student,
+  assignment = null,
   component = null,
   result = null,
   disabled = false,
 }) => {
-  // State
-  const [comment, setComment] = useState<AssignmentCommentModel>({
-    message: "",
-    set: function (data: any) {
-      Object.assign(this, data);
-    },
-    save: async function (options?: any) {
-      console.log("Сохранение комментария:", this);
-      return Promise.resolve();
-    },
-    delete: async function () {
-      console.log("Удаление комментария");
-      return Promise.resolve();
-    },
-    getCreatedAtDate: function () {
-      return new Date(Date.now()).toLocaleString("ru-RU");
-    },
-  });
+  // Auth context
+  const authUser = {
+    firstname: "Иван",
+    lastname: "Иванов",
+    photo: null,
+    id: 1,
+  };
 
-  const [comments, setComments] = useState<AssignmentCommentList>({
-    length: 1,
-    models: [
-      {
-        id: 1,
-        message: "Отличный ответ! Показал глубокое понимание материала.",
-        user_id: 2,
-        created_at: "2023-12-01T10:30:00Z",
-        updated_at: "2023-12-01T10:30:00Z",
-        user: {
-          id: 2,
-          firstname: "Мария",
-          lastname: "Петрова",
-          photo: "https://placehold.co/50x50/ef4444/FFFFFF?text=МП",
-          getFullName: function () {
-            return `${this.firstname} ${this.lastname}`;
-          },
-          getFirstName: function () {
-            return this.firstname;
-          },
-        },
-        getCreatedAtDate: function () {
-          return new Date(this.created_at || Date.now()).toLocaleString(
-            "ru-RU"
-          );
-        },
-        set: function (data: any) {
-          Object.assign(this, data);
-        },
-        save: async function (options?: any) {
-          return Promise.resolve();
-        },
-        delete: async function () {
-          return Promise.resolve();
-        },
-      },
-    ],
-    fetch: async function (params: any) {
-      return Promise.resolve();
-    },
+  // State
+  const [comment, setComment] = useState<Partial<AssignmentCommentModel>>({
+    message: "",
   });
 
   const [editAction, setEditAction] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [commentToDelete, setCommentToDelete] =
-    useState<AssignmentCommentModel | null>(null);
-  const sendBtnRef = useRef<HTMLButtonElement>(null);
+  const [commentToDelete, setCommentToDelete] = useState<number | null>(null);
 
-  // Mock profile data (заменить на реальные данные аутентификации)
+  // Mock profile data
   const profile: UserModel = {
-    id: 1,
-    firstname: "Иван",
-    lastname: "Иванов",
-    photo: "https://placehold.co/100x100/3b82f6/FFFFFF?text=ИИ",
-    getFullName: function () {
-      return `${this.firstname} ${this.lastname}`;
-    },
-    getFirstName: function () {
-      return this.firstname;
-    },
+    id: authUser?.id || 1,
+    firstname: authUser?.firstname || "Иван",
+    lastname: authUser?.lastname || "Иванов",
+    photo: authUser?.photo || null,
   };
 
   // Computed values
-  const paramsApi = (() => {
+  const paramsApi = useCallback(() => {
     let resultId = null;
 
     if (result) {
@@ -175,85 +126,33 @@ const AssignmentCommentBlockComponent: React.FC<
       component_id: component?.id || null,
       component_type: component?.component_type || null,
     };
-  })();
+  }, [
+    assignment?.id,
+    component?.id,
+    component?.component_type,
+    result,
+    viewer,
+  ]);
 
-  const fieldsApi = [
-    "id",
-    "assignment_id",
-    "assignment_result_id",
-    "user_id",
-    "component_id",
-    "component_type",
-    "message",
-    "user:id",
-    "user:firstname",
-    "user:lastname",
-    "user:photo",
-    "created_at",
-    "updated_at",
-  ];
+  const allowSend = comment.message !== null && comment.message.trim() !== "";
 
-  const allowSend = comment.message !== null && comment.message !== "";
+  const assignmentOpened = assignment?.status === "process";
 
-  const assignmentOpened = assignment?.isProcessStatus() || true;
+  // API hooks
+  const {
+    data: commentsData,
+    isLoading: isLoadingComments,
+    isError: isErrorComments,
+    refetch: refetchComments,
+  } = useAssignmentComments(assignment?.id || 0, paramsApi());
 
-  const isOwner = viewer === "owner";
-  const isReviewer = viewer === "reviewer";
+  const { mutate: createComment } = useCreateComment();
+  const { mutate: updateComment } = useUpdateComment();
+  const { mutate: deleteComment } = useDeleteComment();
+
+  const comments = commentsData?.entities || [];
 
   // Methods
-  const fetchComments = async () => {
-    if (!assignment) return;
-
-    try {
-      // Mock fetch
-      const mockComments: AssignmentCommentModel[] = [
-        {
-          id: 1,
-          message: "Отличный ответ! Показал глубокое понимание материала.",
-          user_id: 2,
-          created_at: "2023-12-01T10:30:00Z",
-          updated_at: "2023-12-01T10:30:00Z",
-          user: {
-            id: 2,
-            firstname: "Мария",
-            lastname: "Петрова",
-            photo: "https://placehold.co/50x50/ef4444/FFFFFF?text=МП",
-            getFullName: function () {
-              return `${this.firstname} ${this.lastname}`;
-            },
-            getFirstName: function () {
-              return this.firstname;
-            },
-          },
-          getCreatedAtDate: function () {
-            return new Date(this.created_at || Date.now()).toLocaleString(
-              "ru-RU"
-            );
-          },
-          set: function (data: any) {
-            Object.assign(this, data);
-          },
-          save: async function (options?: any) {
-            return Promise.resolve();
-          },
-          delete: async function () {
-            return Promise.resolve();
-          },
-        },
-      ];
-
-      setComments({
-        length: mockComments.length,
-        models: mockComments,
-        fetch: async function (params: any) {
-          return Promise.resolve();
-        },
-      });
-    } catch (error) {
-      console.error("Error fetching comments:", error);
-    }
-  };
-
   const editComment = (commentToEdit: AssignmentCommentModel) => {
     if (!assignmentOpened) {
       alert("Действие недоступно");
@@ -264,107 +163,64 @@ const AssignmentCommentBlockComponent: React.FC<
     setEditAction(true);
   };
 
-  const removeComment = (commentToRemove: AssignmentCommentModel) => {
+  const removeComment = (commentId: number) => {
     if (!assignmentOpened) {
       alert("Действие недоступно");
       return;
     }
 
-    setCommentToDelete(commentToRemove);
+    setCommentToDelete(commentId);
     setDeleteDialogOpen(true);
   };
 
   const confirmDelete = async () => {
     if (commentToDelete) {
-      try {
-        await commentToDelete.delete();
-        fetchComments();
-      } catch (error) {
-        console.error("Error deleting comment:", error);
-      }
+      deleteComment(commentToDelete);
     }
     setDeleteDialogOpen(false);
     setCommentToDelete(null);
   };
 
   const cancelEdit = () => {
-    setComment({
-      message: "",
-      set: function (data: any) {
-        Object.assign(this, data);
-      },
-      save: async function (options?: any) {
-        return Promise.resolve();
-      },
-      delete: async function () {
-        return Promise.resolve();
-      },
-      getCreatedAtDate: function () {
-        return new Date().toLocaleString("ru-RU");
-      },
-    });
+    setComment({ message: "" });
     setEditAction(false);
   };
 
   const postComment = async () => {
-    if (!allowSend) {
-      return;
-    }
+    if (!allowSend || !assignment) return;
 
     try {
-      // Show loader simulation
-      if (sendBtnRef.current) {
-        sendBtnRef.current.textContent = "Отправка...";
+      const commentData = {
+        ...paramsApi(),
+        message: comment.message,
+      };
+
+      if (editAction && comment.id) {
+        updateComment({ id: comment.id, data: commentData });
+      } else {
+        createComment(commentData);
       }
 
-      // Set params
-      comment.set(paramsApi);
-
-      // Save comment
-      await comment.save({
-        headers: { "X-Requested-Fields": fieldsApi.join(",") },
-      });
-
-      // Reset model
-      setComment({
-        message: "",
-        set: function (data: any) {
-          Object.assign(this, data);
-        },
-        save: async function (options?: any) {
-          return Promise.resolve();
-        },
-        delete: async function () {
-          return Promise.resolve();
-        },
-        getCreatedAtDate: function () {
-          return new Date().toLocaleString("ru-RU");
-        },
-      });
-
+      // Reset form
+      setComment({ message: "" });
       setEditAction(false);
-      fetchComments();
     } catch (error) {
       console.error("Error posting comment:", error);
-    } finally {
-      if (sendBtnRef.current) {
-        sendBtnRef.current.textContent = "Отправить";
-      }
     }
   };
 
   // Effects
   useEffect(() => {
-    fetchComments();
+    if (assignment?.id) {
+      const syncInterval = setInterval(() => {
+        refetchComments();
+      }, 20000);
 
-    const syncInterval = setInterval(() => {
-      fetchComments();
-    }, 20000);
-
-    return () => {
-      clearInterval(syncInterval);
-    };
-  }, [assignment?.id, component?.id, result?.id]);
+      return () => {
+        clearInterval(syncInterval);
+      };
+    }
+  }, [assignment?.id, refetchComments]);
 
   // Render
   if (!assignment) {
@@ -376,40 +232,49 @@ const AssignmentCommentBlockComponent: React.FC<
   }
 
   return (
-    <Card className="comment-block-component p-4 m-0 rounded-none">
-      <CardContent className="p-0">
-        {comments.length > 0 && (
-          <div className="comment-block-list space-y-4">
-            {comments.models.map((item, index) => (
+    <Card className="comment-block-component w-full">
+      <CardContent className="p-4">
+        {isLoadingComments ? (
+          <div className="text-center py-4">Загрузка комментариев...</div>
+        ) : isErrorComments ? (
+          <div className="text-center py-4 text-red-500">
+            Ошибка загрузки комментариев
+          </div>
+        ) : comments.length > 0 ? (
+          <div className="comment-block-list space-y-4 mb-6">
+            {comments.map((item) => (
               <div
-                key={index}
+                key={item.id}
                 className="comment-block-item border-b border-gray-100 pb-4 last:border-b-0"
               >
-                <div className="comment-block-profile flex justify-between flex-col gap-2 pb-2 border-b-1 border-gray-400">
+                <div className="comment-block-profile flex flex-col gap-2">
                   <div className="flex items-center space-x-3">
                     <Avatar className="w-8 h-8">
-                      <AvatarImage
-                        src={item.user?.photo}
-                        alt={item.user?.getFullName()}
-                      />
-                      <AvatarFallback>
-                        <User className="w-4 h-4" />
-                      </AvatarFallback>
+                      {item.user?.photo ? (
+                        <AvatarImage
+                          src={item.user.photo}
+                          alt={getFullName(item.user)}
+                        />
+                      ) : (
+                        <AvatarFallback className="bg-blue-100">
+                          <User className="w-4 h-4 text-blue-600" />
+                        </AvatarFallback>
+                      )}
                     </Avatar>
                     <span className="comment-profile-name text-sm font-medium text-gray-900">
-                      {item.user?.getFullName()}
+                      {item.user && getFullName(item.user)}
                     </span>
                   </div>
                   <div className="comment-meta-date text-xs text-gray-500">
-                    {item.getCreatedAtDate()}
+                    {getCreatedAtDate(item.created_at)}
                   </div>
-                  <div className="comment-block-message text-sm text-black ">
+                  <div className="comment-block-message text-sm text-gray-800">
                     {item.message}
                   </div>
                 </div>
 
                 {item.user_id === profile.id && (
-                  <div className="comment-block-actions flex justify-end space-x-2">
+                  <div className="comment-block-actions flex justify-end space-x-2 mt-2">
                     <Button
                       variant="ghost"
                       size="sm"
@@ -421,8 +286,8 @@ const AssignmentCommentBlockComponent: React.FC<
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700"
-                      onClick={() => removeComment(item)}
+                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
+                      onClick={() => removeComment(item.id!)}
                     >
                       <X className="h-4 w-4" />
                     </Button>
@@ -431,26 +296,29 @@ const AssignmentCommentBlockComponent: React.FC<
               </div>
             ))}
           </div>
-        )}
+        ) : null}
 
         <div className="post-form-wrap relative">
           {(disabled || !assignmentOpened) && (
-            <div className="post-form-overlay absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10">
-              <div className="unavailable-label text-gray-500 font-semibold text-center">
+            <div className="post-form-overlay absolute inset-0 bg-white bg-opacity-70 flex items-center justify-center z-10 rounded">
+              <div className="unavailable-label text-gray-500 font-semibold text-center px-4">
                 Комментарии недоступны
               </div>
             </div>
           )}
 
           <div className="flex items-center space-x-3 mb-4">
-            <Avatar>
-              <AvatarImage src={profile.photo} alt={profile.getFullName()} />
-              <AvatarFallback>
-                <User className="w-5 h-5" />
-              </AvatarFallback>
+            <Avatar className="w-8 h-8">
+              {profile.photo ? (
+                <AvatarImage src={profile.photo} alt={getFullName(profile)} />
+              ) : (
+                <AvatarFallback className="bg-blue-100">
+                  <User className="w-4 h-4 text-blue-600" />
+                </AvatarFallback>
+              )}
             </Avatar>
             <span className="comment-profile-name text-sm font-medium text-gray-900">
-              {profile.getFirstName()}
+              {getFirstName(profile)}
             </span>
           </div>
 
@@ -462,25 +330,24 @@ const AssignmentCommentBlockComponent: React.FC<
           >
             <div className="mb-4">
               <Textarea
-                value={comment.message}
+                value={comment.message || ""}
                 onChange={(e) =>
                   setComment({ ...comment, message: e.target.value })
                 }
                 placeholder="Введите сообщение"
-                className="w-full min-h-[100px] border-1 rounded-none"
+                className="w-full min-h-[100px]"
                 disabled={disabled || !assignmentOpened}
               />
             </div>
 
             <div className="flex justify-between items-center">
               <Button
-                ref={sendBtnRef}
                 type="submit"
                 disabled={!allowSend || disabled || !assignmentOpened}
                 className="flex items-center"
               >
                 <Send className="w-4 h-4 mr-2" />
-                Отправить
+                {editAction ? "Обновить" : "Отправить"}
               </Button>
 
               {editAction && (
