@@ -12,7 +12,7 @@ export interface QuizListResponse {
   status_code: string;
   entities: {
     current_page: number;
-    data: QuizItem[];
+    data: QuizItemInList[];
     first_page_url: string;
     from: number;
     last_page: number;
@@ -31,7 +31,7 @@ export interface QuizListResponse {
   };
 }
 
-export interface QuizItem {
+export interface QuizItemInList {
   id: number;
   name: string;
   description: string | null;

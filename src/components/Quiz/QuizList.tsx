@@ -1,14 +1,14 @@
 "use client";
 
 import { fetchQuizList } from "@/api/quiz";
-import { QuizItem } from "@/types/quiz/quiz";
+import { QuizItemInList } from "@/types/quiz/quiz";
 import { useRouter } from "next/navigation";
 import React, { useState, useMemo, useEffect } from "react";
 
 export default function QuizList() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
-  const [quizzes, setQuizzes] = useState<QuizItem[]>([]);
+  const [quizzes, setQuizzes] = useState<QuizItemInList[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
