@@ -49,7 +49,7 @@ const CollapsibleCard: React.FC<CollapsibleCardProps> = ({
       </div>
 
       {/* Сворачиваемое содержимое */}
-      {!isCollapsed && <div className="p-6 pt-4">{children}</div>}
+      {!isCollapsed && <div className="px-6 pb-6">{children}</div>}
     </Card>
   );
 };

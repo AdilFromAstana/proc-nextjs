@@ -24,13 +24,14 @@ import {
 import { AssignmentStudentsResponse } from "@/types/assignment/students";
 import { AssignmentCommentsResponse } from "@/types/assignment/comments";
 import AssignmentCommentBlockComponent from "@/components/Oqylyk/Assignment/CommentBlockComponent";
-import AssignmentAccessTypeComponent from "./AssignmentAccessTypeComponen/AssignmentAccessTypeComponen";
+import AssignmentAccessTypeComponent from "./AssignmentAccessTypeComponent/AssignmentAccessTypeComponent";
 import AssignmentTeacherReviewerComponent from "./AssignmentTeacherComponent";
 import AssignmentPlanComponent from "./AssignmentPlanComponent";
 import AssignmentMiscSettingsComponent from "./AssignmentMiscSettingsComponent";
 import AssignmentScenarioSettingsComponent from "./AssignmentScenarioSettingsComponent";
 import AssignmentComponentSettingsComponent from "./AssignmentComponentSettingsComponent";
 import AssignmentCertificateComponent from "./AssignmentCertificateComponent";
+import AssignmentProctoringComponent from "./AssignmentProctoringComponent";
 
 const AssignmentPage: React.FC<{
   assignmentId: number;
@@ -274,6 +275,11 @@ const AssignmentPage: React.FC<{
         />
 
         <AssignmentCertificateComponent
+          assignment={assignment}
+          onAssignmentChange={handleAssignmentChange}
+        />
+
+        <AssignmentProctoringComponent
           assignment={assignment}
           onAssignmentChange={handleAssignmentChange}
         />

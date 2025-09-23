@@ -4,15 +4,15 @@ import React from "react";
 interface HeaderAction {
   icon: React.ComponentType<React.SVGProps<SVGSVGElement>>;
   label: string;
-  onClick: () => void;
+  onClick: any;
   className?: string;
 }
 
-interface QuizHeaderActionsProps {
+interface HeaderActionsProps {
   actions: HeaderAction[];
 }
 
-export const QuizHeaderAction: React.FC<{ action: HeaderAction }> = ({
+export const HeaderAction: React.FC<{ action: HeaderAction }> = ({
   action,
 }) => {
   const IconComponent = action.icon;
@@ -30,13 +30,11 @@ export const QuizHeaderAction: React.FC<{ action: HeaderAction }> = ({
   );
 };
 
-export const QuizHeaderActions: React.FC<QuizHeaderActionsProps> = ({
-  actions,
-}) => {
+export const HeaderActions: React.FC<HeaderActionsProps> = ({ actions }) => {
   return (
     <div className="flex items-center space-x-4">
       {actions.map((action, index) => (
-        <QuizHeaderAction key={index} action={action} />
+        <HeaderAction key={index} action={action} />
       ))}
     </div>
   );
