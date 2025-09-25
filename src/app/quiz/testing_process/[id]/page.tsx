@@ -19,6 +19,7 @@ const TestingProcess: React.FC = () => {
   const [previousQuestionIndex, setPreviousQuestionIndex] = useState<
     number | null
   >(null);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   useEffect(() => {
     loadAssignment();
@@ -95,17 +96,12 @@ const TestingProcess: React.FC = () => {
     if (!assignment) return;
 
     try {
-      // Обновляем текущий вопрос перед завершением
       await updateQuestion(currentQuestionIndex);
+      await loadAssignment();
 
-      // Отправляем запрос на завершение теста
       await finishAssignment(assignment.id, assignment.attempt_id);
-
-      alert("Тест завершён!");
-      router.back();
     } catch (error) {
       console.error("Ошибка при завершении теста:", error);
-      alert("Произошла ошибка при завершении теста");
     }
   };
 
@@ -113,13 +109,34 @@ const TestingProcess: React.FC = () => {
   const handleTextChange = (text: string) => {
     if (!currentQuiz) return;
 
-    const updatedQuiz = { ...currentQuiz };
-    const currentQuestionData = updatedQuiz.components[currentQuestionIndex];
+    // Создаем глубокую копию
+    const updatedQuiz = {
+      ...currentQuiz,
+      components: currentQuiz.components.map((component, index) =>
+        index === currentQuestionIndex
+          ? {
+              ...component,
+              component: {
+                ...component.component,
+                attempt: {
+                  ...component.component.attempt,
+                  answer: text,
+                },
+              },
+            }
+          : component
+      ),
+    };
 
+    setCurrentQuiz(updatedQuiz);
+  };
+
+  // Получаем текущий ответ для открытого вопроса
+  const getCurrentAnswer = () => {
     if (currentQuestionData.component_type === "OpenQuestionComponent") {
-      currentQuestionData.component.answer = text;
-      setCurrentQuiz(updatedQuiz);
+      return currentQuestionData.component.attempt["answer"] || "";
     }
+    return "";
   };
 
   // Обработчик для FreeQuestionComponent
@@ -204,22 +221,22 @@ const TestingProcess: React.FC = () => {
     );
   }
 
-  if (!currentQuiz) {
-    return <div>Ошибка загрузки вопроса</div>;
+  if (!currentQuiz.components) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-red-500">
+            components пришел null, надо начать тест
+          </p>
+        </div>
+      </div>
+    );
   }
 
   const totalQuestions = currentQuiz.components.length;
   const currentQuestionData = currentQuiz.components[currentQuestionIndex];
   const currentQuestion = currentQuestionData.component?.question || "Вопрос";
   const currentQuestionOptions = currentQuestionData.component?.options || [];
-
-  // Получаем текущий ответ для открытого вопроса
-  const getCurrentAnswer = () => {
-    if (currentQuestionData.component_type === "OpenQuestionComponent") {
-      return currentQuestionData.component.answer || "";
-    }
-    return "";
-  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -231,8 +248,8 @@ const TestingProcess: React.FC = () => {
           </span>
         </div>
         <Button
-          onClick={handleFinishTest}
-          className="bg-green-500 hover:bg-green-600 text-white"
+          onClick={() => setShowConfirmModal(true)} // Показываем модальное окно вместо немедленного завершения
+          className="bg-green-500 hover:bg-green-600 text-white rounded-full"
         >
           Завершить
         </Button>
@@ -373,6 +390,35 @@ const TestingProcess: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Модальное окно подтверждения завершения теста */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-lg p-6 max-w-3xl w-full mx-4">
+            <h3 className="text-lg font-medium text-gray-800 mb-2">
+              Вы уверены, что хотите завершить выполнение экзамена?
+            </h3>
+            <p className="text-gray-600 mb-6">
+              После завершения вы не сможете отредактировать ответы к вопросам.
+            </p>
+            <div className="flex justify-end space-x-3">
+              <Button
+                onClick={() => setShowConfirmModal(false)}
+                variant="outline"
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Продолжить
+              </Button>
+              <Button
+                onClick={handleFinishTest}
+                className="bg-green-500 hover:bg-green-600 text-white"
+              >
+                Завершить
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="fixed bottom-4 right-4 w-48 h-36 bg-gray-900 rounded-lg shadow-xl overflow-hidden border-2 border-white">
         <video
