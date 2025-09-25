@@ -1,5 +1,7 @@
 import {
   FetchQuizListParams,
+  QuizAttemptsApi,
+  QuizAttemptsResponse,
   QuizComponentsResponse,
   QuizDetailEntity,
   QuizDetailResponse,
@@ -8,6 +10,69 @@ import {
   QuizQuestionItem,
 } from "@/types/quiz/quiz";
 import axiosClient from "../axiosClient";
+
+export interface FinishAssignmentActionResponse {
+  actions: FinishAssignmentAction[];
+}
+
+// Тип для действия завершения теста
+export interface FinishAssignmentAction {
+  action_type: "finished";
+  assignment_attempt_id: number;
+  assignment_id: number;
+  id: null;
+  initiator_id: null;
+  student_id: null;
+  webinar_session_id: null;
+  screenshot: null;
+  screenshots: null;
+  is_warning: boolean;
+  is_archived: boolean;
+  description: null;
+  created_at: null;
+  diff: null;
+  user: {
+    REQUEST_CONTINUE: number;
+    REQUEST_REDUNDANT: number;
+    REQUEST_SKIP: number;
+    id: null;
+    school_id: null;
+    auth_type: null;
+    group: null;
+    photo: null;
+    photo_thumb: {};
+    color: null;
+    firstname: null;
+    lastname: null;
+    patronymic: null;
+    email: null;
+    phone: null;
+    username: null;
+    description: null;
+    password: null;
+    school: {
+      REQUEST_CONTINUE: number;
+      REQUEST_REDUNDANT: number;
+      REQUEST_SKIP: number;
+      id: null;
+      type: null;
+      name: null;
+      logo: null;
+      logo_thumb: {};
+      website: null;
+      email: null;
+    };
+    register_date: null;
+    last_activity_date: null;
+    additional: {
+      almaty_daryn_school_id: null;
+      almaty_daryn_teacher_name: null;
+    };
+    is_online: boolean;
+    is_need_complete_challenge: boolean;
+    is_multiple_schools: boolean;
+  };
+}
 
 export const fetchQuizList = async (
   params: FetchQuizListParams
@@ -58,6 +123,90 @@ export const fetchQuizById = async (
     headers: { "X-Requested-Fields": fields.join(",") },
   });
   return response.data;
+};
+
+export const sendAnswer = async (
+  assignmentId: number,
+  componentId: number,
+  newData: QuizAttemptsApi[]
+) => {
+  const response = await axiosClient.post<QuizAttemptsResponse>(
+    `/assignment/quiz-attempts/${assignmentId}/${componentId}.json`,
+    newData
+  );
+};
+
+// НОВАЯ ФУНКЦИЯ: Завершение теста
+export const finishAssignment = async (
+  assignmentId: number,
+  assignmentAttemptId: number
+): Promise<void> => {
+  const finishAction: FinishAssignmentActionResponse = {
+    actions: [
+      {
+        action_type: "finished",
+        assignment_attempt_id: assignmentAttemptId,
+        assignment_id: assignmentId,
+        id: null,
+        initiator_id: null,
+        student_id: null,
+        webinar_session_id: null,
+        screenshot: null,
+        screenshots: null,
+        is_warning: false,
+        is_archived: false,
+        description: null,
+        created_at: null,
+        diff: null,
+        user: {
+          REQUEST_CONTINUE: 0,
+          REQUEST_REDUNDANT: 1,
+          REQUEST_SKIP: 2,
+          id: null,
+          school_id: null,
+          auth_type: null,
+          group: null,
+          photo: null,
+          photo_thumb: {},
+          color: null,
+          firstname: null,
+          lastname: null,
+          patronymic: null,
+          email: null,
+          phone: null,
+          username: null,
+          description: null,
+          password: null,
+          school: {
+            REQUEST_CONTINUE: 0,
+            REQUEST_REDUNDANT: 1,
+            REQUEST_SKIP: 2,
+            id: null,
+            type: null,
+            name: null,
+            logo: null,
+            logo_thumb: {},
+            website: null,
+            email: null,
+          },
+          register_date: null,
+          last_activity_date: null,
+          additional: {
+            almaty_daryn_school_id: null,
+            almaty_daryn_teacher_name: null,
+          },
+          is_online: false,
+          is_need_complete_challenge: false,
+          is_multiple_schools: false,
+        },
+      },
+    ],
+  };
+
+  await axiosClient.post(
+    `/assignment/actions/${assignmentId}.json`,
+    finishAction
+  );
 };
 
 export const updateQuiz = async (

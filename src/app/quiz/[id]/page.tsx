@@ -13,24 +13,22 @@ export default function QuizItemPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const loadQuiz = async () => {
-      try {
-        setLoading(true);
-        const response = await fetchQuizById(Number(params.id));
-        setQuizData(response);
-        setError(null);
-      } catch (err) {
-        setError("Не удалось загрузить тест");
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (params.id) {
-      loadQuiz();
+  const loadQuiz = async () => {
+    try {
+      setLoading(true);
+      const response = await fetchQuizById(Number(params.id));
+      setQuizData(response);
+      setError(null);
+    } catch (err) {
+      setError("Не удалось загрузить тест");
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    loadQuiz();
   }, [params.id]);
 
   const handleUpdateQuiz = (updatedQuiz: QuizDetailResponse) => {

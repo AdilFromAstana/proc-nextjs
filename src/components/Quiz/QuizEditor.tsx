@@ -18,7 +18,7 @@ import { AppointIcon } from "@/app/icons/Quiz/QuizHeaderIcons/AppointIcon";
 import { CloneIcon } from "@/app/icons/Quiz/QuizHeaderIcons/CloneIcon";
 import { DeleteIcon } from "@/app/icons/Quiz/QuizHeaderIcons/DeleteIcon";
 import { CloseIcon } from "@/app/icons/Quiz/QuizHeaderIcons/CloseIcon";
-import { QuizHeaderActions } from "./HeaderActions";
+import { HeaderActions } from "./HeaderActions";
 
 type Props = {
   quiz: QuizDetailResponse | null;
@@ -259,7 +259,7 @@ export default function QuizEditor({
           {localQuiz.entity.name || "Новый тест"}
         </h1>
 
-        <QuizHeaderActions
+        <HeaderActions
           actions={[
             {
               icon: SaveIcon,

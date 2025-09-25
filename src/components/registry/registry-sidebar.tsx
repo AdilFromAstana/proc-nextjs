@@ -1,11 +1,10 @@
 "use client";
 
-import { ChevronDown, Home, Menu, ToyBrick, X } from "lucide-react";
+import { ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 
-import { RegistryLogo } from "@/components/registry/registry-logo";
 import { ModeToggle } from "@/components/registry/theme-toggle";
 import { Button } from "@/components/ui/button";
 import {
@@ -101,7 +100,7 @@ export function RegistrySidebar() {
 
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader className="border-b bg-gray-400">
+      <SidebarHeader>
         <div className="flex items-center justify-between px-2 py-2">
           <Link href="/" className="flex min-w-0 items-center">
             <Logo />
