@@ -5,8 +5,9 @@ export const FillBlanksQuestionCard = ({
 }: {
   question: QuizQuestionItem;
 }) => {
-  const questionText = question.component.question || "";
-  const blanks = question.component.blanks || [];
+  if (!question) return null;
+  const questionText = question?.component?.question || "";
+  const blanks = question?.component?.blanks || [];
 
   return (
     <div>

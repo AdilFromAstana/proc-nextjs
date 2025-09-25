@@ -10,7 +10,7 @@ import QuestionCard from "./QuestionCard";
 import ButtonsPanel from "./ButtonsPanel";
 import { fetchQuizById } from "@/api/quiz";
 import LibraryOfQuestions from "./Modals/LibraryOfQuestions";
-import ImportModal from "./Modals/ImportModal";
+import QuizComponentImportModal from "./Modals/QuizComponentImportModal/index";
 import { InfoIcon } from "@/app/icons/InfoIcon";
 import { FilterIcon } from "@/app/icons/Quiz/FilterIcon";
 import { SaveIcon } from "@/app/icons/Quiz/QuizHeaderIcons/SaveIcon";
@@ -25,6 +25,63 @@ type Props = {
   quizId: number;
   onUpdateQuiz: (updatedQuiz: QuizDetailResponse) => void;
   onClose?: () => void;
+};
+
+// Функция перевода (замените на вашу реальную функцию перевода)
+const t = (key: string) => {
+  const translations: Record<string, string> = {
+    "label-import-quiz-type": "Тип вопроса",
+    "hint-import-quiz-type": "Выберите тип вопроса для импорта",
+    "label-import-quiz-file": "Файл",
+    "hint-import-quiz-file": "Выберите файл для импорта (.xls, .xlsx, .csv)",
+    "btn-upload-file": "Загрузить файл",
+    "label-import-quiz-settings": "Дополнительные настройки",
+    "btn-show-additional-settings": "Показать дополнительные настройки",
+    "label-import-quiz-offset": "Смещение строк",
+    "hint-import-quiz-offset": "Количество строк для пропуска в начале файла",
+    "placeholder-import-quiz-offset": "Введите смещение",
+    "label-allow-attachments": "Разрешить вложения",
+    "hint-allow-attachments": "Разрешить прикрепление файлов к ответам",
+    "label-enable-antiplagiarism": "Включить антиплагиат",
+    "hint-enable-antiplagiarism": "Проверять ответы на плагиат",
+    "label-fill-space-question-placeholder": "Плейсхолдер",
+    "hint-fill-space-question-placeholder":
+      "Текст плейсхолдера для заполнения пропусков",
+    "placeholder-fill-space-question-placeholder": "Введите плейсхолдер",
+    "label-import-quiz-difficult-group": "Группы сложности",
+    "hint-import-quiz-difficult-group": "Настройте группы сложности",
+    "placeholder-difficult-group": "Введите значение группы",
+    "label-import-quiz-variant-group": "Группы вариантов",
+    "hint-import-quiz-variant-group": "Настройте группы вариантов",
+    "placeholder-variant-group": "Введите значение варианта",
+    "label-import-quiz-rows": "Сопоставление колонок",
+    "hint-import-quiz-rows": "Сопоставьте буквы колонок с полями",
+    "placeholder-import-quiz-letter-value": "Выберите поле",
+    "btn-show-more": "Показать больше",
+    "btn-show-less": "Показать меньше",
+    "btn-start-import": "Начать импорт",
+    "btn-cancel": "Отмена",
+    "label-import-quiz-question": "Вопрос",
+    "label-import-quiz-answer-item": "Вариант ответа",
+    "label-import-quiz-answer-true": "Правильный ответ",
+    "label-import-quiz-answer": "Ответ",
+    "label-import-quiz-id": "ID",
+    "label-import-quiz-position": "Позиция",
+    "label-import-quiz-points-encouragement": "Баллы за правильный ответ",
+    "label-import-quiz-points-penalty": "Баллы за неправильный ответ",
+    "label-import-quiz-difficult": "Сложность",
+    "label-import-quiz-variant": "Вариант",
+    "confirm-import-task": "Вы уверены, что хотите начать импорт?",
+    "label-difficult-easy": "Легкий",
+    "label-difficult-medium": "Средний",
+    "label-difficult-hard": "Сложный",
+    "label-variant-a": "Вариант A",
+    "label-variant-b": "Вариант B",
+    "label-free-question": "Вопрос с выбором",
+    "label-open-question": "Открытый вопрос",
+    "label-fill-space-question": "Заполнение пропусков",
+  };
+  return translations[key] || key;
 };
 
 export default function QuizEditor({
@@ -54,8 +111,22 @@ export default function QuizEditor({
   const handleOpenLibraryModal = () => {
     setIsLibraryModalOpen(true);
   };
+
   const handleOpenImportModal = () => {
     setIsImportModalOpen(true);
+  };
+
+  const handleImportCreated = () => {
+    // Обработка успешного создания импорта
+    console.log("Импорт создан");
+    // Здесь можно обновить список вопросов
+    handleQuestionUpdated();
+  };
+
+  const handleImportFinished = () => {
+    // Обработка завершения импорта
+    console.log("Импорт завершен");
+    setIsImportModalOpen(false);
   };
 
   useEffect(() => {
@@ -370,10 +441,14 @@ export default function QuizEditor({
         onAddQuestions={handleAddQuestions}
       />
 
-      <ImportModal
-        isOpen={isImportModalOpen}
+      <QuizComponentImportModal
+        assessmentType="quiz" // или нужный тип
+        assessment={localQuiz?.entity} // передаем объект теста
+        isVisible={isImportModalOpen}
         onClose={() => setIsImportModalOpen(false)}
-        onAdd={() => {}}
+        onCreated={handleImportCreated}
+        onFinished={handleImportFinished}
+        t={t} // функция перевода
       />
     </div>
   );

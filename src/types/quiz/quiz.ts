@@ -87,6 +87,7 @@ export interface QuizQuestionComponent {
   description: string;
   is_multiple: number;
   options?: [];
+  blanks?: [];
   attempts: number | null;
   settings: QuizQuestionSettings;
   created_at: string;

@@ -1,3 +1,4 @@
+import RichText from "@/components/Chunks/RichText";
 import { QuizQuestionItem } from "@/types/quiz/quiz";
 
 export const OpenQuestionCard = ({
@@ -5,8 +6,9 @@ export const OpenQuestionCard = ({
 }: {
   question: QuizQuestionItem;
 }) => {
-  const questionText = question.component.question || "";
-  const answerText = question.component.answer || "";
+  if (!question) return null;
+  const questionText = question?.component?.question || "";
+  const answerText = question?.component?.answer || "";
 
   return (
     <div>
@@ -14,24 +16,14 @@ export const OpenQuestionCard = ({
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Вопрос
         </label>
-        <textarea
-          value={questionText}
-          readOnly
-          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none resize-none"
-          rows={2}
-        />
+        <RichText content={questionText} />
       </div>
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
           Ответ
         </label>
-        <textarea
-          value={answerText}
-          readOnly
-          className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-50 focus:outline-none resize-none"
-          rows={2}
-        />
+        <RichText content={answerText} />
       </div>
     </div>
   );
