@@ -1,5 +1,7 @@
 // src/types/assignment/detail.ts
 
+import { QuizDetailEntity, QuizQuestionItem } from "../quiz/quiz";
+
 // Владелец задания
 export interface Owner {
   id: number;
@@ -33,14 +35,15 @@ export interface Class {
   color: string;
 }
 
-// Викторина
-export interface Quiz {
-  id: number;
-  name: string;
-  description: string | null;
-  image: string | null;
-  color: string;
-}
+// // Викторина
+// export interface Quiz {
+//   id: number;
+//   name: string;
+//   description: string | null;
+//   image: string | null;
+//   color: string;
+//   components: QuizQuestionItem;
+// }
 
 // Прогресс
 export interface Progress {
@@ -165,29 +168,29 @@ export interface Settings {
 // Детали задания
 export interface AssignmentDetail {
   id: number;
+  quiz_id: number | null;
+  lesson_id: number | null;
+  status: "process" | "completed" | "remaining" | string;
+  type: "quiz" | "lesson" | string;
+  name: string;
+  description: string | null;
+  external_url: string | null;
+  settings: Settings;
+  complete_time: number | string;
+  max_attempts: number | string;
+  starting_at_type: string;
   external_id: string | null;
+  ending_at: string;
   class_id: number;
   owner_id: number;
-  lesson_id: number | null;
-  quiz_id: number | null;
   webinar_id: number | null;
   chat_id: number;
+  starting_at: string;
   invite_code_id: number | null;
   product_id: number | null;
   certificate_id: number | null;
-  external_url: string | null;
-  status: "process" | "completed" | "remaining" | string;
-  type: "quiz" | "lesson" | string;
   access_type: "free" | "paid" | string;
-  name: string;
-  description: string | null;
-  complete_time: number | string;
-  max_attempts: number | string;
   points_method_type: string;
-  settings: Settings;
-  starting_at: string;
-  starting_at_type: string;
-  ending_at: string;
   ending_at_type: string;
   observer: any | null;
   application: "browser" | "desktop" | string;
@@ -209,7 +212,7 @@ export interface AssignmentDetail {
   owner: Owner;
   invite_code: any | null;
   class: Class;
-  quizzes: Quiz[];
+  quizzes: QuizDetailEntity[];
   lessons: any[];
   reviewers: any[];
   rooms: any[];
@@ -221,4 +224,76 @@ export interface AssignmentDetailResponse {
   status: "success" | string;
   status_code: string;
   entity: AssignmentDetail;
+}
+
+// На странице прокторинга
+export interface ProctoringAssignmentResponse {
+  status: "success";
+  status_code: "0000";
+  entity: AssignmentEntity;
+}
+
+// На странице прокторинга
+export interface AssignmentEntity {
+  id: number;
+  quiz_id: number;
+  lesson_id: number;
+  status: string;
+  type: string;
+  name: string;
+  description: string;
+  external_url: string;
+  settings: {};
+  complete_time: number;
+  max_attempts: number;
+  starting_at: string;
+  starting_at_type: string;
+  ending_at: string;
+  ending_at_type: string;
+  is_straight_answer: number;
+  is_show_results_after_finished: number;
+  is_show_answers_after_finished: number;
+  is_points_method: number;
+  is_comments: number;
+  is_chat: number;
+  is_certificate: false;
+  is_proctoring: number;
+  is_webinar: number;
+  is_started: true;
+  is_finished: false;
+  is_registered: true;
+  application: string;
+  proctoring_policy_agree: false;
+  head_identity_manual_disabled: false;
+  head_tracking_manual_disabled: false;
+  main_camera_manual_disabled: false;
+  second_camera_manual_disabled: false;
+  screen_share_manual_disabled: false;
+  fullscreen_mode_manual_disabled: false;
+  displays_check_manual_disabled: false;
+  read_clipboard_manual_disabled: false;
+  focus_detector_manual_disabled: false;
+  extension_detector_manual_disabled: false;
+  noise_detector_manual_disabled: false;
+  head_identity_manual_enabled: false;
+  head_tracking_manual_enabled: false;
+  main_camera_manual_enabled: false;
+  second_camera_manual_enabled: false;
+  screen_share_manual_enabled: false;
+  fullscreen_mode_manual_enabled: false;
+  displays_check_manual_enabled: false;
+  read_clipboard_manual_enabled: false;
+  focus_detector_manual_enabled: false;
+  extension_detector_manual_enabled: false;
+  noise_detector_manual_enabled: false;
+  attempt_id: number;
+  available_time: null;
+  student_assessments: [];
+  attempts: [];
+  results: null;
+  points: number;
+  quizzes: QuizDetailEntity[];
+  lessons: [];
+  webinar: {};
+  chat_id: number;
 }

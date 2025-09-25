@@ -95,7 +95,7 @@ export default function Header() {
   }
 
   return (
-    <header className="w-full p-5 relative bg-gray-50">
+    <header className="w-full p-5 relative bg-gray-50 hidden">
       <div className="flex flex-row justify-start items-center">
         {/* LANGUAGES */}
         <div className="header-lang">{/* <LanguageSwitcherComponent /> */}</div>

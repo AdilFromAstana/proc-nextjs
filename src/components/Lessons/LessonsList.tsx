@@ -20,7 +20,7 @@ export default function LessonsList() {
         setLessons(response.entities.data);
         setError(null);
       } catch (err) {
-        setError("Не удалось загрузить список тестов");
+        setError("Не удалось загрузить список уроков");
         console.error(err);
       } finally {
         setLoading(false);

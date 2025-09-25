@@ -62,7 +62,6 @@ export interface QuizComponentsResponse {
     total: number;
   };
 }
-
 export interface QuizQuestionItem {
   id: number;
   quiz_id: number;
@@ -75,9 +74,9 @@ export interface QuizQuestionItem {
 }
 
 export interface QuizQuestionComponent {
+  id: number;
   _attempts_showed: false;
   _answers_showed: false;
-  id: number;
   owner_id: number;
   component_type: string;
   question: string;
@@ -86,8 +85,9 @@ export interface QuizQuestionComponent {
   feedback: string;
   description: string;
   is_multiple: number;
-  options?: [];
-  attempts: number | null;
+  options?: [{ id: any; answer: any }];
+  attempts?: any | null;
+  attempt?: any | null;
   settings: QuizQuestionSettings;
   created_at: string;
   updated_at: string;
@@ -115,7 +115,7 @@ export interface QuizQuestionSettings {
 
 export interface QuizDetailEntity {
   id: number;
-  owner_id: number;
+  owner_id?: number;
   name: string;
   description: string | null;
   settings: any[];
@@ -133,4 +133,43 @@ export interface FetchQuizListParams {
   per_page?: number;
   query?: string;
   type?: any;
+}
+
+export interface QuizAttemptsApi {
+  id: number;
+  assignment_id: number;
+  assignment_attempt_id: number;
+  free_question_id?: number;
+  open_question_id?: number;
+  question_id?: number;
+  student_id: number;
+  option_id?: number;
+  answer?: string;
+  result: null;
+  attachments: any[];
+  created_at: string;
+  antiplagiarism_task_id: number;
+  antiplagiarism_task: [];
+}
+export interface QuizAttemptsPost {
+  id: number;
+  assignment_id: number;
+  assignment_attempt_id: number;
+  free_question_id?: number;
+  open_question_id?: number;
+  question_id?: number;
+  student_id: number;
+  option_id?: number;
+  answer?: string;
+  result: null;
+  attachments: any[];
+  created_at: string;
+  antiplagiarism_task_id: number;
+  antiplagiarism_task: [];
+}
+
+export interface QuizAttemptsResponse {
+  status: string;
+  status_code: string;
+  result: null;
 }

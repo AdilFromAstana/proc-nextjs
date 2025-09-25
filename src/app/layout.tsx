@@ -6,13 +6,7 @@ import { cn } from "@/lib/utils";
 
 import "@/app/globals.css";
 import { Providers } from "./providers";
-import Header from "@/components/Header/Header";
-import { SidebarProvider } from "@/components/ui/sidebar";
-import {
-  MobileSidebarTrigger,
-  RegistrySidebar,
-} from "@/components/registry/registry-sidebar";
-import { Toaster } from "@/components/ui/sonner";
+import ConditionalLayout from "./ConditionalLayout";
 
 export const metadata: Metadata = {
   title: "Registry Starter",
@@ -35,41 +29,11 @@ const MontserratSerif = Montserrat({
   variable: "--font-serif",
 });
 
-// Создаем Client Component для условного рендеринга
-function ConditionalLayout({
-  children,
-  showSidebar,
-}: {
-  children: ReactNode;
-  showSidebar: boolean;
-}) {
-  "use client";
-
-  return (
-    <>
-      <Header />
-      {showSidebar ? (
-        <SidebarProvider>
-          <MobileSidebarTrigger />
-          <RegistrySidebar />
-          <main className="flex w-full justify-center h-full">{children}</main>
-        </SidebarProvider>
-      ) : (
-        <main className="w-full">{children}</main>
-      )}
-      <Toaster />
-    </>
-  );
-}
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: ReactNode;
 }>) {
-  const noSidebarPages = ["/assignments", "/login", "/register"];
-  const showSidebar = true;
-
   return (
     <html
       lang="en"
@@ -86,9 +50,7 @@ export default function RootLayout({
       />
       <body className="h-full">
         <Providers>
-          <ConditionalLayout showSidebar={showSidebar}>
-            {children}
-          </ConditionalLayout>
+          <ConditionalLayout>{children}</ConditionalLayout>
         </Providers>
       </body>
     </html>
