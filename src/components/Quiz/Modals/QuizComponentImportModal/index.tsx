@@ -6,7 +6,7 @@ import FileUploadSection from "./FileUploadSection";
 import AdditionalSettingsSection from "./AdditionalSettingsSection";
 import RowsMappingSection from "./RowsMappingSection";
 import ModalFooter from "./ModalFooter";
-import WordToCreateTest from "./WordToCreateTest";
+import WordToCreateTest from "./WordToCreateTest/WordToCreateTest";
 
 const QuizComponentImportModal: React.FC<{
   assessmentType?: string;
@@ -243,13 +243,13 @@ const QuizComponentImportModal: React.FC<{
 
   if (!isVisibleState) return null;
 
+  return <WordToCreateTest isOpen={isVisibleState} onClose={onClose} />;
+
   return (
     <div className="fixed inset-0 z-50">
       <ModalWrapper isVisible={isVisibleState} onClose={onClose}>
         <div className="flex flex-col h-full">
           <div className="flex-1 overflow-y-auto p-6">
-            <WordToCreateTest />
-            {/*
             <QuestionTypeSection
               questionTypes={questionTypes}
               postData={postData}
@@ -291,17 +291,14 @@ const QuizComponentImportModal: React.FC<{
               onToggleLetterList={toggleLetterList}
             />
           </div>
-          */}
-          </div>
-
-          {/* <div className="p-6">
+          <div className="p-6">
             <ModalFooter
               allowImport={allowImport}
               t={t}
               onStartImport={createTask}
               onCancel={onClose}
             />
-          </div> */}
+          </div>
         </div>
       </ModalWrapper>
     </div>
