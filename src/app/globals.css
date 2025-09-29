@@ -9,6 +9,21 @@ html body[data-scroll-locked] {
   margin-right: 0 !important;
 }
 
+@keyframes flash3 {
+  0%,
+  100% {
+    background-color: transparent;
+    border-color: transparent;
+  }
+  50% {
+    background-color: #fee2e2;
+    border-color: #f87171;
+  }
+}
+.flash-3 {
+  animation: flash3 0.6s ease-in-out 3;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

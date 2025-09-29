@@ -32,11 +32,11 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  },
+  }
 );
 
 function Button({
-  className,
+  className = "cursor-pointer",
   variant,
   size,
   asChild = false,
@@ -50,7 +50,9 @@ function Button({
   return (
     <Comp
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={`${cn(
+        buttonVariants({ variant, size, className })
+      )} cursor-pointer`}
       {...props}
     />
   );

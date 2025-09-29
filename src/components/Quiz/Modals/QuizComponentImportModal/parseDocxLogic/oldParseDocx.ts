@@ -1,5 +1,5 @@
 import JSZip from "jszip";
-import { Option, Question } from "./WordToCreateTest";
+import { Option, Question } from "../WordToCreateTest/WordToCreateTest";
 
 // --- Парсинг всего файла с извлечением формул ---
 const parseDocx = async (file: File): Promise<Question[]> => {
