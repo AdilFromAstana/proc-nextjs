@@ -1,7 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
-import { AssignmentDetail } from "@/types/assignment/detail";
+import { Input } from "@/components/ui/input";
+import {
+  AssignmentDetail,
+  ProctoringSettings,
+} from "@/types/assignment/detail";
 import CollapsibleCard from "@/components/Oqylyk/Assignment/CollapsibleCard";
 import {
   Dialog,
@@ -10,6 +14,7 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
+import { numericToBoolean } from "@/utils/numericToBoolean";
 
 interface AssignmentProctoringComponentProps {
   assignment: AssignmentDetail;
@@ -18,9 +23,14 @@ interface AssignmentProctoringComponentProps {
 }
 
 interface ProctoringSettingsModalProps {
-  assignment: AssignmentDetail;
+  proctoringSettings: ProctoringSettings;
+  applicationType: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSettingsChange: (
+    settings: ProctoringSettings,
+    applicationType: string
+  ) => void;
 }
 
 export function Robot(props: React.SVGProps<SVGSVGElement>) {
@@ -34,162 +44,357 @@ export function Robot(props: React.SVGProps<SVGSVGElement>) {
   );
 }
 
-const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
-  assignment,
-  open,
-  onOpenChange,
+// Компонент для отображения параметра с переключателем
+const SwitchParameter: React.FC<{
+  label: string;
+  description?: string;
+  checked: boolean;
+  onCheckedChange?: (checked: boolean) => void;
+}> = ({ label, description, checked, onCheckedChange }) => (
+  <div className="flex items-center justify-between py-2">
+    <div className="space-y-1">
+      <div className="font-medium">{label}</div>
+      {description && (
+        <div className="text-sm text-gray-500">{description}</div>
+      )}
+    </div>
+    <Switch
+      checked={numericToBoolean(checked)}
+      onCheckedChange={onCheckedChange}
+    />
+  </div>
+);
+
+// Компонент для отображения параметра с выбором из вариантов
+const SelectParameter: React.FC<{
+  label: string;
+  description?: string;
+  value: string;
+  options: { value: string; label: string }[];
+  onValueChange?: (value: string) => void;
+}> = ({ label, description, value, options, onValueChange }) => (
+  <div className="py-2">
+    <div className="font-medium">{label}</div>
+    {description && (
+      <div className="text-sm text-gray-500 mb-2">{description}</div>
+    )}
+    <div className="flex gap-2 flex-wrap">
+      {options.map((option) => (
+        <button
+          key={option.value}
+          type="button"
+          onClick={() => onValueChange?.(option.value)}
+          className={`px-3 py-1 rounded-full text-sm border ${
+            value === option.value
+              ? "bg-blue-100 text-blue-800 border-blue-200"
+              : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+          }`}
+        >
+          {option.label}
+        </button>
+      ))}
+    </div>
+  </div>
+);
+
+// Компонент для поля ввода
+const InputParameter: React.FC<{
+  label: string;
+  description?: string;
+  value: string | number;
+  placeholder: string;
+  type?: "text" | "number";
+  onValueChange?: (value: string) => void;
+}> = ({
+  label,
+  description,
+  value,
+  placeholder,
+  type = "text",
+  onValueChange,
+}) => (
+  <div className="py-2">
+    <div className="font-medium">{label}</div>
+    {description && (
+      <div className="text-sm text-gray-500 mb-2">{description}</div>
+    )}
+    <Input
+      type={type}
+      value={value || ""}
+      onChange={(e) => onValueChange?.(e.target.value)}
+      placeholder={placeholder}
+      className=""
+    />
+  </div>
+);
+
+const CameraParameter: React.FC<{
+  label: string;
+  description?: string;
+  recordValue: boolean;
+  uploadValue: boolean;
+  onModeChange?: (mode: string) => void;
+  additionalSettings?: {
+    label: string;
+    value: boolean;
+    hidden?: boolean;
+    onCheckedChange?: (checked: boolean) => void;
+  }[];
+}> = ({
+  label,
+  description,
+  recordValue,
+  uploadValue,
+  onModeChange,
+  additionalSettings,
 }) => {
-  const proctoringSettings = Object.entries(
-    assignment.settings?.proctoring_settings || {}
+  const [showSettings, setShowSettings] = useState(false);
+
+  const getCameraMode = () => {
+    if (!recordValue && !uploadValue) return "Отключено";
+    if (recordValue && !uploadValue) return "Стриминг";
+    if (!recordValue && uploadValue) return "Запись";
+    if (recordValue && uploadValue) return "Стриминг"; // Если оба true, считаем стримингом
+    return "Отключено";
+  };
+
+  const mode = getCameraMode();
+
+  const handleModeChange = (newMode: string) => {
+    onModeChange?.(newMode);
+  };
+
+  const getModeDescription = () => {
+    if (mode === "Стриминг") {
+      return "В данном режиме будет осуществлена прямая трансляция (SFU) и запись. Требуется стабильное интернет-соединение";
+    }
+    if (mode === "Запись") {
+      return "В данном режиме будет осуществлена прямая трансляция (P2P) и запись. Не зависит от качества интернет-соединения";
+    }
+    return null;
+  };
+
+  const filteredSettings = additionalSettings?.filter(
+    (setting) => !setting.hidden
   );
 
-  // Словарь с описаниями параметров
-  const settingDescriptions: Record<string, string> = {
-    check_env: "Проверка окружения",
-    browser_type: "Тип браузера",
-    head_tracking: "Отслеживание головы",
-    object_detect: "Object Detection",
-    displays_check: "Устройства отображения",
-    focus_detector: "Фокус мыши",
-    noise_detector: "Детекция шумов",
-    read_clipboard: "Буфер обмена",
-    content_protect: "Content Protect",
-    face_landmarker: "Маркировщик лица",
-    fullscreen_mode: "Полноэкранный режим",
-    id_verification: "Верификация",
-    speech_detector: "Детекция голоса",
-    mute_frames_count: "Количество кадров без звука",
-    noise_sensitivity: "Чувствительность микрофона к шуму",
-    extension_detector: "Вспомогательные расширения",
-    head_x_sensitivity: "Чувствительность поворота головы X",
-    head_y_sensitivity: "Чувствительность поворота головы Y",
-    main_camera_record: "Запись основной камеры",
-    main_camera_upload: "Загрузка основной камеры",
-    quite_frames_count: "Количество тихих кадров",
-    photo_head_identity: "Фото Идентификация",
-    screen_share_record: "Запись экрана",
-    screen_share_upload: "Загрузка экрана",
-    video_head_identity: "Видео Идентификация",
-    head_tracking_client: "Клиентское отслеживание головы",
-    head_tracking_server: "Серверное отслеживание головы",
-    second_camera_record: "Запись второй камеры",
-    second_camera_upload: "Загрузка второй камеры",
-    head_compare_interval: "Интервал распознавания лица",
-    main_camera_blackhole: "Черная дыра основной камеры",
-    speech_pre_pad_frames: "Кадры перед речью",
-    head_depth_sensitivity: "Чувствительность отдаления головы",
-    head_position_interval: "Интервал позиции головы",
-    head_tolerance_seconds: "Толерантность поворота головы",
-    noise_tolerance_frames: "Счетчик кадров шума",
-    object_detect_interval: "Интервал детекции объектов",
-    screen_share_blackhole: "Черная дыра экрана",
-    focus_tolerance_seconds: "Толерантность к потере фокуса",
-    head_center_area_size_x: "Размер центральной области X",
-    head_center_area_size_y: "Размер центральной области Y",
-    noise_tolerance_seconds: "Толерантность к шуму",
-    object_detect_threshold: "Порог детекции объектов",
-    second_camera_blackhole: "Черная дыра второй камеры",
-    second_microphone_label: "Метка второго микрофона",
-    speech_min_frames_count: "Минимальное количество кадров речи",
-    face_landmarker_interval: "Интервал маркировщика лица",
-    head_position_confidence: "Уверенность позиции головы",
-    object_detect_categories: "Категории детекции объектов",
-    second_microphone_record: "Запись второго микрофона",
-    second_microphone_upload: "Загрузка второго микрофона",
-    silent_tolerance_seconds: "Толерантность к тишине",
-    speech_tolerance_seconds: "Толерантность к речи",
-    face_landmarker_threshold: "Порог маркировщика лица",
-    head_position_probability: "Вероятность позиции головы",
-    head_tracking_server_post: "POST запрос отслеживания головы",
-    speech_positive_threshold: "Порог положительной речи",
-    face_landmarker_categories: "Категории маркировщика лица",
-    second_microphone_blackhole: "Черная дыра второго микрофона",
-    head_tracking_server_realtime: "Реалтайм отслеживания головы",
-    head_compare_euclidean_distance: "Евклидово расстояние сравнения",
+  return (
+    <div className="py-2">
+      <div className="font-medium">{label}</div>
+      {description && (
+        <div className="text-sm text-gray-500 mb-2">{description}</div>
+      )}
+
+      <div className="flex gap-2 mb-2">
+        {["Отключено", "Стриминг", "Запись"].map((option) => (
+          <button
+            key={option}
+            type="button"
+            onClick={() => handleModeChange(option)}
+            className={`px-3 py-1 rounded-full text-sm border ${
+              mode === option
+                ? "bg-blue-100 text-blue-800 border-blue-200"
+                : "bg-gray-100 text-gray-600 border-gray-200 hover:bg-gray-200"
+            }`}
+          >
+            {option}
+          </button>
+        ))}
+      </div>
+
+      {mode !== "Отключено" && (
+        <>
+          <div className="py-1 px-2 bg-yellow-50 border border-yellow-200 rounded-md mb-2">
+            <div className="text-sm text-gray-500">{getModeDescription()}</div>
+          </div>
+
+          {filteredSettings && filteredSettings.length > 0 && (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowSettings(!showSettings)}
+                className="text-blue-600 hover:text-blue-800 text-sm font-medium mb-2"
+              >
+                {showSettings ? "Скрыть настройки" : "Настройки"}
+              </button>
+
+              {showSettings && (
+                <div className="ml-4 space-y-2 border-l-2 border-gray-200 pl-4">
+                  {filteredSettings.map((setting, index) => (
+                    <SwitchParameter
+                      key={index}
+                      label={setting.label}
+                      checked={setting.value}
+                      onCheckedChange={setting.onCheckedChange}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
+  proctoringSettings,
+  applicationType,
+  open,
+  onOpenChange,
+  onSettingsChange,
+}) => {
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [settings, setSettings] = useState(proctoringSettings);
+  const [appType, setAppType] = useState(applicationType);
+
+  // Синхронизируем состояние с props при их изменении
+  useEffect(() => {
+    setSettings(proctoringSettings);
+  }, [proctoringSettings]);
+
+  useEffect(() => {
+    setAppType(applicationType);
+  }, [applicationType]);
+
+  const handleSettingsChange = (newSettings: ProctoringSettings) => {
+    setSettings(newSettings);
+    onSettingsChange(newSettings, appType);
   };
 
-  // Функция для определения, является ли значение boolean (включая 0/1)
-  const isBooleanValue = (key: string, value: any): boolean => {
-    const booleanKeys = [
-      "check_env",
-      "focus_detector",
-      "noise_detector",
-      "content_protect",
-      "face_landmarker",
-      "fullscreen_mode",
-      "id_verification",
-      "speech_detector",
-      "extension_detector",
-      "main_camera_record",
-      "main_camera_upload",
-      "photo_head_identity",
-      "screen_share_record",
-      "screen_share_upload",
-      "video_head_identity",
-      "head_tracking_client",
-      "head_tracking_server",
-      "second_camera_record",
-      "second_camera_upload",
-      "main_camera_blackhole",
-      "screen_share_blackhole",
-      "second_camera_blackhole",
-      "second_microphone_record",
-      "second_microphone_upload",
-      "second_microphone_blackhole",
-      "head_tracking_server_post",
-      "head_tracking_server_realtime",
+  const handleAppTypeChange = (type: string) => {
+    setAppType(type);
+    onSettingsChange(settings, type);
+  };
+
+  const handleCameraModeChange = (cameraType: string, mode: string) => {
+    const newSettings = { ...settings };
+
+    switch (mode) {
+      case "Отключено":
+        if (cameraType === "main") {
+          newSettings.main_camera_record = false;
+          newSettings.main_camera_upload = false;
+        } else if (cameraType === "second") {
+          newSettings.second_camera_record = false;
+          newSettings.second_camera_upload = false;
+        } else if (cameraType === "screen") {
+          newSettings.screen_share_record = false;
+          newSettings.screen_share_upload = false;
+        } else if (cameraType === "microphone") {
+          newSettings.second_microphone_record = false;
+          newSettings.second_microphone_upload = false;
+        }
+        break;
+      case "Стриминг":
+        if (cameraType === "main") {
+          newSettings.main_camera_record = true;
+          newSettings.main_camera_upload = false;
+        } else if (cameraType === "second") {
+          newSettings.second_camera_record = true;
+          newSettings.second_camera_upload = false;
+        } else if (cameraType === "screen") {
+          newSettings.screen_share_record = true;
+          newSettings.screen_share_upload = false;
+        } else if (cameraType === "microphone") {
+          newSettings.second_microphone_record = true;
+          newSettings.second_microphone_upload = false;
+        }
+        break;
+      case "Запись":
+        if (cameraType === "main") {
+          newSettings.main_camera_record = false;
+          newSettings.main_camera_upload = true;
+        } else if (cameraType === "second") {
+          newSettings.second_camera_record = false;
+          newSettings.second_camera_upload = true;
+        } else if (cameraType === "screen") {
+          newSettings.screen_share_record = false;
+          newSettings.screen_share_upload = true;
+        } else if (cameraType === "microphone") {
+          newSettings.second_microphone_record = false;
+          newSettings.second_microphone_upload = true;
+        }
+        break;
+    }
+
+    handleSettingsChange(newSettings);
+  };
+
+  const handleSwitchChange = (
+    key: keyof ProctoringSettings,
+    value: boolean
+  ) => {
+    const newSettings = { ...settings, [key]: value };
+    handleSettingsChange(newSettings);
+  };
+
+  const handleInputChange = (key: keyof ProctoringSettings, value: string) => {
+    // Преобразуем строку в число, если это числовое поле
+    const numValue = isNaN(Number(value)) ? value : Number(value);
+    const newSettings = { ...settings, [key]: numValue };
+    handleSettingsChange(newSettings);
+  };
+
+  const handleBrowserTypeChange = (value: string) => {
+    const newSettings = { ...settings, browser_type: value };
+    handleSettingsChange(newSettings);
+  };
+
+  // Дополнительные настройки для фронтальной камеры
+  const getFrontCameraSettings = () => {
+    const mainCameraMode = getCameraMode(
+      numericToBoolean(settings.main_camera_record),
+      numericToBoolean(settings.main_camera_upload)
+    );
+
+    const settingsList = [
+      {
+        label:
+          "Отслеживание действий (Client-Side): Включить отслеживание действий пользователя на стороне клиента",
+        value: numericToBoolean(settings.head_tracking_client),
+        onCheckedChange: (checked: boolean) =>
+          handleSwitchChange("head_tracking_client", checked),
+      },
+      {
+        label:
+          "Отслеживание действий (Post Server-Side): Включить отслеживание действий пользователя на стороне сервера (Post)",
+        value: numericToBoolean(settings.head_tracking_server_post),
+        onCheckedChange: (checked: boolean) =>
+          handleSwitchChange("head_tracking_server_post", checked),
+      },
+      {
+        label:
+          "Отслеживание действий (RealTime Server-Side): Включить отслеживание действий пользователя на стороне сервера (RealTime)",
+        value: numericToBoolean(settings.head_tracking_server_realtime),
+        onCheckedChange: (checked: boolean) =>
+          handleSwitchChange("head_tracking_server_realtime", checked),
+        hidden: mainCameraMode !== "Стриминг",
+      },
+      {
+        label: "Eye Tracking: Отслеживание зрачков",
+        value: numericToBoolean(settings.head_tracking_server),
+        onCheckedChange: (checked: boolean) =>
+          handleSwitchChange("head_tracking_server", checked),
+      },
+      {
+        label: "Object Detection: Обнаружение предметов",
+        value: numericToBoolean(settings.object_detect),
+        onCheckedChange: (checked: boolean) =>
+          handleSwitchChange("object_detect", checked),
+      },
     ];
 
-    return booleanKeys.includes(key) || typeof value === "boolean";
+    return mainCameraMode === "Отключено" ? [] : settingsList;
   };
 
-  // Функция для определения типа значения
-  const getValueType = (
-    key: string,
-    value: any
-  ): "boolean" | "number" | "string" | "object" => {
-    if (isBooleanValue(key, value)) return "boolean";
-    if (typeof value === "boolean") return "boolean";
-    if (typeof value === "number") return "number";
-    if (typeof value === "string") return "string";
-    return "object";
-  };
-
-  // Рендер значения в зависимости от типа
-  const renderValue = (key: string, value: any) => {
-    const type = getValueType(key, value);
-
-    switch (type) {
-      case "boolean":
-        // Преобразуем 0/1 в boolean
-        const booleanValue = typeof value === "number" ? value === 1 : value;
-        return (
-          <Switch
-            checked={booleanValue}
-            // onCheckedChange={(checked) => handleSettingChange(key, checked)}
-            disabled
-          />
-        );
-
-      case "object":
-        return (
-          <details className="text-xs">
-            <summary className="cursor-pointer text-blue-600">
-              Показать детали
-            </summary>
-            <pre className="bg-gray-100 p-2 rounded mt-1 max-w-xs overflow-x-auto">
-              {JSON.stringify(value, null, 2)}
-            </pre>
-          </details>
-        );
-
-      default:
-        return (
-          <span className="text-sm font-mono bg-gray-100 px-2 py-1 rounded">
-            {String(value)}
-          </span>
-        );
-    }
+  // Вспомогательная функция для определения режима камеры
+  const getCameraMode = (record: boolean, upload: boolean) => {
+    if (!record && !upload) return "Отключено";
+    if (record && !upload) return "Стриминг";
+    if (!record && upload) return "Запись";
+    return "Стриминг";
   };
 
   return (
@@ -200,36 +405,372 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           <DialogDescription>Конфигурация параметров</DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-3">
-          {proctoringSettings.length > 0 ? (
-            proctoringSettings.map(([key, value]) => (
-              <div
-                key={key}
-                className="flex items-start justify-between p-4 bg-white border rounded-lg hover:bg-gray-50"
-              >
-                <div className="flex-1 pr-4">
-                  <div className="font-medium text-gray-900">
-                    {settingDescriptions[key] || key}
-                  </div>
-                  {settingDescriptions[key] && (
-                    <div className="text-xs text-gray-500 font-mono mt-1">
-                      {key}
-                    </div>
-                  )}
-                  {!settingDescriptions[key] && (
-                    <div className="text-xs text-gray-400 italic mt-1">
-                      Описание отсутствует
-                    </div>
-                  )}
-                </div>
-                <div className="flex-shrink-0">{renderValue(key, value)}</div>
+        <div className="space-y-2">
+          <SelectParameter
+            label="Приложение"
+            description="Выберите тип приложения"
+            value={appType}
+            options={[
+              { value: "browser", label: "Браузер" },
+              { value: "tray", label: "Tray" },
+              { value: "desktop", label: "Desktop" },
+            ]}
+            onValueChange={handleAppTypeChange}
+          />
+
+          {appType === "browser" && (
+            <SelectParameter
+              label="Браузер"
+              description="Разрешенные браузеры"
+              value={settings.browser_type}
+              options={[
+                { value: "*", label: "All" },
+                { value: "Chrome", label: "Chrome" },
+                { value: "Safari", label: "Safari" },
+                { value: "Edge", label: "Edge" },
+                { value: "Yandex", label: "Yandex" },
+              ]}
+              onValueChange={handleBrowserTypeChange}
+            />
+          )}
+
+          {(appType === "desktop" || appType === "tray") && (
+            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+              <div className="text-sm text-yellow-800">
+                Перед началом экзамена, потребуется загрузить и установить
+                приложение
               </div>
-            ))
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              Настройки прокторинга отсутствуют
             </div>
           )}
+
+          <CameraParameter
+            label="Фронтальная камера"
+            description="Включить запись фронтальной камеры"
+            recordValue={numericToBoolean(settings.main_camera_record)}
+            uploadValue={numericToBoolean(settings.main_camera_upload)}
+            onModeChange={(mode) => handleCameraModeChange("main", mode)}
+            additionalSettings={getFrontCameraSettings()}
+          />
+
+          <CameraParameter
+            label="Внешняя камера"
+            description="Будет задействовано дополнительное устройство для записи. Захват видеопотока камеры мобильного устройства."
+            recordValue={numericToBoolean(settings.second_camera_record)}
+            uploadValue={numericToBoolean(settings.second_camera_upload)}
+            onModeChange={(mode) => handleCameraModeChange("second", mode)}
+          />
+
+          <CameraParameter
+            label="Экран"
+            description="Включить запись рабочего стола (экрана)"
+            recordValue={numericToBoolean(settings.screen_share_record)}
+            uploadValue={numericToBoolean(settings.screen_share_upload)}
+            onModeChange={(mode) => handleCameraModeChange("screen", mode)}
+          />
+
+          <CameraParameter
+            label="Детектор микронаушников"
+            description="Требуется обязательное подключение 'Детектор микронаушников У.М.' к устройству."
+            recordValue={numericToBoolean(settings.second_microphone_record)}
+            uploadValue={numericToBoolean(settings.second_microphone_upload)}
+            onModeChange={(mode) => handleCameraModeChange("microphone", mode)}
+          />
+
+          <SwitchParameter
+            label="Фото Идентификация"
+            description="Включить идентификацию лица по фотографии"
+            checked={numericToBoolean(settings.photo_head_identity)}
+            onCheckedChange={(checked) =>
+              handleSwitchChange("photo_head_identity", checked)
+            }
+          />
+
+          <SwitchParameter
+            label="Видео Идентификация"
+            description="Включить идентификацию лица по видео"
+            checked={numericToBoolean(settings.video_head_identity)}
+            onCheckedChange={(checked) =>
+              handleSwitchChange("video_head_identity", checked)
+            }
+          />
+
+          <SwitchParameter
+            label="Верификация"
+            description="Идентификация по удостоверению личности"
+            checked={numericToBoolean(settings.id_verification)}
+            onCheckedChange={(checked) =>
+              handleSwitchChange("id_verification", checked)
+            }
+          />
+
+          <SwitchParameter
+            label="Детекция шумов"
+            description="Включить детекцию шумов"
+            checked={numericToBoolean(settings.noise_detector)}
+            onCheckedChange={(checked) =>
+              handleSwitchChange("noise_detector", checked)
+            }
+          />
+
+          <SwitchParameter
+            label="Детекция голоса"
+            description="Включить детекцию голоса"
+            checked={numericToBoolean(settings.speech_detector)}
+            onCheckedChange={(checked) =>
+              handleSwitchChange("speech_detector", checked)
+            }
+          />
+
+          <SwitchParameter
+            label="Устройства отображения"
+            description="Включить проверку на наличие подключенных мониторов, проекторов, TV"
+            checked={numericToBoolean(settings.displays_check)}
+            onCheckedChange={(checked) =>
+              handleSwitchChange("displays_check", checked)
+            }
+          />
+
+          <SwitchParameter
+            label="HDCP проверка"
+            description="Детальная проверка подключенных устройств отображения (Beta)"
+            checked={numericToBoolean(settings.hdcp_check)}
+            onCheckedChange={(checked) =>
+              handleSwitchChange("hdcp_check", checked)
+            }
+          />
+
+          <SwitchParameter
+            label="Content Protect"
+            description="Запрет передачи содержимого вопроса от удаленных пользователей"
+            checked={numericToBoolean(settings.content_protect)}
+            onCheckedChange={(checked) =>
+              handleSwitchChange("content_protect", checked)
+            }
+          />
+
+          <SwitchParameter
+            label="Полноэкранный режим"
+            description="Включить полноэкранный режим"
+            checked={numericToBoolean(settings.fullscreen_mode)}
+            onCheckedChange={(checked) =>
+              handleSwitchChange("fullscreen_mode", checked)
+            }
+          />
+
+          <SwitchParameter
+            label="Буфер обмена"
+            description="Включить чтение буфера обмена"
+            checked={numericToBoolean(settings.read_clipboard)}
+            onCheckedChange={(checked) =>
+              handleSwitchChange("read_clipboard", checked)
+            }
+          />
+
+          <SwitchParameter
+            label="Фокус мыши"
+            description="Включить отслеживание фокуса мыши"
+            checked={numericToBoolean(settings.focus_detector)}
+            onCheckedChange={(checked) =>
+              handleSwitchChange("focus_detector", checked)
+            }
+          />
+
+          <SwitchParameter
+            label="Вспомогательные расширения"
+            description="Включить проверку на наличие вспомогательных расширений"
+            checked={numericToBoolean(settings.extension_detector)}
+            onCheckedChange={(checked) =>
+              handleSwitchChange("extension_detector", checked)
+            }
+          />
+
+          {/* Расширенные настройки */}
+          <div className="border-t pt-4">
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="text-blue-600 hover:text-blue-800 font-medium text-lg"
+            >
+              {showAdvanced
+                ? "Скрыть расширенные настройки"
+                : "Расширенные настройки"}
+            </button>
+
+            {showAdvanced && (
+              <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                <InputParameter
+                  label="Интервал распознавания действий"
+                  description="Интервал распознавания действий в миллисекундах. Чем меньше значение, тем больше нагрузка на CPU/GPU (Client-Side)"
+                  value={settings.head_recognize_interval || ""}
+                  placeholder="Интервал распознавания действий"
+                  type="number"
+                  onValueChange={(value) =>
+                    handleInputChange("head_recognize_interval", value)
+                  }
+                />
+
+                {/* 2. Интервал распознавания лица */}
+                <InputParameter
+                  label="Интервал распознавания лица"
+                  description="Интервал проверки подмены лица"
+                  value={settings.head_compare_interval || ""}
+                  placeholder="Интервал распознавания лица"
+                  type="number"
+                  onValueChange={(value) =>
+                    handleInputChange("head_compare_interval", value)
+                  }
+                />
+
+                {/* 3. Чувствительность поворота головы по X */}
+                <InputParameter
+                  label="Чувствительность поворота головы (X)"
+                  description="Допустимое значение поворота головы по оси X"
+                  value={settings.head_x_sensitivity || ""}
+                  placeholder="Чувствительность поворота головы по X"
+                  type="number"
+                  onValueChange={(value) =>
+                    handleInputChange("head_x_sensitivity", value)
+                  }
+                />
+
+                {/* 4. Чувствительность поворота головы по Y */}
+                <InputParameter
+                  label="Чувствительность поворота головы (Y)"
+                  description="Допустимое значение поворота головы по оси Y"
+                  value={settings.head_y_sensitivity || ""}
+                  placeholder="Чувствительность поворота головы по Y"
+                  type="number"
+                  onValueChange={(value) =>
+                    handleInputChange("head_y_sensitivity", value)
+                  }
+                />
+
+                {/* 5. Чувствительность отдаления головы */}
+                <InputParameter
+                  label="Чувствительность отдаления головы"
+                  description="Допустимое значение отдаления головы по оси Z"
+                  value={settings.head_depth_sensitivity || ""}
+                  placeholder="Чувствительность отдаления головы"
+                  type="number"
+                  onValueChange={(value) =>
+                    handleInputChange("head_depth_sensitivity", value)
+                  }
+                />
+
+                {/* 6. Толерантность поворота головы */}
+                <InputParameter
+                  label="Толерантность поворота головы"
+                  description="Время в миллисекундах. При котором пользователю разрешено находиться в запрещенном положении. При достижении указанного значения, нарушение будет зафиксировано"
+                  value={settings.head_tolerance_seconds || ""}
+                  placeholder="Толерантность поворота головы"
+                  type="number"
+                  onValueChange={(value) =>
+                    handleInputChange("head_tolerance_seconds", value)
+                  }
+                />
+
+                {/* 7. Чувствительность микрофона к шуму */}
+                <InputParameter
+                  label="Чувствительность микрофона к шуму"
+                  description="Чувствительность микрофона в децибелах (dB) к шуму. При превышении порога dB, сработает счетчик захвата кадров"
+                  value={settings.noise_sensitivity || ""}
+                  placeholder="Чувствительность микрофона к шуму"
+                  type="number"
+                  onValueChange={(value) =>
+                    handleInputChange("noise_sensitivity", value)
+                  }
+                />
+
+                {/* 8. Счетчик кадров шума */}
+                <InputParameter
+                  label="Счетчик кадров шума"
+                  description="Счетчик захвата количества последовательных кадров превышения dB. При достижении значении счетчика сработает триггер нарушения"
+                  value={settings.noise_tolerance_frames || ""}
+                  placeholder="Счетчик кадров шума"
+                  type="number"
+                  onValueChange={(value) =>
+                    handleInputChange("noise_tolerance_frames", value)
+                  }
+                />
+
+                {/* 9. Толерантность к шуму */}
+                <InputParameter
+                  label="Толерантность к шуму"
+                  description="Время в миллисекундах. В течении этого времени пользователю необходимо устранить все шумы, иначе будет зафиксировано нарушение"
+                  value={settings.noise_tolerance_seconds || ""}
+                  placeholder="Толерантность к шуму"
+                  type="number"
+                  onValueChange={(value) =>
+                    handleInputChange("noise_tolerance_seconds", value)
+                  }
+                />
+
+                {/* 10. Толерантность к потере фокуса */}
+                <InputParameter
+                  label="Толерантность к потере фокуса"
+                  description="Время в миллисекундах. В течении указанного времени, пользователю необходимо вернуть указатель (фокус) на вкладку с заданием, иначе будет зафиксировано нарушение"
+                  value={settings.focus_tolerance_seconds || ""}
+                  placeholder="Толерантность к потере фокуса"
+                  type="number"
+                  onValueChange={(value) =>
+                    handleInputChange("focus_tolerance_seconds", value)
+                  }
+                />
+
+                {/* 11. Таймаут подключения */}
+                <InputParameter
+                  label="Таймаут подключения"
+                  description="Время в миллисекундах. Таймаут подключения к серверу захвата видеопотока. При достижении указанного времени, функция записи камеры / рабочего стола будет отключена"
+                  value={settings.rtc_connection_timeout || ""}
+                  placeholder="Таймаут подключения"
+                  type="number"
+                  onValueChange={(value) =>
+                    handleInputChange("rtc_connection_timeout", value)
+                  }
+                />
+
+                {/* 12. Таймаут инициализации */}
+                <InputParameter
+                  label="Таймаут инициализации"
+                  description="Таймаут инициализации библиотеки распознавания действий пользователя. При достижении указанного времени, функция идентификации и фиксации нарушений действий пользователя будет отключена"
+                  value={settings.facemodel_init_timeout || ""}
+                  placeholder="Таймаут инициализации"
+                  type="number"
+                  onValueChange={(value) =>
+                    handleInputChange("facemodel_init_timeout", value)
+                  }
+                />
+
+                {/* 13. Mobile Restrict */}
+                <div className="col-span-2">
+                  <SwitchParameter
+                    label="Mobile Restrict"
+                    description="Запретить сдачу через мобильные устройства (веб-браузер)"
+                    checked={numericToBoolean(
+                      settings.proctoring_mobile_restrict
+                    )}
+                    onCheckedChange={(checked) =>
+                      handleSwitchChange("proctoring_mobile_restrict", checked)
+                    }
+                  />
+                </div>
+
+                {/* 14. Fallback */}
+                <div className="col-span-2">
+                  <SwitchParameter
+                    label="Fallback"
+                    description="При невозможности подключения выше активированных опций у пользователя - пропускать шаг"
+                    checked={numericToBoolean(
+                      settings.proctoring_fallback_allow
+                    )}
+                    onCheckedChange={(checked) =>
+                      handleSwitchChange("proctoring_fallback_allow", checked)
+                    }
+                  />
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-4 border-t mt-4">
@@ -245,8 +786,33 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 const AssignmentProctoringComponent: React.FC<
   AssignmentProctoringComponentProps
 > = ({ assignment, errors = {}, onAssignmentChange }) => {
-  const [isProctoringEnable, setIsProctoringEnable] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Определяем включен ли прокторинг
+  const isProctoringEnable = numericToBoolean(assignment.is_proctoring);
+
+  const handleProctoringToggle = (enabled: boolean) => {
+    const updatedAssignment = {
+      ...assignment,
+      is_proctoring: enabled ? 1 : 0,
+    };
+    onAssignmentChange(updatedAssignment);
+  };
+
+  const handleProctoringSettingsChange = (
+    settings: ProctoringSettings,
+    applicationType: string
+  ) => {
+    const updatedAssignment = {
+      ...assignment,
+      application: applicationType,
+      settings: {
+        ...assignment.settings,
+        proctoring_settings: settings,
+      },
+    };
+    onAssignmentChange(updatedAssignment);
+  };
 
   return (
     <>
@@ -255,22 +821,28 @@ const AssignmentProctoringComponent: React.FC<
         description="Процедура наблюдения и контроля за дистанционным испытанием"
         icon={<Robot className="h-5 w-5 text-blue-600" />}
       >
-        <Switch
-          checked={isProctoringEnable}
-          onCheckedChange={() => setIsProctoringEnable(!isProctoringEnable)}
-        />
+        <div className="flex items-center justify-between">
+          <Switch
+            checked={isProctoringEnable}
+            onCheckedChange={handleProctoringToggle}
+          />
+        </div>
 
         {isProctoringEnable && (
           <div className="space-y-4 py-2">
-            <Button onClick={() => setIsModalOpen(true)}>Настройки</Button>
+            <Button onClick={() => setIsModalOpen(true)}>
+              Настройки прокторинга
+            </Button>
           </div>
         )}
       </CollapsibleCard>
 
       <ProctoringSettingsModal
-        assignment={assignment}
+        proctoringSettings={assignment.settings.proctoring_settings}
+        applicationType={assignment.application}
         open={isModalOpen}
         onOpenChange={setIsModalOpen}
+        onSettingsChange={handleProctoringSettingsChange}
       />
     </>
   );

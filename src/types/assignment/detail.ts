@@ -55,57 +55,60 @@ export interface Progress {
 // Настройки прокторинга
 export interface ProctoringSettings {
   check_env: boolean;
+  hdcp_check: boolean | number; // может быть 0 или false
   browser_type: string;
   head_tracking: string;
-  object_detect: number;
-  displays_check: number;
-  focus_detector: boolean;
-  noise_detector: boolean;
-  read_clipboard: number;
-  content_protect: number;
-  face_landmarker: boolean;
-  fullscreen_mode: boolean;
+  object_detect: boolean | number; // может быть 1 или true
+  displays_check: boolean | number;
+  focus_detector: boolean | number;
+  noise_detector: boolean | number;
+  read_clipboard: boolean | number;
+  content_protect: boolean | number;
+  face_landmarker: boolean | number;
+  fullscreen_mode: boolean | number;
   id_verification: boolean;
-  speech_detector: boolean;
+  speech_detector: boolean | number;
   mute_frames_count: number;
-  noise_sensitivity: number;
-  extension_detector: boolean;
-  head_x_sensitivity: number;
-  head_y_sensitivity: number;
+  noise_sensitivity: string | number;
+  extension_detector: boolean | number;
+  head_x_sensitivity: string | number;
+  head_y_sensitivity: string | number;
   main_camera_record: boolean;
   main_camera_upload: boolean;
   quite_frames_count: number;
-  photo_head_identity: boolean;
+  photo_head_identity: boolean | number;
   screen_share_record: boolean;
   screen_share_upload: boolean;
-  video_head_identity: boolean;
-  head_tracking_client: boolean;
+  video_head_identity: boolean | number;
+  head_tracking_client: boolean | number;
   head_tracking_server: boolean;
   second_camera_record: boolean;
   second_camera_upload: boolean;
-  head_compare_interval: number;
+  head_compare_interval: string | number;
   main_camera_blackhole: boolean;
   speech_pre_pad_frames: number;
-  head_depth_sensitivity: number;
+  facemodel_init_timeout: string | number;
+  head_depth_sensitivity: string | number;
   head_position_interval: number;
-  head_tolerance_seconds: number;
-  noise_tolerance_frames: number;
+  head_tolerance_seconds: string | number;
+  noise_tolerance_frames: string | number;
   object_detect_interval: number;
+  rtc_connection_timeout: string | number;
   screen_share_blackhole: boolean;
-  focus_tolerance_seconds: number;
+  focus_tolerance_seconds: string | number;
   head_center_area_size_x: number;
   head_center_area_size_y: number;
-  noise_tolerance_seconds: number;
+  head_recognize_interval: string | number;
+  noise_tolerance_seconds: string | number;
   object_detect_threshold: number;
   second_camera_blackhole: boolean;
   second_microphone_label: string;
   speech_min_frames_count: number;
   face_landmarker_interval: number;
   head_position_confidence: number;
-  head_tracking_server_post: boolean;
-  speech_positive_threshold: number;
-  face_landmarker_categories: {
+  object_detect_categories: {
     [key: string]: {
+      count: number;
       score: number;
       action: string;
     };
@@ -116,7 +119,18 @@ export interface ProctoringSettings {
   speech_tolerance_seconds: number;
   face_landmarker_threshold: number;
   head_position_probability: number;
-  head_tracking_server_realtime: boolean;
+  head_tracking_server_post: boolean;
+  proctoring_fallback_allow: boolean | number;
+  speech_positive_threshold: number;
+  face_landmarker_categories: {
+    [key: string]: {
+      score: number;
+      action: string;
+    };
+  };
+  proctoring_mobile_restrict: boolean | number;
+  second_microphone_blackhole: boolean;
+  head_tracking_server_realtime: boolean | number;
   head_compare_euclidean_distance: number;
 }
 

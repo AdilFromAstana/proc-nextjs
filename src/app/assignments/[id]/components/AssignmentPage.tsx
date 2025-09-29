@@ -1,8 +1,7 @@
-// app  [id]/page.tsx
 "use client";
 import React, { useState, useCallback, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { User } from "@/types/assignment";
 import { AssignmentDetail } from "@/types/assignment/detail"; // Импортируем AssignmentDetail
 
@@ -15,14 +14,12 @@ import AssignmentStudentSection from "./AssignmentStudentSection";
 import { getViewerType } from "@/types/assignment";
 import { AssignmentDetailResponse } from "@/types/assignment/detail";
 import {
-  fetchAssignmentComments,
   fetchAssignmentDetail,
   fetchAssignmentStudents,
   // Импортируем функцию для обновления задания (замените на вашу)
-  // updateAssignmentDetail,
+  updateAssignmentDetail,
 } from "@/api/assignmentDetail";
 import { AssignmentStudentsResponse } from "@/types/assignment/students";
-import { AssignmentCommentsResponse } from "@/types/assignment/comments";
 import AssignmentCommentBlockComponent from "@/components/Oqylyk/Assignment/CommentBlockComponent";
 import AssignmentAccessTypeComponent from "./AssignmentAccessTypeComponent/AssignmentAccessTypeComponent";
 import AssignmentTeacherReviewerComponent from "./AssignmentTeacherComponent";
@@ -32,6 +29,7 @@ import AssignmentScenarioSettingsComponent from "./AssignmentScenarioSettingsCom
 import AssignmentComponentSettingsComponent from "./AssignmentComponentSettingsComponent";
 import AssignmentCertificateComponent from "./AssignmentCertificateComponent";
 import AssignmentProctoringComponent from "./AssignmentProctoringComponent";
+import { useRouter } from "next/navigation";
 
 const AssignmentPage: React.FC<{
   assignmentId: number;
@@ -46,6 +44,7 @@ const AssignmentPage: React.FC<{
   // --- Новое состояние для assignment ---
   const [assignment, setAssignment] = useState<AssignmentDetail | null>(null);
   // -------------------------------------
+  const router = useRouter();
 
   const {
     data: assignmentData,
@@ -82,26 +81,32 @@ const AssignmentPage: React.FC<{
       setAssignment(updatedAssignment);
       // Здесь можно также вызвать API для сохранения изменений на сервере
       // Например, с использованием useMutation
-      // updateAssignmentMutation.mutate(updatedAssignment);
+      updateAssignmentMutation.mutate(updatedAssignment);
     },
     []
   );
   // ----------------------------------------------------------------
 
   // --- (Опционально) Мутация для сохранения на сервере ---
-  // const updateAssignmentMutation = useMutation({
-  //   mutationFn: (updatedAssignment: AssignmentDetail) => updateAssignmentDetail(assignmentId, updatedAssignment),
-  //   onSuccess: (data) => {
-  //     // Обновляем кэш react-query
-  //     queryClient.setQueryData(["assignment", assignmentId], data);
-  //     toast({ title: "Успешно", description: "Задание обновлено" });
-  //   },
-  //   onError: (error) => {
-  //     toast({ title: "Ошибка", description: "Не удалось обновить задание", variant: "destructive" });
-  //     // Откатываем локальное состояние в случае ошибки, если необходимо
-  //     // setAssignment(prev => prev); // или какая-то другая логика
-  //   },
-  // });
+  const updateAssignmentMutation = useMutation({
+    mutationFn: (updatedAssignment: AssignmentDetail) =>
+      updateAssignmentDetail(assignmentId, updatedAssignment),
+    onSuccess: (data) => {
+      // Обновляем кэш react-query
+      queryClient.setQueryData(["assignment", assignmentId], data);
+      toast({ title: "Успешно", description: "Задание обновлено" });
+    },
+    onError: (error) => {
+      toast({
+        title: "Ошибка",
+        description: "Не удалось обновить задание",
+        // variant: "destructive",
+      });
+      console.log(error);
+      // Откатываем локальное состояние в случае ошибки, если необходимо
+      // setAssignment(prev => prev); // или какая-то другая логика
+    },
+  });
   // ---------------------------------------------------------
 
   const handleStudentSelected = useCallback((student: any) => {
@@ -158,6 +163,12 @@ const AssignmentPage: React.FC<{
           if (window.confirm("Удалить задание?")) {
             // API call
           }
+          break;
+        case "proctoring":
+          {
+            router.push(`/assignments/proctoring/${assignmentId}`);
+          }
+          // API call
           break;
         default:
           toast({

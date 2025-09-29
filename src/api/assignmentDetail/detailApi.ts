@@ -2,6 +2,7 @@
 
 import axiosClient from "../axiosClient";
 import {
+  AssignmentDetail,
   AssignmentDetailResponse,
   ProctoringAssignmentResponse,
 } from "@/types/assignment/detail";
@@ -64,7 +65,7 @@ export const fetchAssignmentDetail = async (
     "quizzes:name",
     "quizzes:description",
     "quizzes:image",
-    "quizzes:components",
+    // "quizzes:components",
     "quizzes:color",
     "lessons:id",
     "lessons:name",
@@ -190,6 +191,17 @@ export const fetchAssignmentDetailProctoring = async (
         "X-Requested-Fields": AssignmentRequestedModelFields.join(","),
       },
     }
+  );
+  return response.data;
+};
+
+export const updateAssignmentDetail = async (
+  id: number,
+  updateData: Partial<AssignmentDetail>
+): Promise<AssignmentDetailResponse> => {
+  const response = await axiosClient.put<AssignmentDetailResponse>(
+    `/assignments/${id}`,
+    updateData
   );
   return response.data;
 };

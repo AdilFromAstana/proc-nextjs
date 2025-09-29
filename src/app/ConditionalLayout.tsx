@@ -14,7 +14,8 @@ const ConditionalLayout = ({ children }: { children: ReactNode }) => {
   const noSidebarPages = [
     "/login",
     "/register",
-    "/quiz/testing_process", // Исправил опечатку
+    "/quiz/testing_process",
+    "/assignments/proctoring",
   ];
 
   const pathname = usePathname();

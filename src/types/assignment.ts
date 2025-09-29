@@ -1,4 +1,4 @@
-import { AssignmentDetail } from "./assignment/detail";
+import { AssignmentDetail, ProctoringSettings } from "./assignment/detail";
 import { Student } from "./students";
 
 // Базовые интерфейсы из API данных
@@ -45,75 +45,6 @@ export interface AssignmentProgress {
   components: number;
   chapters: number;
   total: number;
-}
-
-export interface ProctoringSettings {
-  browser_type: string;
-  main_camera_record: boolean;
-  main_camera_upload: boolean;
-  main_camera_blackhole: boolean;
-  screen_share_record: boolean;
-  screen_share_upload: boolean;
-  screen_share_blackhole: boolean;
-  second_camera_record: boolean;
-  second_camera_upload: boolean;
-  second_camera_blackhole: boolean;
-  second_microphone_record: boolean;
-  second_microphone_upload: boolean;
-  second_microphone_blackhole: boolean;
-  second_microphone_label: string;
-  check_env: boolean;
-  displays_check: boolean;
-  content_protect: boolean;
-  fullscreen_mode: boolean;
-  focus_detector: boolean;
-  extension_detector: boolean;
-  noise_detector: boolean;
-  speech_detector: boolean;
-  read_clipboard: boolean;
-  id_verification: boolean;
-  photo_head_identity: boolean;
-  video_head_identity: boolean;
-  head_tracking_client: boolean;
-  head_tracking_server_post: boolean;
-  head_tracking_server_realtime: boolean;
-  // Добавленные свойства для исправления ошибки
-  head_tracking?: string;
-  head_tracking_server?: boolean;
-  // Конец добавленных свойств
-  noise_sensitivity: number;
-  head_x_sensitivity: number;
-  head_y_sensitivity: number;
-  head_depth_sensitivity: number;
-  head_center_area_size_x: number;
-  head_center_area_size_y: number;
-  head_position_confidence: number;
-  head_position_probability: number;
-  head_position_interval: number;
-  head_compare_interval: number;
-  head_compare_euclidean_distance: number;
-  face_landmarker: boolean;
-  face_landmarker_interval: number;
-  face_landmarker_threshold: number;
-  face_landmarker_categories: Record<string, { action: string; score: number }>;
-  object_detect: boolean;
-  object_detect_interval: number;
-  object_detect_threshold: number;
-  object_detect_categories: Record<
-    string,
-    { action: string; score: number; count: number }
-  >;
-  noise_tolerance_frames: number;
-  noise_tolerance_seconds: number;
-  speech_tolerance_seconds: number;
-  speech_min_frames_count: number;
-  speech_pre_pad_frames: number;
-  speech_positive_threshold: number;
-  quite_frames_count: number;
-  mute_frames_count: number;
-  silent_tolerance_seconds: number;
-  head_tolerance_seconds: number;
-  focus_tolerance_seconds: number;
 }
 
 export interface AssignmentSettings {
