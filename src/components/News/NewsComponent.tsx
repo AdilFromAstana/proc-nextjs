@@ -1,6 +1,7 @@
 "use client";
 
 import { mockNews, NewsItem } from "@/mockData";
+import { useTranslations } from "next-intl";
 import React, { useState, useEffect } from "react";
 
 type NewsComponentProps = {
@@ -8,20 +9,15 @@ type NewsComponentProps = {
 };
 
 export default function NewsComponent({ news }: NewsComponentProps) {
-  const [hideNews, setHideNews] = useState(false);
+  const t = useTranslations();
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
 
-  // Используем переданные новости или тестовые данные
   const actualNews = news || mockNews;
 
-  // Если включена свитч-кнопка, используем пустой массив, иначе - актуальные новости
-  const displayedNews = hideNews ? [] : actualNews;
-
-  // Разбиваем новости на страницы (по 3 новости на страницу)
   const pageSize = 3;
-  const totalPages = Math.ceil(displayedNews.length / pageSize);
-  const currentPageNews = displayedNews.slice(
+  const totalPages = Math.ceil(actualNews.length / pageSize);
+  const currentPageNews = actualNews.slice(
     currentPage * pageSize,
     (currentPage + 1) * pageSize
   );
@@ -64,14 +60,10 @@ export default function NewsComponent({ news }: NewsComponentProps) {
     return (
       <div className="mb-4 rounded-lg border bg-card p-6">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="font-semibold text-xl">Новости</h2>
+          <h2 className="font-semibold text-xl">{t("label-news")}</h2>
           <div className="flex items-center gap-3">
-            <span className="text-sm text-gray-600 hidden sm:block">
-              Скрыть новости
-            </span>
-            <div className="w-11 h-6 bg-gray-200 rounded-full"></div>
             <a className="text-blue-600 hover:text-blue-800 text-sm" href="#">
-              Посмотреть все
+              {t("btn-show-all")}
             </a>
           </div>
         </div>
@@ -92,27 +84,15 @@ export default function NewsComponent({ news }: NewsComponentProps) {
   return (
     <div className="mb-4 rounded-lg border bg-card p-6">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="font-semibold text-xl">Новости</h2>
+        <h2 className="font-semibold text-xl">{t("label-news")}</h2>
         <div className="flex items-center gap-3">
-          <span className="text-sm text-gray-600 hidden sm:block">
-            Скрыть новости
-          </span>
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              className="sr-only peer"
-              checked={hideNews}
-              onChange={(e) => setHideNews(e.target.checked)}
-            />
-            <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
           <a className="text-blue-600 hover:text-blue-800 text-sm" href="#">
-            Посмотреть все
+            {t("btn-show-all")}
           </a>
         </div>
       </div>
 
-      {displayedNews.length === 0 ? (
+      {actualNews.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
           Элементы отсутствуют
         </div>

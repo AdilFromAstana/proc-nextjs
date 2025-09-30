@@ -3,7 +3,7 @@ import React from "react";
 import { QuizQuestionItem } from "@/types/quiz/quiz";
 import { TestQuestionCard } from "@/components/Quiz/QuestionForms/TestQuestionCard";
 import { OpenQuestionCard } from "@/components/Quiz/QuestionForms/OpenQuestionCard";
-import { FillBlanksQuestionCard } from "@/components/Quiz/QuestionForms/FillBlanksQuestionCard";
+import { FillSpaceQuestionCard } from "@/components/Quiz/QuestionForms/FillSpaceQuestionCard";
 import { DragDropQuestionCard } from "@/components/Quiz/QuestionForms/DragDropQuestionCard";
 
 interface QuestionViewerProps {
@@ -22,7 +22,7 @@ const QuestionViewer: React.FC<QuestionViewerProps> = ({
 
   if (isTestQuestion) return <TestQuestionCard question={question} />;
   if (isOpenQuestion) return <OpenQuestionCard question={question} />;
-  if (isFillBlanks) return <FillBlanksQuestionCard question={question} />;
+  if (isFillBlanks) return <FillSpaceQuestionCard question={question} />;
   if (isDragDrop) return <DragDropQuestionCard question={question} />;
   return null;
 };

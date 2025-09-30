@@ -1,4 +1,3 @@
-// types/quiz/index.ts
 export type QuestionType =
   | "test"
   | "free"
@@ -6,6 +5,12 @@ export type QuestionType =
   | "drag-drop"
   | "library"
   | "import";
+
+export type QuestionComponentType =
+  | "FreeQuestionComponent"
+  | "OpenQuestionComponent"
+  | "FillSpaceQuestionComponent"
+  | "DragAndDropQuestionComponent";
 
 export interface QuizListResponse {
   status: string;
@@ -78,6 +83,7 @@ export interface QuizQuestionComponent {
   _attempts_showed: false;
   _answers_showed: false;
   owner_id: number;
+  image?: string;
   component_type: string;
   question: string;
   answer?: string;
@@ -107,19 +113,23 @@ export interface FreeQuestionOptions {
 export interface QuizQuestionSettings {
   group: string;
   variant: string;
-  attachments: number;
+  attachments?: number;
   score_penalty: string;
-  antiplagiarism: number;
+  antiplagiarism?: number;
   score_encouragement: string;
 }
 
 export interface QuizDetailEntity {
   id: number;
   owner_id?: number;
+  image?: string;
+  color?: string;
   name: string;
   description: string | null;
-  settings: any[];
+  is_unlisted: boolean;
+  owner?: [];
   components: QuizQuestionItem[];
+  settings: any[];
 }
 
 export interface QuizDetailResponse {

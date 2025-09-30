@@ -4,11 +4,16 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { QuizDetailResponse, QuizQuestionComponent } from "@/types/quiz/quiz";
+import {
+  QuestionComponentType,
+  QuizDetailResponse,
+  QuizQuestionComponent,
+  QuizQuestionItem,
+} from "@/types/quiz/quiz";
 import React, { useEffect, useState } from "react";
 import QuestionCard from "./QuestionCard";
 import ButtonsPanel from "./ButtonsPanel";
-import { fetchQuizById } from "@/api/quiz";
+import { addQuestionToQuiz, fetchQuizById } from "@/api/quiz";
 import LibraryOfQuestions from "./Modals/LibraryOfQuestions";
 import QuizComponentImportModal from "./Modals/QuizComponentImportModal/index";
 import { InfoIcon } from "@/app/icons/InfoIcon";
@@ -20,6 +25,13 @@ import { DeleteIcon } from "@/app/icons/Quiz/QuizHeaderIcons/DeleteIcon";
 import { CloseIcon } from "@/app/icons/Quiz/QuizHeaderIcons/CloseIcon";
 import { HeaderActions } from "./HeaderActions";
 
+import { EnumOption } from "@/types/enum";
+import {
+  getDifficultLevelQuestionType,
+  getVariantQuestionType,
+} from "@/api/enum/listApi";
+import { QuestionSettings } from "@/types/quiz/addQuestion";
+
 type Props = {
   quiz: QuizDetailResponse | null;
   quizId: number;
@@ -27,7 +39,6 @@ type Props = {
   onClose?: () => void;
 };
 
-// Функция перевода (замените на вашу реальную функцию перевода)
 const t = (key: string) => {
   const translations: Record<string, string> = {
     "label-import-quiz-type": "Тип вопроса",
@@ -104,6 +115,50 @@ export default function QuizEditor({
   const [isLibraryModalOpen, setIsLibraryModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
+  const [difficultyOptions, setDifficultyOptions] = useState<EnumOption[]>([]);
+  const [variantOptions, setVariantOptions] = useState<EnumOption[]>([]);
+  const [isLoadingEnums, setIsLoadingEnums] = useState(true);
+
+  useEffect(() => {
+    const fetchEnums = async () => {
+      try {
+        setIsLoadingEnums(true);
+
+        const difficultyData = await getDifficultLevelQuestionType();
+        setDifficultyOptions(difficultyData);
+
+        const variantData = await getVariantQuestionType();
+        setVariantOptions(variantData);
+      } catch (error) {
+        console.error("Ошибка при загрузке enum данных:", error);
+        setDifficultyOptions([]);
+        setVariantOptions([]);
+      } finally {
+        setIsLoadingEnums(false);
+      }
+    };
+
+    fetchEnums();
+  }, []);
+
+  const reverseDifficultyMap: Record<string, string> = {};
+  if (Array.isArray(difficultyOptions)) {
+    difficultyOptions.forEach((option) => {
+      if (option && option.name && option.raw) {
+        reverseDifficultyMap[option.name] = option.raw;
+      }
+    });
+  }
+
+  const reverseVariantMap: Record<string, string> = {};
+  if (Array.isArray(variantOptions)) {
+    variantOptions.forEach((option) => {
+      if (option && option.name && option.raw) {
+        reverseVariantMap[option.name] = option.raw;
+      }
+    });
+  }
+
   const handleAddQuestions = (questions: QuizQuestionComponent[]) => {
     console.log("Добавлены вопросы:", questions);
   };
@@ -127,6 +182,124 @@ export default function QuizEditor({
     // Обработка завершения импорта
     console.log("Импорт завершен");
     setIsImportModalOpen(false);
+  };
+
+  const handleCreateQuestion = async (questionType: string) => {
+    try {
+      if (!localQuiz) return;
+
+      // Базовые настройки для нового вопроса
+      const baseSettings = {
+        group: "easy",
+        variant: "first",
+        score_encouragement: "1",
+        score_penalty: "0",
+      };
+
+      let newQuestion;
+
+      switch (questionType) {
+        case "FreeQuestionComponent":
+          newQuestion = {
+            id: null,
+            owner_id: null,
+            question: "Новый вопрос с выбором",
+            hint: "",
+            description: null,
+            is_multiple: 0,
+            options: [
+              {
+                id: null,
+                free_question_id: null,
+                answer: "Правильный ответ",
+                feedback: "",
+                is_true: true,
+                percent: 100,
+                settings: {},
+              },
+            ],
+            attempts: [],
+            difficult: null,
+            score: null,
+            settings: baseSettings,
+            _attempts_showed: false,
+            _answers_showed: false,
+            component_type: questionType,
+            feedback: "",
+          };
+          break;
+
+        case "OpenQuestionComponent":
+          newQuestion = {
+            id: null,
+            owner_id: null,
+            question: "Новый открытый вопрос",
+            answer: "",
+            hint: "",
+            description: null,
+            attempt: {
+              REQUEST_CONTINUE: 0,
+              REQUEST_REDUNDANT: 0,
+              REQUEST_SKIP: 0,
+              id: null,
+              question_id: null,
+              student_id: null,
+              assignment_attempt_id: null,
+              antiplagiarism_task_id: null,
+              answer: null,
+              result: null,
+              antiplagiarism_task: {
+                REQUEST_CONTINUE: 0,
+                REQUEST_REDUNDANT: 0,
+                REQUEST_SKIP: 0,
+                id: null,
+                antiplagiarism_service_id: null,
+                author_id: null,
+                state: null,
+                uid: null,
+                text: null,
+                file_url: null,
+                file_name: null,
+                file_size: null,
+                mime_type: null,
+                name: null,
+                description: null,
+                unique: null,
+                references: [],
+                report_url: null,
+                failure_state_code: null,
+                failure_state_message: null,
+              },
+              attachments: [],
+            },
+            difficult: null,
+            score: null,
+            settings: baseSettings,
+            _attempts_showed: false,
+            _answers_showed: false,
+            component_type: questionType,
+            feedback: "",
+          };
+          break;
+
+        default:
+          console.error("Unknown question type:", questionType);
+          return;
+      }
+
+      // Добавляем тип для функции addQuestionToQuiz
+      const questionToSend = {
+        ...newQuestion,
+        type: questionType,
+      };
+
+      const updatedQuiz = await addQuestionToQuiz(localQuiz, questionToSend);
+
+      handleQuestionUpdated();
+    } catch (error) {
+      console.error("Error creating question:", error);
+      // Здесь можно добавить уведомление об ошибке
+    }
   };
 
   useEffect(() => {
@@ -164,93 +337,12 @@ export default function QuizEditor({
 
   const remainingChars = 200 - quizDescription.length;
 
-  const difficultyMap: Record<string, string> = {
-    easy: "Легкий",
-    medium: "Средний",
-    hard: "Сложный",
-    easy_alpha: "Легкий (Альфа)",
-    medium_alpha: "Средний (Альфа)",
-    hard_alpha: "Сложный (Альфа)",
-  };
-
-  const reverseDifficultyMap: Record<string, string> = Object.fromEntries(
-    Object.entries(difficultyMap).map(([eng, rus]) => [rus, eng])
-  );
-
-  const variantMap: Record<string, string> = {
-    "": "Без варианта",
-    first: "1-й вариант",
-    second: "2-й вариант",
-    third: "3-й вариант",
-    fourth: "4-й вариант",
-  };
-
-  const reverseVariantMap: Record<string, string> = Object.fromEntries(
-    Object.entries(variantMap).map(([eng, rus]) => [rus, eng])
-  );
-
-  const difficultyOptions = Object.values(difficultyMap);
-  const variantOptions = Object.values(variantMap);
-
   const sortOptions = [
     { label: "По баллу (по возрастанию)", value: "score-asc" },
     { label: "По баллу (по убыванию)", value: "score-desc" },
   ];
 
-  // Фильтрация и сортировка вопросов
-  const getFilteredAndSortedQuestions = () => {
-    if (!localQuiz) return [];
-
-    let filteredQuestions = [...localQuiz.entity.components];
-
-    // Фильтр по поиску
-    if (searchQuery) {
-      filteredQuestions = filteredQuestions.filter((q) =>
-        q.component.question.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-    }
-
-    // Фильтр по сложности
-    if (difficultyFilter) {
-      const englishDifficulty = reverseDifficultyMap[difficultyFilter];
-      if (englishDifficulty) {
-        filteredQuestions = filteredQuestions.filter(
-          (q) => q.settings.group === englishDifficulty
-        );
-      }
-    }
-
-    // Фильтр по варианту
-    if (variantFilter) {
-      const englishVariant = reverseVariantMap[variantFilter];
-      if (englishVariant !== undefined) {
-        filteredQuestions = filteredQuestions.filter(
-          (q) => q.settings.variant === englishVariant
-        );
-      }
-    }
-
-    // Сортировка
-    if (sortOption) {
-      filteredQuestions.sort((a, b) => {
-        const scoreA = parseInt(a.settings.score_encouragement) || 0;
-        const scoreB = parseInt(b.settings.score_encouragement) || 0;
-
-        if (sortOption === "score-asc") {
-          return scoreA - scoreB;
-        } else if (sortOption === "score-desc") {
-          return scoreB - scoreA;
-        }
-        return 0;
-      });
-    }
-
-    return filteredQuestions;
-  };
-
   if (!localQuiz) return null;
-
-  const filteredQuestions = getFilteredAndSortedQuestions();
 
   return (
     <div className="w-full m-8">
@@ -371,13 +463,15 @@ export default function QuizEditor({
                 value={difficultyFilter}
                 onChange={(e) => setDifficultyFilter(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
+                disabled={isLoadingEnums}
               >
                 <option value="">Сложность</option>
-                {difficultyOptions.map((difficulty) => (
-                  <option key={difficulty} value={difficulty}>
-                    {difficulty}
-                  </option>
-                ))}
+                {Array.isArray(difficultyOptions) &&
+                  difficultyOptions.map((difficulty) => (
+                    <option key={difficulty.raw} value={difficulty.name}>
+                      {difficulty.name}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -386,11 +480,12 @@ export default function QuizEditor({
                 value={variantFilter}
                 onChange={(e) => setVariantFilter(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
+                disabled={isLoadingEnums}
               >
                 <option value="">Вариант</option>
                 {variantOptions.map((variant) => (
-                  <option key={variant} value={variant}>
-                    {variant}
+                  <option key={variant.raw} value={variant.name}>
+                    {variant.name}
                   </option>
                 ))}
               </select>
@@ -414,9 +509,8 @@ export default function QuizEditor({
         </AccordionItem>
       </Accordion>
 
-      {/* Questions list - используем отфильтрованные вопросы */}
       <div>
-        {filteredQuestions.map((q) => (
+        {localQuiz?.entity?.components?.map((q) => (
           <QuestionCard
             key={q.component_id}
             question={q}
@@ -427,10 +521,18 @@ export default function QuizEditor({
       </div>
 
       <ButtonsPanel
-        onCreateTestQuestion={() => {}}
-        onCreateOpenQuestion={() => {}}
-        onCreateFillBlanksQuestion={() => {}}
-        onCreateDragDropQuestion={() => {}}
+        onCreateTestQuestion={() =>
+          handleCreateQuestion("FreeQuestionComponent")
+        }
+        onCreateOpenQuestion={() =>
+          handleCreateQuestion("OpenQuestionComponent")
+        }
+        onCreateFillBlanksQuestion={() =>
+          handleCreateQuestion("FillSpaceQuestionComponent")
+        }
+        onCreateDragDropQuestion={() =>
+          handleCreateQuestion("DragAndDropQuestionComponent")
+        }
         onOpenLibrary={handleOpenLibraryModal}
         onImportFromFile={handleOpenImportModal}
       />

@@ -238,9 +238,6 @@ export const deleteQuestionFromQuiz = async (
     components: updatedComponents,
   });
 };
-
-// НОВЫЕ ФУНКЦИИ
-
 /**
  * Обновление отдельного компонента вопроса
  */
@@ -254,7 +251,6 @@ export const updateQuestionComponent = async (
   );
   return response.data;
 };
-
 /**
  * Обновление вопроса в тесте (оба PUT запроса)
  */
@@ -298,24 +294,88 @@ export const updateQuestionInQuiz = async (
     throw error;
   }
 };
-
 /**
  * Добавление нового вопроса в тест
  */
 export const addQuestionToQuiz = async (
-  quizId: number,
+  quiz: QuizDetailResponse,
   newComponent: any
 ): Promise<QuizDetailResponse> => {
-  // Получаем текущий тест
-  const quizResponse = await fetchQuizById(quizId);
-  const currentQuiz = quizResponse.entity;
+  const quizId = quiz.entity.id;
 
-  // Добавляем новый компонент в конец массива
-  const updatedComponents = [...currentQuiz.components, newComponent];
+  const getEndpoint = (type: string) => {
+    switch (type) {
+      case "FreeQuestionComponent":
+        return "free-questions";
+      case "OpenQuestionComponent":
+        return "open-questions";
+      case "FillSpaceQuestionComponent":
+        return "fill-space-questions";
+      case "DragAndDropQuestionComponent":
+        return "drag-and-drop-questions";
+      default:
+        throw new Error(`Unknown question type: ${type}`);
+    }
+  };
 
-  // Отправляем обновлённый тест
-  return await updateQuiz(quizId, {
-    ...currentQuiz,
-    components: updatedComponents,
-  });
+  try {
+    // 1. Отправляем вопрос на соответствующий endpoint
+    const endpoint = getEndpoint(newComponent.type);
+
+    // Удаляем лишние поля перед отправкой
+    const { componentType, type, ...questionData } = newComponent;
+
+    const createResponse = await axiosClient.post(`/${endpoint}`, questionData);
+
+    if (createResponse.status !== 200 && createResponse.status !== 201) {
+      throw new Error("Failed to create question");
+    }
+
+    const createdQuestion = createResponse.data;
+
+    // 2. Получаем созданный вопрос по его ID
+    const getResponse = await axiosClient.get(
+      `/${endpoint}/${createdQuestion.entity.id}`
+    );
+
+    if (getResponse.status !== 200) {
+      throw new Error("Failed to fetch created question");
+    }
+
+    const fullQuestion = getResponse.data;
+
+    // 3. Создаем новый компонент для добавления в тест
+    const newQuizComponent = {
+      id: null, // будет установлен сервером
+      quiz_id: quizId,
+      component_id: fullQuestion.entity.id,
+      component_type: newComponent.type,
+      data: [],
+      position: quiz.entity.components.length, // следующая позиция
+      settings: fullQuestion.entity.settings, // настройки из созданного вопроса
+      component: fullQuestion.entity, // полный объект вопроса
+      temporary_id: null,
+    };
+
+    // 4. Создаем обновленный объект теста с новым компонентом
+    const updatedQuiz = {
+      ...quiz.entity,
+      components: [...quiz.entity.components, newQuizComponent],
+    };
+
+    // 5. Отправляем обновленный тест
+    const addToQuizResponse = await axiosClient.put(
+      `/quiz/${quizId}`,
+      updatedQuiz
+    );
+
+    if (addToQuizResponse.status !== 200 && addToQuizResponse.status !== 201) {
+      throw new Error("Failed to add question to quiz");
+    }
+
+    return addToQuizResponse.data;
+  } catch (error) {
+    console.error("Error adding question to quiz:", error);
+    throw error;
+  }
 };

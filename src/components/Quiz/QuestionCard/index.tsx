@@ -9,8 +9,11 @@ import QuestionBody from "./QuestionBody";
 const QUESTION_TYPE_MAP = {
   FreeQuestionComponent: { type: "test", name: "Тестовый вопрос" },
   OpenQuestionComponent: { type: "free", name: "Открытый вопрос" },
-  FillBlanksComponent: { type: "fill-blanks", name: "Заполните пробелы" },
-  DragDropComponent: { type: "drag-drop", name: "Drag & Drop" },
+  FillSpaceQuestionComponent: {
+    type: "fill-blanks",
+    name: "Заполните пробелы",
+  },
+  DragAndDropQuestionComponent: { type: "drag-drop", name: "Drag & Drop" },
 } as const;
 
 interface QuestionCardProps {
@@ -25,10 +28,12 @@ const QuestionCard: React.FC<QuestionCardProps> = React.memo(
     const [editedQuestion, setEditedQuestion] = useState(question);
 
     const getQuestionInfo = useCallback(() => {
+      console.log("question:", question);
       const questionTypeInfo =
         QUESTION_TYPE_MAP[
           question.component_type as keyof typeof QUESTION_TYPE_MAP
         ];
+
       return questionTypeInfo || { type: "test", name: "Тестовый вопрос" };
     }, [question.component_type]);
 

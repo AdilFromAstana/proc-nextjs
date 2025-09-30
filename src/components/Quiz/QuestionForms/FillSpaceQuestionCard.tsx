@@ -1,13 +1,13 @@
 import { QuizQuestionItem } from "@/types/quiz/quiz";
 
-export const FillBlanksQuestionCard = ({
+export const FillSpaceQuestionCard = ({
   question,
 }: {
   question: QuizQuestionItem;
 }) => {
   if (!question) return null;
   const questionText = question?.component?.question || "";
-  const blanks = question?.component?.blanks || [];
+  const blanks = question?.component?.options || [];
 
   return (
     <div>

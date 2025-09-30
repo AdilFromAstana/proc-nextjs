@@ -36,21 +36,7 @@ const uiItems = getUIPrimitives();
 const componentItems = getComponents();
 const blockItems = getBlocks();
 
-export const libraryItems = [
-  { title: "Главная", path: "/" },
-  { title: "Задания", path: "/assignments" },
-  { title: "База уроков", path: "/lessons" },
-  { title: "База тестов и задач", path: "/quiz" },
-  { title: "Курсы", path: "/courses" },
-  { title: "Медиафайлы", path: "/media" },
-];
-
-export const groupsItems = [
-  { title: "Новая группа", path: "/classes/create" },
-  { title: "Мои группы", path: "/classes" },
-  { title: "Кабинеты", path: "/rooms" },
-  { title: "Коды приглашения", path: "/invites" },
-];
+import { useTranslations } from "next-intl";
 
 export function MobileSidebarTrigger() {
   const { setOpenMobile } = useSidebar();
@@ -65,14 +51,84 @@ export function MobileSidebarTrigger() {
 }
 
 export function RegistrySidebar() {
-  const pathname = usePathname();
+  const t = useTranslations();
 
+  const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
 
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredUiItems, setFilteredUiItems] = useState(uiItems);
   const [filteredComponents, setFilteredComponents] = useState(componentItems);
   const [filteredBlocks, setFilteredBlocks] = useState(blockItems);
+
+  const libraryItems = [
+    { title: t("page-main-page"), path: "/" },
+    { title: t("page-assignment-index"), path: "/assignments" },
+    { title: t("page-lesson-index"), path: "/lessons" },
+    { title: t("page-quiz-index"), path: "/quiz" },
+    { title: t("page-course-index"), path: "/courses" },
+    { title: t("page-media-index"), path: "/media" },
+  ];
+
+  const groupsItems = [
+    { title: t("page-class-create"), path: "/classes/create" },
+    { title: t("page-class-index"), path: "/classes" },
+    { title: t("page-rooms-index"), path: "/rooms" },
+    { title: t("page-invite-index"), path: "/invites" },
+  ];
+
+  const switchLanguage = () => {
+    const currentLocale =
+      document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("locale="))
+        ?.split("=")[1] || "ru";
+
+    // Определяем следующий язык по кругу: ru -> en -> kz -> ru
+    const getNextLocale = (current: string) => {
+      switch (current) {
+        case "ru":
+          return "en";
+        case "en":
+          return "kz";
+        case "kz":
+          return "ru";
+        default:
+          return "ru";
+      }
+    };
+
+    const newLocale = getNextLocale(currentLocale);
+
+    document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+
+    // Перезагружаем страницу для применения нового языка
+    window.location.reload();
+  };
+
+  const getCurrentLanguage = () => {
+    if (typeof document === "undefined") return "ru";
+
+    const locale = document.cookie
+      .split("; ")
+      .find((row) => row.startsWith("locale="))
+      ?.split("=")[1];
+
+    return locale || "ru";
+  };
+
+  const getLanguageLabel = (locale: string) => {
+    switch (locale) {
+      case "kz":
+        return "ҚАЗ";
+      case "ru":
+        return "РУС";
+      case "en":
+        return "ENG";
+      default:
+        return "РУС";
+    }
+  };
 
   useEffect(() => {
     if (searchTerm) {
@@ -125,7 +181,7 @@ export function RegistrySidebar() {
                   <div className="flex min-w-0 items-center">
                     <LibraryIcon className="w-5 h-5" />
                     <span className="ml-2 opacity-100 transition-all duration-200">
-                      Библиотека
+                      {t("label-library")}
                     </span>
                   </div>
                   <ChevronDown className="size-4 flex-shrink-0 opacity-100 transition-all duration-200 group-data-[state=open]/collapsible:rotate-180" />
@@ -163,7 +219,7 @@ export function RegistrySidebar() {
                   <div className="flex min-w-0 items-center">
                     <GroupsIcon className="w-5 h-5" />
                     <span className="ml-2 opacity-100 transition-all duration-200">
-                      Группы
+                      {t("label-group-list")}
                     </span>
                   </div>
                   <ChevronDown className="size-4 flex-shrink-0 opacity-100 transition-all duration-200 group-data-[state=open]/collapsible:rotate-180" />
@@ -201,7 +257,7 @@ export function RegistrySidebar() {
                   <div className="flex min-w-0 items-center">
                     <InfoIcon className="w-5 h-5" />
                     <span className="ml-2 opacity-100 transition-all duration-200">
-                      Ресурсы
+                      {t("label-resources")}
                     </span>
                   </div>
                   <ChevronDown className="size-4 flex-shrink-0 opacity-100 transition-all duration-200 group-data-[state=open]/collapsible:rotate-180" />
@@ -220,7 +276,7 @@ export function RegistrySidebar() {
                           onClick={() => setOpenMobile(false)}
                           href={"/resources"}
                         >
-                          Цифровые библиотеки
+                          {t("label-digital-library")}
                         </Link>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -233,7 +289,15 @@ export function RegistrySidebar() {
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex justify-end">
+        <div className="flex justify-between items-center w-full">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={switchLanguage}
+            className="flex items-center gap-2"
+          >
+            <span>{getLanguageLabel(getCurrentLanguage())}</span>
+          </Button>
           <ModeToggle />
         </div>
       </SidebarFooter>

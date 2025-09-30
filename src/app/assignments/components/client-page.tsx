@@ -18,6 +18,7 @@ import AssignmentListComponent from "@/components/Assignment/ListComponent";
 import PaginateComponent from "@/components/Pagination/PaginateComponent";
 import { useAssignments } from "@/api/assignmentQuery";
 import { Assignment } from "@/types/assignment";
+import { useTranslations } from "next-intl";
 
 // ✅ 1. ОБЪЯВИ ИНТЕРФЕЙС ПРОПСОВ
 interface ClientPageProps {
@@ -36,6 +37,8 @@ interface ClientPageProps {
 export default function AssignmentsClientPage({
   initialData,
 }: ClientPageProps) {
+  const t = useTranslations();
+
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -124,12 +127,12 @@ export default function AssignmentsClientPage({
           className="w-full md:w-auto"
           onClick={() => router.push("/assignments/create")}
         >
-          + Создать
+          + {t("btn-create")}
         </Button>
 
         <div className="w-full md:w-7/12 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           <Input
-            placeholder="Поиск..."
+            placeholder={t("placeholder-query")}
             value={postData.query || ""}
             onChange={(e) => handleQueryChange(e.target.value)}
             className="bg-white"
@@ -140,14 +143,18 @@ export default function AssignmentsClientPage({
             onValueChange={handleStatusChange}
           >
             <SelectTrigger className="bg-white w-full">
-              <SelectValue placeholder="Статус" />
+              {postData.status ? (
+                <SelectValue placeholder={postData.status} />
+              ) : (
+                <>{t("placeholder-status")}</>
+              )}
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">Все статусы</SelectItem>
               {[
-                { id: "process", name: "В процессе" },
-                { id: "completed", name: "Завершено" },
-                { id: "remaining", name: "Осталось" },
+                { id: "process", name: t("label-assignment-process") },
+                { id: "completed", name: t("label-assignment-completed") },
+                { id: "remaining", name: t("label-assignment-remaining") },
+                { id: "suspended", name: t("label-assignment-suspended") },
               ].map((option) => (
                 <SelectItem key={option.id} value={option.id}>
                   {option.name}
@@ -158,13 +165,13 @@ export default function AssignmentsClientPage({
 
           <Select value={postData.type} onValueChange={handleTypeChange}>
             <SelectTrigger className="bg-white w-full">
-              <SelectValue placeholder="Тип" />
+              <SelectValue placeholder={postData.type} />
             </SelectTrigger>
             <SelectContent>
               {[
-                { id: "all", name: "Все" },
-                { id: "lessons", name: "Уроки" },
-                { id: "quiz", name: "Тесты" },
+                { id: "all", name: t("option-all-assessments") },
+                { id: "lessons", name: t("option-only-lessons") },
+                { id: "quiz", name: t("option-only-quiz") },
               ].map((option) => (
                 <SelectItem key={option.id} value={option.id}>
                   {option.name}
@@ -175,12 +182,12 @@ export default function AssignmentsClientPage({
 
           <Select value={postData.orderBy} onValueChange={handleOrderChange}>
             <SelectTrigger className="bg-white w-full">
-              <SelectValue placeholder="Сортировка" />
+              <SelectValue placeholder={postData.orderBy} />
             </SelectTrigger>
             <SelectContent>
               {[
-                { id: "desc", name: "Сначала новые" },
-                { id: "asc", name: "Сначала старые" },
+                { id: "desc", name: t("option-before-new") },
+                { id: "asc", name: t("option-before-old") },
               ].map((option) => (
                 <SelectItem key={option.id} value={option.id}>
                   {option.name}

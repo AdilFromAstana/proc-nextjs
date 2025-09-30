@@ -2,10 +2,13 @@
 
 import { fetchLessonsList } from "@/api/lessons/listApi";
 import { LessonItem } from "@/types/lessons/lessons";
+import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import React, { useState, useMemo, useEffect } from "react";
 
 export default function LessonsList() {
+  const t = useTranslations();
+
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [lessons, setLessons] = useState<LessonItem[]>([]);
@@ -57,7 +60,7 @@ export default function LessonsList() {
       <div className="w-full m-8">
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-          <p className="mt-2 text-gray-600">Загрузка уроков...</p>
+          <p className="mt-2 text-gray-600">{t("label-upload")}</p>
         </div>
       </div>
     );
@@ -74,7 +77,7 @@ export default function LessonsList() {
   return (
     <div className="w-full m-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">База уроков</h1>
+        <h1 className="text-2xl font-bold text-gray-900"></h1>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -83,7 +86,7 @@ export default function LessonsList() {
             className="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             onClick={handleCreateLesson}
           >
-            Создать
+            {t("btn-create")}
           </button>
         </div>
 
@@ -91,13 +94,14 @@ export default function LessonsList() {
           <SearchInput
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
+            placeholder={t("placeholder-query")}
           />
         </div>
       </div>
 
       {filteredLessons.length === 0 ? (
         <div className="text-center py-8 text-gray-500">
-          {searchQuery ? "По вашему запросу ничего не найдено" : "Нет тестов"}
+          {t("label-empty-elements")}
         </div>
       ) : (
         <div className="space-y-4">
@@ -131,7 +135,7 @@ export default function LessonsList() {
                     {lesson.name}
                   </h3>
                   <p className="text-gray-500 text-sm mt-1 truncate">
-                    {lesson.description || "Нет описания"}
+                    {lesson.description}
                   </p>
                 </div>
               </div>
@@ -146,14 +150,19 @@ export default function LessonsList() {
 interface SearchInputProps {
   searchQuery: string;
   setSearchQuery: (query: string) => void;
+  placeholder: string;
 }
 
-function SearchInput({ searchQuery, setSearchQuery }: SearchInputProps) {
+function SearchInput({
+  searchQuery,
+  setSearchQuery,
+  placeholder,
+}: SearchInputProps) {
   return (
     <div className="relative flex-1 min-w-[200px]">
       <input
         type="text"
-        placeholder="Поиск по названию или описанию"
+        placeholder={placeholder}
         value={searchQuery}
         onChange={(e) => setSearchQuery(e.target.value)}
         className="w-full pl-4 pr-10 py-2 text-sm border border-gray-300 rounded-md"

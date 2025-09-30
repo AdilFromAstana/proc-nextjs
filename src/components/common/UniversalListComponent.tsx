@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import React, { useState, useEffect } from "react";
 
 // Базовый тип для элемента списка
@@ -39,13 +40,13 @@ export default function UniversalListComponent<T extends BaseItem>({
   renderItem,
   onClickItem,
   viewAllLink = "#",
-  enableHideToggle = false,
   loading = false,
   emptyMessage = "Нет элементов для отображения",
 }: UniversalListComponentProps<T>) {
+  const t = useTranslations();
+
   const [isLoading, setIsLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState(defaultFilter);
-  const [hideItems, setHideItems] = useState(false);
 
   useEffect(() => {
     if (!loading) {
@@ -57,8 +58,6 @@ export default function UniversalListComponent<T extends BaseItem>({
   }, [loading]);
 
   const filteredItems = (() => {
-    if (hideItems) return [];
-
     const activeFilterObj = filters.find((f) => f.key === activeFilter);
 
     if (!activeFilterObj || activeFilter === "all") return items;
@@ -81,7 +80,7 @@ export default function UniversalListComponent<T extends BaseItem>({
             <h2 className="font-semibold text-xl">{title}</h2>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-sm text-gray-600">Посмотреть все</span>
+            <span className="text-sm text-gray-600">{t("btn-show-all")}</span>
             <div className="w-11 h-6 bg-gray-200 rounded-full"></div>
           </div>
         </div>
@@ -113,27 +112,11 @@ export default function UniversalListComponent<T extends BaseItem>({
         </div>
 
         <div className="flex items-center gap-3">
-          {enableHideToggle && (
-            <>
-              <span className="text-sm text-gray-600 hidden sm:block">
-                Скрыть элементы
-              </span>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input
-                  type="checkbox"
-                  className="sr-only peer"
-                  checked={hideItems}
-                  onChange={(e) => setHideItems(e.target.checked)}
-                />
-                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-              </label>
-            </>
-          )}
           <a
             className="text-blue-600 hover:text-blue-800 text-sm"
             href={viewAllLink}
           >
-            Посмотреть все
+            {t("btn-show-all")}
           </a>
         </div>
       </div>
@@ -159,21 +142,15 @@ export default function UniversalListComponent<T extends BaseItem>({
 
       {/* Список элементов */}
       <div className="space-y-3 ">
-        {filteredItems.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            {hideItems ? "Элементы скрыты" : emptyMessage}
+        {filteredItems.map((item) => (
+          <div
+            key={item.id}
+            onClick={() => onClickItem && onClickItem(item)}
+            className={onClickItem ? "cursor-pointer" : ""}
+          >
+            {renderItem(item)}
           </div>
-        ) : (
-          filteredItems.map((item) => (
-            <div
-              key={item.id}
-              onClick={() => onClickItem && onClickItem(item)}
-              className={onClickItem ? "cursor-pointer" : ""}
-            >
-              {renderItem(item)}
-            </div>
-          ))
-        )}
+        ))}
       </div>
     </div>
   );

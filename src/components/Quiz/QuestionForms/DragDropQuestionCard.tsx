@@ -6,7 +6,7 @@ export const DragDropQuestionCard = ({
 }: {
   question: QuizQuestionItem;
 }) => {
-  const fileName = question.component.file_name || "Файл не загружен";
+  const fileName = question.component.image || "Файл не загружен";
 
   return (
     <div>
@@ -15,8 +15,11 @@ export const DragDropQuestionCard = ({
           Файл для Drag & Drop
         </label>
         <div className="p-4 border-2 border-dashed border-gray-300 rounded-md bg-gray-50 text-center">
-          <UploadIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
-          <p className="text-sm text-gray-600">{fileName}</p>
+          {!fileName ? (
+            <UploadIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
+          ) : (
+            <img src={fileName} className="text-sm text-gray-600" />
+          )}
         </div>
       </div>
 
@@ -25,7 +28,7 @@ export const DragDropQuestionCard = ({
           Элементы для перетаскивания
         </label>
         <div className="space-y-2">
-          {question.component.items?.map((item: any, index: number) => (
+          {question.component.options?.map((item: any, index: number) => (
             <div
               key={index}
               className="px-3 py-2 border border-gray-300 rounded-md bg-white shadow-sm"
