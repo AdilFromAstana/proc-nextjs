@@ -30,10 +30,13 @@ import AssignmentComponentSettingsComponent from "./AssignmentComponentSettingsC
 import AssignmentCertificateComponent from "./AssignmentCertificateComponent";
 import AssignmentProctoringComponent from "./AssignmentProctoringComponent";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 const AssignmentPage: React.FC<{
   assignmentId: number;
 }> = ({ assignmentId }) => {
+  const t = useTranslations();
+
   const { toast } = useToast();
   const queryClient = useQueryClient(); // Для инвалидации кэша
 
@@ -141,7 +144,7 @@ const AssignmentPage: React.FC<{
   const copyReportUrl = useCallback(
     (student: any) => {
       toast({
-        title: "Ссылка скопирована",
+        title: t("notify-assignment-report-url-copied"),
         description: "Ссылка на отчет скопирована в буфер обмена",
       });
     },
@@ -160,7 +163,7 @@ const AssignmentPage: React.FC<{
           window.history.back();
           break;
         case "delete":
-          if (window.confirm("Удалить задание?")) {
+          if (window.confirm(t("notify-abort-action-task"))) {
             // API call
           }
           break;
@@ -203,7 +206,7 @@ const AssignmentPage: React.FC<{
   // const assignment = assignmentData?.entity; // Убираем это, так как используем локальное состояние
   if (!assignment) {
     // Проверяем локальное состояние
-    return <div className="p-8">Задание не найдено</div>;
+    return <div className="p-8">{t("label-empty-found")}</div>;
   }
 
   // ✅ Логика

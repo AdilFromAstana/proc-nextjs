@@ -7,12 +7,14 @@ import {
 } from "@/api/proctoring";
 import { AssignmentAction } from "@/types/assignment/proctoring";
 import { Student } from "@/types/students";
+import { useTranslations } from "next-intl";
 import React, { useState, useEffect, useMemo } from "react";
 
 type StudentsPerPage = 12 | 36 | 72;
 type StudentFilter = "all" | "online";
 
 export default function ProctoringPage({ params }) {
+  const t = useTranslations();
   const { id } = params;
   const assignmentId = id ? parseInt(id as string, 10) : undefined;
 
@@ -180,7 +182,7 @@ export default function ProctoringPage({ params }) {
           <div className="flex-1 max-w-md">
             <input
               type="text"
-              placeholder="Поиск по студентам..."
+              placeholder={t("placeholder-query")}
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-sm"
@@ -223,13 +225,6 @@ export default function ProctoringPage({ params }) {
       {/* Журнал событий с уменьшенной высотой */}
       <div className="bg-white p-6">
         <div className="overflow-hidden rounded-lg border border-gray-200">
-          {/* Заголовок таблицы */}
-          <div className="grid grid-cols-12 bg-gray-50 px-3 py-2 text-xs font-medium text-gray-500 uppercase tracking-wider">
-            <div className="col-span-3">Дата и время</div>
-            <div className="col-span-3">Студент</div>
-            <div className="col-span-6">Событие</div>
-          </div>
-
           {/* Тело таблицы с уменьшенной высотой и скроллом */}
           <div
             className="divide-y divide-gray-200 overflow-y-auto"

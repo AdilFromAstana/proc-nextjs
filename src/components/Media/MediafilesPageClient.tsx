@@ -10,8 +10,11 @@ import { fetchMediaFiles, openFolderById } from "@/api/media/mediafilesApi";
 import { createFolder } from "@/api/media/mediafilesApi";
 import Breadcrumb from "./Breadcrumb";
 import UploadFileModal from "./UploadFileModal";
+import { useTranslations } from "next-intl";
 
 export default function MediafilesPageClient() {
+  const t = useTranslations();
+
   const [mediafiles, setMediafiles] = useState<MediaFile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +34,7 @@ export default function MediafilesPageClient() {
   };
 
   const [breadcrumbPath, setBreadcrumbPath] = useState<BreadcrumbItem[]>([
-    { id: 0, name: "Главная" },
+    { id: 0, name: t("label-media-root") },
   ]);
 
   // Загрузка медиафайлов при монтировании компонента
@@ -42,10 +45,8 @@ export default function MediafilesPageClient() {
         let response;
 
         if (currentFolderId) {
-          // Загружаем содержимое конкретной папки
           response = await openFolderById(currentFolderId);
         } else {
-          // Загружаем корневые файлы
           response = await fetchMediaFiles();
         }
 
@@ -110,7 +111,7 @@ export default function MediafilesPageClient() {
       // Переход в корень
       setCurrentFolderId(null);
       setFolderHistory([]);
-      setBreadcrumbPath([{ id: 0, name: "Главная" }]);
+      setBreadcrumbPath([{ id: 0, name: t("label-media-root") }]);
     } else {
       // Переход к конкретной папке
       const folderIndex = breadcrumbPath.findIndex(
@@ -169,7 +170,7 @@ export default function MediafilesPageClient() {
     } else {
       // Если история пуста, возвращаемся в корень
       setCurrentFolderId(null);
-      setBreadcrumbPath([{ id: 0, name: "Главная" }]);
+      setBreadcrumbPath([{ id: 0, name: t("label-media-root") }]);
     }
   };
 
@@ -178,9 +179,7 @@ export default function MediafilesPageClient() {
     try {
       // Создаем папку в текущей директории
       const newFolder = await createFolder("Новая папка", currentFolderId); // currentFolderId может быть null
-      console.log("Создана новая папка:", newFolder);
 
-      // Добавляем новую папку в существующий список
       setMediafiles((prev) => [...prev, newFolder]);
     } catch (err) {
       console.error("Ошибка создания папки:", err);

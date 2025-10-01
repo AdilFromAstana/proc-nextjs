@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Calendar } from "lucide-react";
 import CollapsibleCard from "@/components/Oqylyk/Assignment/CollapsibleCard";
 import { AssignmentDetail } from "@/types/assignment/detail";
+import { useTranslations } from "next-intl";
 
 interface AssignmentPlanComponentProps {
   assignment: AssignmentDetail;
@@ -24,21 +25,23 @@ const AssignmentPlanComponent: React.FC<AssignmentPlanComponentProps> = ({
   errors = {},
   onAssignmentChange,
 }) => {
+  const t = useTranslations();
+
   // Options
   const completeTimesOptions = [
-    { minutes: 0, label: "Без ограничений" },
-    { minutes: 30, label: "30 минут" },
-    { minutes: 45, label: "45 минут" },
-    { minutes: 60, label: "60 минут" },
-    { minutes: 90, label: "90 минут" },
-    { minutes: 120, label: "120 минут" },
-    { minutes: 180, label: "180 минут" },
-    { minutes: 240, label: "240 минут" },
-    { minutes: "custom", label: "Другое время" },
+    { minutes: 0, label: t("option-unlimited") },
+    { minutes: 30, label: t("option-30-minutes") },
+    { minutes: 45, label: t("option-45-minutes") },
+    { minutes: 60, label: t("option-60-minutes") },
+    { minutes: 90, label: t("option-90-minutes") },
+    { minutes: 120, label: t("option-120-minutes") },
+    { minutes: 180, label: t("option-180-minutes") },
+    { minutes: 240, label: t("option-240-minutes") },
+    { minutes: "custom", label: t("option-custom-time") },
   ];
 
   const startingAtTypes = [
-    { id: "now", name: "Немедленно", raw: "now" },
+    { id: "now", name: "Сейчас", raw: "now" },
     { id: "plan", name: "Запланировать", raw: "plan" },
   ];
 
@@ -60,9 +63,9 @@ const AssignmentPlanComponent: React.FC<AssignmentPlanComponentProps> = ({
   const hintStartingAtType = useMemo(() => {
     switch (assignment.starting_at_type) {
       case "now":
-        return "Задание будет доступно сразу после публикации";
+        return t("hint-assignment-starting-at-now");
       case "plan":
-        return "Задание будет доступно с указанной даты и времени";
+        return t("hint-assignment-starting-at-plan");
       default:
         return null;
     }
@@ -71,9 +74,9 @@ const AssignmentPlanComponent: React.FC<AssignmentPlanComponentProps> = ({
   const hintEndingAtType = useMemo(() => {
     switch (assignment.ending_at_type) {
       case "without":
-        return "Задание будет доступно бессрочно";
+        return t("hint-assignment-ending-at-without");
       case "until":
-        return "Задание будет доступно до указанной даты и времени";
+        return t("hint-assignment-ending-at-until");
       default:
         return null;
     }
@@ -165,8 +168,8 @@ const AssignmentPlanComponent: React.FC<AssignmentPlanComponentProps> = ({
 
   return (
     <CollapsibleCard
-      title="Планирование задания"
-      description="Настройте время доступности и прохождения задания"
+      title={t("label-assignment-plan-title")}
+      description={t("label-assignment-plan-description")}
       icon={<Calendar className="h-5 w-5 text-blue-600" />}
       defaultCollapsed={true}
     >
@@ -174,14 +177,16 @@ const AssignmentPlanComponent: React.FC<AssignmentPlanComponentProps> = ({
         {/* ASSIGNMENT COMPLETE TIME */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-700">
-            Время на выполнение задания
+            {t("label-assignment-complete-time")}
           </Label>
           <Select
             value={assignment.complete_time?.toString() || "0"}
             onValueChange={handleCompleteTimeChange}
           >
             <SelectTrigger className="w-full">
-              <SelectValue placeholder="Выберите время" />
+              <SelectValue
+                placeholder={t("placeholder-assignment-starting-at-time")}
+              />
             </SelectTrigger>
             <SelectContent>
               {completeTimesOptions.map((option) => (
@@ -212,14 +217,14 @@ const AssignmentPlanComponent: React.FC<AssignmentPlanComponentProps> = ({
           )}
 
           <p className="text-sm text-gray-500 mt-1">
-            Укажите максимальное время, отведенное на выполнение задания
+            {t("hint-assignment-complete-time")}
           </p>
         </div>
 
         {/* STARTING AT TYPE */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-700">
-            Начало доступности задания
+            {t("label-assignment-starting-at-date")}
           </Label>
           <div className="flex bg-gray-100 rounded-lg p-1 w-fit">
             {startingAtTypes.map((type) => (
@@ -249,7 +254,7 @@ const AssignmentPlanComponent: React.FC<AssignmentPlanComponentProps> = ({
         {assignment.starting_at_type === "plan" && (
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">
-              Дата и время начала
+              {t("label-assignment-starting-at-date")}
             </Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
@@ -264,7 +269,7 @@ const AssignmentPlanComponent: React.FC<AssignmentPlanComponentProps> = ({
               </div>
             </div>
             <p className="text-sm text-gray-500">
-              Укажите точную дату и время, когда задание станет доступно
+              {t("hint-assignment-starting-at-date")}
             </p>
           </div>
         )}
@@ -272,7 +277,7 @@ const AssignmentPlanComponent: React.FC<AssignmentPlanComponentProps> = ({
         {/* ENDING AT TYPE */}
         <div className="space-y-2">
           <Label className="text-sm font-medium text-gray-700">
-            Окончание доступности задания
+            {t("label-assignment-ending-at-date")}
           </Label>
           <div className="flex bg-gray-100 rounded-lg p-1 w-fit">
             {endingAtTypes.map((type) => (
@@ -302,7 +307,7 @@ const AssignmentPlanComponent: React.FC<AssignmentPlanComponentProps> = ({
         {assignment.ending_at_type === "until" && (
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">
-              Дата и время окончания
+              {t("label-assignment-ending-at-date")}
             </Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="relative">
@@ -317,8 +322,7 @@ const AssignmentPlanComponent: React.FC<AssignmentPlanComponentProps> = ({
               </div>
             </div>
             <p className="text-sm text-gray-500">
-              Укажите точную дату и время, когда задание перестанет быть
-              доступным
+              {t("hint-assignment-ending-at-date")}
             </p>
           </div>
         )}

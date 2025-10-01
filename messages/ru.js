@@ -19,7 +19,7 @@ export default {
   "label-created-at": "Создан",
   "label-empty-records": "Нет записей",
   "label-empty-elements": "Элементы отсутствуют",
-  "label-empty-description": "Описание отсуствует",
+  "label-empty-description": "Описание отсутствует",
   "label-empty-found": "Ничего не найдено",
   "label-entity-without-name": "Без названия",
   "label-not-available": "Временно недоступно",
@@ -312,7 +312,7 @@ export default {
    */
 
   "btn-course-select-certificate": "Выбрать",
-  "btn-course-detach-certificate": "Отвязяать",
+  "btn-course-detach-certificate": "Отвязать",
 
   /**
    * Course Material Modal Component
@@ -613,7 +613,7 @@ export default {
     "При неактивном состоянии кабинет не сможет принимать бронь",
   "hint-room-have_acs": "Данная опция позволит контролировать доступ в кабинет",
 
-  "placeholder-room-name": "Ввдеите наименование",
+  "placeholder-room-name": "Введите наименование",
   "placeholder-room-description": "Введите описание",
   "placeholder-room-timezone": "Выберите часовой пояс",
 
@@ -2135,7 +2135,7 @@ export default {
   "option-point-system-sum-method": "Суммировать",
   "option-point-system-avg-method": "Среднее значение",
 
-  "placeholder-assignment-max-attempts-option": "Укажаите кол-во попыток",
+  "placeholder-assignment-max-attempts-option": "Укажите кол-во попыток",
   "placeholder-assignment-max-attempts-input": "Введите кол-во попыток",
 
   "btn-attach-certificate": "Сертификат",
@@ -2358,4 +2358,13 @@ export default {
   "error-unknown-error": "Неизвестная ошибка",
   "error-user-not-exists":
     "Пользователь не найден или введен неправильный пароль",
+
+  /**
+   * NEW WORDS
+   */
+
+  "hint-webinar-record-type-streaming":
+    "В данном режиме будет осуществлена прямая трансляция (SFU) и запись. Требуется стабильное интернет-соединение",
+  "hint-webinar-record-type-recording":
+    "В данном режиме будет осуществлена прямая трансляция (P2P) и запись. Не зависит от качества интернет-соединения",
 };

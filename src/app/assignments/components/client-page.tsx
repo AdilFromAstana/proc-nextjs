@@ -17,8 +17,8 @@ import {
 import AssignmentListComponent from "@/components/Assignment/ListComponent";
 import PaginateComponent from "@/components/Pagination/PaginateComponent";
 import { useAssignments } from "@/api/assignmentQuery";
-import { Assignment } from "@/types/assignment";
 import { useTranslations } from "next-intl";
+import { Assignment } from "@/types/assignment/list";
 
 // ✅ 1. ОБЪЯВИ ИНТЕРФЕЙС ПРОПСОВ
 interface ClientPageProps {

@@ -8,6 +8,7 @@ import InviteCodeListComponent from "./InviteCodeListComponent";
 import ProductListComponent from "./ProductListComponent";
 import { Button } from "@/components/ui/button";
 import CollapsibleCard from "@/components/Oqylyk/Assignment/CollapsibleCard";
+import { useTranslations } from "next-intl";
 
 interface AccessTypeOption {
   id: string;
@@ -29,13 +30,15 @@ interface AssignmentAccessTypeComponentProps {
 const AssignmentAccessTypeComponent: React.FC<
   AssignmentAccessTypeComponentProps
 > = ({ assignment, errors = {}, onAssignmentChange }) => {
+  const t = useTranslations();
+
   // State
   const [accessTypes, setAccessTypes] = useState<AssignmentAccessTypeList>({
     models: [],
     fetch: async () => {
       setAccessTypes({
         models: [
-          { id: "free", name: "Открытый", raw: "free" },
+          { id: "free", name: t(""), raw: "free" },
           { id: "private", name: "Приватный", raw: "private" },
           { id: "prepaid", name: "По предоплате", raw: "prepaid" },
         ],
@@ -52,11 +55,11 @@ const AssignmentAccessTypeComponent: React.FC<
   const hintAvailability = (() => {
     switch (assignment.access_type) {
       case "free":
-        return "Любой пользователь может пройти задание без ограничений";
+        return t("hint-assignment-access-type-free");
       case "private":
-        return "Доступ только по пригласительным кодам";
+        return t("hint-assignment-access-type-private");
       case "prepaid":
-        return "Доступ после оплаты";
+        return t("hint-assignment-access-type-prepaid");
       default:
         return null;
     }
@@ -133,8 +136,8 @@ const AssignmentAccessTypeComponent: React.FC<
 
   return (
     <CollapsibleCard
-      title="Тип доступа к заданию"
-      description="Выберите способ доступа пользователей к заданию"
+      title={t("label-assignment-access-type-title")}
+      description={t("label-assignment-access-type-description")}
       icon={<LockOpen className="h-5 w-5 text-blue-600" />}
       defaultCollapsed={false} // Можно передать начальное состояние
     >
@@ -142,7 +145,6 @@ const AssignmentAccessTypeComponent: React.FC<
 
       {/* ACCESS TYPE */}
       <div className="space-y-2">
-        <label className="text-sm font-medium text-gray-700">Тип доступа</label>
         <div className="flex bg-gray-100 rounded-lg p-1 w-fit">
           {accessTypes.models.map((option) => (
             <Button

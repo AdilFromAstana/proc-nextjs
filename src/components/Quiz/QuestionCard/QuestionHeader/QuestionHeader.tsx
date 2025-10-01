@@ -6,6 +6,7 @@ import {
   ScoreIcon,
 } from "@/app/icons/Quiz";
 import { getQuestionIcon } from "../questionUtils";
+import { useTranslations } from "next-intl";
 
 interface QuestionHeaderProps {
   position: number;
@@ -30,6 +31,8 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
   onSaveClick,
   onCancelClick,
 }) => {
+  const t = useTranslations();
+
   const QuestionIcon = getQuestionIcon(questionType);
 
   return (
@@ -75,14 +78,14 @@ const QuestionHeader: React.FC<QuestionHeaderProps> = ({
               className="px-3 py-1 bg-green-500 text-white rounded text-sm hover:bg-green-600"
               type="button"
             >
-              Сохранить
+              {t("btn-save")}
             </button>
             <button
               onClick={onCancelClick}
               className="px-3 py-1 bg-gray-500 text-white rounded text-sm hover:bg-gray-600"
               type="button"
             >
-              Отмена
+              {t("btn-cancel")}
             </button>
           </div>
         )}

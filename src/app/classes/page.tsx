@@ -1,74 +1,117 @@
 "use client";
 
-import React from "react";
-import UniversalListComponent, {
-  FilterOption,
-} from "../../components/common/UniversalListComponent";
-import { Class } from "@/types/groups";
-import { mockClasses } from "@/mockData";
-import { useRouter } from "next/navigation";
-
-const classFilters: FilterOption[] = [
-  { key: "all", label: "Все классы и группы" },
-  {
-    key: "groups",
-    label: "Группы",
-    filterFn: (item) => item.studentCount > 20,
-  },
-  {
-    key: "classes",
-    label: "Классы",
-    filterFn: (item) => item.studentCount <= 20,
-  },
-];
+import { fetchClassesList } from "@/api/classes";
+import ClassesList from "@/components/Classes/ClassesList";
+import { ClassEntity } from "@/types/classes/classes";
+import { FilterOption } from "@/types/common";
+import { useTranslations } from "next-intl";
+import React, { useEffect, useState } from "react";
 
 export default function ClassGroupsList() {
-  const router = useRouter();
+  const t = useTranslations();
 
-  const handleItemClick = (item: Class) => {
-    router.push(`/classes/${item.id}`);
+  const [classes, setClasses] = useState<ClassEntity[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [classFilter, setClassFilter] = useState<string>("all");
+  const [sortOrder, setSortOrder] = useState<string>("name_asc");
+
+  const allClassesFilters: FilterOption[] = [
+    { key: "all-classes", label: t("option-all-classes") },
+    { key: "only-classes", label: t("option-only-classes") },
+    { key: "only-groups", label: t("option-only-groups") },
+  ];
+
+  const sortOptions: FilterOption[] = [
+    { key: "date_newest", label: t("option-before-new") },
+    { key: "date_oldest", label: t("option-before-old") },
+  ];
+
+  const handleCreateClass = () => {
+    console.log("Создание новой группы");
   };
+
+  useEffect(() => {
+    const loadClasses = async () => {
+      try {
+        setLoading(true);
+        const response = await fetchClassesList({ page: 1 });
+        setClasses(response.entities.data);
+        setError(null);
+      } catch (err) {
+        setError("Не удалось загрузить список уроков");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadClasses();
+  }, []);
+
   return (
-    <UniversalListComponent<Class>
-      title="Мои группы"
-      items={mockClasses}
-      filters={classFilters}
-      defaultFilter="all"
-      viewAllLink="/classes"
-      enableHideToggle
-      renderItem={(classGroup) => (
-        <div className="border rounded-lg p-4 hover:shadow-md transition-shadow">
-          <div className="flex justify-between items-start">
-            <div>
-              <h3 className="font-semibold text-lg">{classGroup.name}</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                {classGroup.description}
-              </p>
-            </div>
-            <span
-              className={`px-2 py-1 text-xs rounded-full ${
-                classGroup.status === "active"
-                  ? "bg-green-100 text-green-800"
-                  : "bg-red-100 text-red-800"
-              }`}
+    <div className="min-h-screen w-full bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900">
+            {t("page-class-index")}
+          </h1>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-6 mb-8">
+          <div className="flex-shrink-0">
+            <button
+              onClick={handleCreateClass}
+              className="inline-flex items-center px-4 py-2 border border-blue-600 text-blue-600 rounded-md text-sm font-medium hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
-              {classGroup.status === "active" ? "Активен" : "Неактивен"}
-            </span>
+              + {t("btn-create")}
+            </button>
           </div>
-          <div className="flex gap-4 mt-3 text-sm">
-            <span className="flex items-center gap-1">
-              👨‍🎓 {classGroup.studentCount} учеников
-            </span>
-            <span className="flex items-center gap-1">
-              👨‍🏫 {classGroup.teacherCount} преподавателей
-            </span>
-          </div>
-          <div className="text-xs text-gray-500 mt-2">
-            Создан: {new Date(classGroup.createdAt).toLocaleDateString()}
+
+          <div className="flex-1 flex flex-wrap gap-4">
+            <div className="relative flex-1 min-w-[200px]">
+              <input
+                type="text"
+                placeholder={t("placeholder-query")}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-4 pr-10 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+
+            <div className="min-w-[150px]">
+              <select
+                value={classFilter}
+                onChange={(e) => setClassFilter(e.target.value)}
+                className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              >
+                {allClassesFilters.map((filter) => (
+                  <option key={filter.key} value={filter.key}>
+                    {filter.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="min-w-[150px]">
+              <select
+                value={sortOrder}
+                onChange={(e) => setSortOrder(e.target.value)}
+                className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+              >
+                {sortOptions.map((filter) => (
+                  <option key={filter.key} value={filter.key}>
+                    {filter.label}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
-      )}
-      onClickItem={handleItemClick}
-    />
+        <ClassesList classes={classes} />
+      </div>
+    </div>
   );
 }

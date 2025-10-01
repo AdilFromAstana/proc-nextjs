@@ -7,6 +7,7 @@ import AdditionalSettingsSection from "./AdditionalSettingsSection";
 import RowsMappingSection from "./RowsMappingSection";
 import ModalFooter from "./ModalFooter";
 import WordToCreateTest from "./WordToCreateTest/WordToCreateTest";
+import { useTranslations } from "next-intl";
 
 const QuizComponentImportModal: React.FC<{
   assessmentType?: string;
@@ -15,7 +16,6 @@ const QuizComponentImportModal: React.FC<{
   onClose: () => void;
   onCreated?: () => void;
   onFinished?: () => void;
-  t: (key: string) => string;
 }> = ({
   assessmentType,
   assessment,
@@ -23,8 +23,8 @@ const QuizComponentImportModal: React.FC<{
   onClose,
   onCreated,
   onFinished,
-  t,
 }) => {
+  const t = useTranslations();
   const [isVisibleState, setIsVisibleState] = useState(false);
   const [shortenLetterState, setShortenLetterState] = useState(true);
   const [additionalSettingsState, setAdditionalSettingsState] = useState(false);

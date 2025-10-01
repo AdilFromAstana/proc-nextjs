@@ -19,6 +19,7 @@ import {
   ComponentSetting,
 } from "@/types/assignment/detail";
 import { numericToBoolean } from "@/utils/numericToBoolean";
+import { useTranslations } from "next-intl";
 
 // Определяем тип для одного условия сложности
 type DifficultyCondition = NonNullable<ComponentSetting["conditions"]>[number];
@@ -40,6 +41,8 @@ const AssignmentComponentSettingsComponent: React.FC<
   collapsed = true,
   onAssignmentChange,
 }) => {
+  const t = useTranslations();
+
   const [kind, setKind] = useState<string>("all");
 
   // --- Получаем настройки компонентов из assignment ---
@@ -244,8 +247,8 @@ const AssignmentComponentSettingsComponent: React.FC<
 
   return (
     <CollapsibleCard
-      title="Настройки компонентов задания"
-      description="Настройте параметры компонентов задания"
+      title={t("label-assignment-component-settings-title")}
+      description={t("label-assignment-component-settings-description")}
       icon={<div className="w-5 h-5 bg-blue-500 rounded-full"></div>}
       defaultCollapsed={collapsed}
     >
@@ -281,10 +284,10 @@ const AssignmentComponentSettingsComponent: React.FC<
           <div className="flex items-center justify-between">
             <div>
               <Label className="text-sm font-medium text-gray-700">
-                Перемешивать компоненты
+                {t("label-assignment-shuffle-components")}
               </Label>
               <p className="text-sm text-gray-500 mt-1">
-                Компоненты будут перемешиваться в случайном порядке
+                {t("hint-assignment-shuffle-components")}
               </p>
             </div>
             <Switch
@@ -299,10 +302,10 @@ const AssignmentComponentSettingsComponent: React.FC<
           <div className="flex items-center justify-between">
             <div>
               <Label className="text-sm font-medium text-gray-700">
-                Разделить компоненты по вариантам
+                {t("label-assignment-split-components-by-variant")}
               </Label>
               <p className="text-sm text-gray-500 mt-1">
-                Каждый студент получит уникальный вариант задания
+                {t("hint-assignment-split-components-by-variant")}
               </p>
             </div>
             <Switch
@@ -316,8 +319,11 @@ const AssignmentComponentSettingsComponent: React.FC<
           {/* COMPONENTS PER STUDENT */}
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">
-              Компонентов на студента
+              {t("label-assignment-components-per-student")}
             </Label>
+            <p className="text-sm text-gray-500">
+              {t("hint-assignment-components-per-student")}
+            </p>
             <Input
               type="number"
               value={currentKindSettings.per_student || ""}
@@ -326,11 +332,8 @@ const AssignmentComponentSettingsComponent: React.FC<
                 const numValue = value === "" ? 0 : Number(value);
                 updateSetting("per_student", isNaN(numValue) ? 0 : numValue);
               }}
-              placeholder="Введите количество компонентов"
+              placeholder={t("placeholder-settings-difficult-count")}
             />
-            <p className="text-sm text-gray-500">
-              Количество компонентов, которые получит каждый студент
-            </p>
           </div>
 
           {/* DIFFICULT SETTINGS */}
@@ -420,7 +423,7 @@ const AssignmentComponentSettingsComponent: React.FC<
               onClick={addDifficultCondition}
               className="flex items-center"
             >
-              Добавить условие
+              {t("btn-add-condition")}
             </Button>
           </div>
         </div>

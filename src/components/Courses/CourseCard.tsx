@@ -2,24 +2,27 @@ import React from "react";
 import { CourseItemInList } from "@/types/courses/courses";
 import { useRouter } from "next/navigation";
 import { GlobusIcon } from "@/app/icons/Courses/GlobusIcon";
+import { useTranslations } from "next-intl";
 
 interface CourseCardProps {
   course: CourseItemInList;
 }
 
 const CourseCard = ({ course }: CourseCardProps) => {
+  const t = useTranslations();
+
   const router = useRouter();
 
   const getStatusInfo = (status: string) => {
     switch (status) {
       case "published":
         return {
-          label: "Опубликован",
+          label: t("label-course-status-published"),
           color: "bg-green-100 text-green-800",
         };
       case "draft":
         return {
-          label: "Черновик",
+          label: t("label-course-status-draft"),
           color: "bg-yellow-100 text-yellow-800",
         };
       default:
@@ -60,7 +63,6 @@ const CourseCard = ({ course }: CourseCardProps) => {
   };
 
   const statusInfo = getStatusInfo(course.status);
-  const typeInfo = getTypeInfo(course.status);
 
   return (
     <div

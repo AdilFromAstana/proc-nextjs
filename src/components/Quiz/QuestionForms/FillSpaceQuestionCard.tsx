@@ -1,4 +1,5 @@
 import { QuizQuestionItem } from "@/types/quiz/quiz";
+import { useTranslations } from "next-intl";
 
 export const FillSpaceQuestionCard = ({
   question,
@@ -6,6 +7,7 @@ export const FillSpaceQuestionCard = ({
   question: QuizQuestionItem;
 }) => {
   if (!question) return null;
+  const t = useTranslations();
   const questionText = question?.component?.question || "";
   const blanks = question?.component?.options || [];
 
@@ -13,7 +15,7 @@ export const FillSpaceQuestionCard = ({
     <div>
       <div className="mb-4">
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Вопрос с пропусками
+          {t("label-question")}
         </label>
         <div className="p-3 border border-gray-300 rounded-md bg-gray-50 min-h-[60px]">
           <p className="text-gray-700">{questionText}</p>
@@ -22,14 +24,11 @@ export const FillSpaceQuestionCard = ({
 
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-1">
-          Пропуски и ответы
+          {t("label-answer")}
         </label>
         <div className="space-y-2">
           {blanks.map((blank: any, index: number) => (
             <div key={index} className="flex items-center space-x-2">
-              <span className="text-sm text-gray-600">
-                Пропуск {index + 1}:
-              </span>
               <input
                 type="text"
                 value={blank.answer || ""}

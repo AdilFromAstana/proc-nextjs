@@ -19,7 +19,8 @@ import AssignmentRadialChartComponent from "@/components/Assignment/UI/RadialCha
 import AssignmentStatusComponent from "@/components/Assignment/UI/StatusComponent";
 
 import { useBasket } from "@/hooks/useBasket";
-import { Assignment } from "@/api/assignmentApi";
+import { Assignment } from "@/types/assignment/list";
+import { useTranslations } from "next-intl";
 
 // Типы пропсов
 interface AssignmentListComponentProps {
@@ -40,16 +41,6 @@ export interface AssignmentListRef {
   hideLoader: () => void;
 }
 
-// ✅ Вспомогательные функции (вместо методов класса)
-const getTypeName = (type: string): string => {
-  const map: Record<string, string> = {
-    quiz: "Тест",
-    lesson: "Урок",
-    // Добавь переводы по необходимости
-  };
-  return map[type] || type;
-};
-
 const AssignmentListComponent = forwardRef<
   AssignmentListRef,
   AssignmentListComponentProps
@@ -69,7 +60,7 @@ const AssignmentListComponent = forwardRef<
     },
     ref
   ) => {
-    const { t } = useTranslation();
+    const t = useTranslations();
     const router = useRouter();
 
     // Ref для EntityListComponent
@@ -88,6 +79,16 @@ const AssignmentListComponent = forwardRef<
       showLoader: () => entityListRef.current?.showLoader(),
       hideLoader: () => entityListRef.current?.hideLoader(),
     }));
+
+    // ✅ Вспомогательные функции (вместо методов класса)
+    const getTypeName = (type: string): string => {
+      const map: Record<string, string> = {
+        quiz: t("label-quiz"),
+        lesson: t("label-lesson"),
+        // Добавь переводы по необходимости
+      };
+      return map[type] || type;
+    };
 
     // ✅ Логика клика по заданию
     const handleAssignmentClick = (assignment: Assignment) => {

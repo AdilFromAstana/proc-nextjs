@@ -350,6 +350,7 @@ import { fetchQuizComponents } from "@/api/quiz";
 import { OpenQuestionIcon } from "@/app/icons/Quiz";
 import { FreeQuestionIcon } from "@/app/icons/Quiz/FreeQuestionIcon";
 import { QuizQuestionComponent } from "@/types/quiz/quiz";
+import { useTranslations } from "next-intl";
 import React, { useState, useEffect } from "react";
 
 interface LibraryOfQuestionsProps {
@@ -382,6 +383,7 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
   onClose,
   onAddQuestions,
 }) => {
+  const t = useTranslations();
   const [questions, setQuestions] = useState<QuizQuestionComponent[]>([]);
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -392,9 +394,9 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
 
   const componentTypes = [
     { value: "", label: "Все типы" },
-    { value: "FreeQuestionComponent", label: "Тестовый вопрос" },
-    { value: "OpenQuestionComponent", label: "Открытый вопрос" },
-    { value: "FillBlanksComponent", label: "Заполните пробелы" },
+    { value: "FreeQuestionComponent", label: t("label-quiz-question") },
+    { value: "OpenQuestionComponent", label: t("label-free-question") },
+    { value: "FillBlanksComponent", label: t("label-fill-spaces") },
     { value: "DragDropComponent", label: "Drag & Drop" },
   ];
 
@@ -466,9 +468,9 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
 
   const getComponentTypeName = (type: string) => {
     const typeMap: Record<string, string> = {
-      FreeQuestionComponent: "Тестовый",
-      OpenQuestionComponent: "Открытый",
-      FillBlanksComponent: "Пробелы",
+      FreeQuestionComponent: t("label-quiz-question"),
+      OpenQuestionComponent: t("label-free-question"),
+      FillBlanksComponent: t("label-fill-spaces"),
       DragDropComponent: "Drag & Drop",
     };
     return typeMap[type] || type;
@@ -497,7 +499,7 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
         {/* Заголовок модального окна */}
         <div className="px-6 py-4 border-b border-gray-200">
           <h2 className="text-xl font-semibold text-gray-800">
-            Библиотека вопросов
+            {t("label-library")}
           </h2>
         </div>
 
@@ -507,7 +509,7 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
             <div className="flex-1">
               <input
                 type="text"
-                placeholder="Поиск вопросов..."
+                placeholder={t("placeholder-query")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -532,7 +534,8 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
         {/* Счетчик выбранных вопросов */}
         <div className="px-6 py-2 bg-blue-50 border-b border-gray-200 text-sm">
           <span className="text-blue-700 font-medium">
-            Выбрано: {selectedQuestions.length} из {questions.length} вопросов
+            {t("btn-selected")}: {selectedQuestions.length} из{" "}
+            {questions.length}
           </span>
         </div>
 
@@ -554,13 +557,13 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16"
                     >
-                      Тип
+                      {t("label-import-quiz-type")}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Вопрос
+                      {t("label-question")}
                     </th>
                   </tr>
                 </thead>
@@ -573,7 +576,7 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
             </div>
           ) : questions.length === 0 ? (
             <div className="flex items-center justify-center h-64 text-gray-500">
-              Вопросы не найдены
+              {t("label-empty-found")}
             </div>
           ) : (
             <div className="overflow-x-auto">
@@ -598,13 +601,13 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16"
                     >
-                      Тип
+                      {t("label-import-quiz-type")}
                     </th>
                     <th
                       scope="col"
                       className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
                     >
-                      Вопрос
+                      {t("label-question")}
                     </th>
                   </tr>
                 </thead>
@@ -679,7 +682,7 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
                 disabled={currentPage === 1 || loading}
                 className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                Назад
+                {t("btn-back")}
               </button>
 
               <span className="text-sm text-gray-600">
@@ -691,7 +694,7 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
                 disabled={currentPage === totalPages || loading}
                 className="px-3 py-1 text-sm border border-gray-300 rounded disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50"
               >
-                Вперед
+                {t("btn-next")}
               </button>
             </div>
 
@@ -701,7 +704,7 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
                 onClick={onClose}
                 className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
               >
-                Отмена
+                {t("btn-cancel")}
               </button>
 
               <button
@@ -709,7 +712,7 @@ const LibraryOfQuestions: React.FC<LibraryOfQuestionsProps> = ({
                 disabled={selectedQuestions.length === 0 || loading}
                 className="px-4 py-2 text-sm font-medium text-white bg-blue-600 border border-transparent rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                Готово ({selectedQuestions.length})
+                {t("btn-ready")} ({selectedQuestions.length})
               </button>
             </div>
           </div>

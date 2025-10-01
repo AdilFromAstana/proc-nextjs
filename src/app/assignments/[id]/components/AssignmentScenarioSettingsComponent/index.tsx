@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Trash2 } from "lucide-react";
 import CollapsibleCard from "@/components/Oqylyk/Assignment/CollapsibleCard";
 import { AssignmentDetail } from "@/types/assignment/detail";
+import { useTranslations } from "next-intl";
 // import {
 //   ScenarioSettings,
 //   ScenarioCondition,
@@ -47,6 +48,8 @@ const AssignmentScenarioSettingsComponent: React.FC<
   collapsed = true,
   onAssignmentChange,
 }) => {
+  const t = useTranslations();
+
   // State для локальных изменений настроек
   const [settings, setSettings] = useState<ScenarioSettings>({
     conditions: [],
@@ -74,13 +77,19 @@ const AssignmentScenarioSettingsComponent: React.FC<
   // Computed values
   const scoreOptions = useMemo(
     () => [
-      { id: 1, label: "Оценка: 1" },
-      { id: 2, label: "Оценка: 2" },
-      { id: 3, label: "Оценка: 3" },
-      { id: 4, label: "Оценка: 4" },
-      { id: 5, label: "Оценка: 5" },
-      { id: "assignment-completed", label: "Задание завершено" },
-      { id: "assignment-failured", label: "Задание провалено" },
+      { id: 1, label: t("option-scenario-score-value") },
+      { id: 2, label: t("option-scenario-score-value") },
+      { id: 3, label: t("option-scenario-score-value") },
+      { id: 4, label: t("option-scenario-score-value") },
+      { id: 5, label: t("option-scenario-score-value") },
+      {
+        id: "assignment-completed",
+        label: t("option-scenario-assignment-completed"),
+      },
+      {
+        id: "assignment-failured",
+        label: t("option-scenario-assignment-failured"),
+      },
     ],
     []
   );
@@ -163,8 +172,8 @@ const AssignmentScenarioSettingsComponent: React.FC<
 
   return (
     <CollapsibleCard
-      title="Настройки сценария"
-      description="Настройте условия и действия для сценария задания"
+      title={t("label-assignment-scenario-settings-title")}
+      description={t("label-assignment-scenario-settings-description")}
       icon={<div className="w-5 h-5 bg-blue-500 rounded-full"></div>} // Заменить на реальную иконку
       defaultCollapsed={collapsed}
     >
@@ -180,10 +189,18 @@ const AssignmentScenarioSettingsComponent: React.FC<
           <div className="scenario-condition-list space-y-4">
             {/* HEADER - только для экранов среднего размера и больше */}
             <div className="scenario-condition-row scenario-condition-header hidden md:flex text-gray-500 text-sm font-semibold">
-              <div className="flex-1">Индикатор</div>
-              <div className="flex-1">Условие</div>
-              <div className="flex-1">Значение</div>
-              <div className="flex-1">Действие</div>
+              <div className="flex-1">
+                {t("label-settings-scenario-indicator")}
+              </div>
+              <div className="flex-1">
+                {t("label-settings-scenario-condition")}
+              </div>
+              <div className="flex-1">
+                {t("label-settings-scenario-needle")}
+              </div>
+              <div className="flex-1">
+                {t("label-settings-scenario-action")}
+              </div>
             </div>
 
             {/* CONTENT */}
@@ -204,7 +221,9 @@ const AssignmentScenarioSettingsComponent: React.FC<
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Выберите индикатор" />
+                      <SelectValue
+                        placeholder={t("label-settings-scenario-indicator")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {assignmentIndicatorTypes.map((type) => (
@@ -228,7 +247,9 @@ const AssignmentScenarioSettingsComponent: React.FC<
                     }
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Выберите условие" />
+                      <SelectValue
+                        placeholder={t("label-settings-scenario-condition")}
+                      />
                     </SelectTrigger>
                     <SelectContent>
                       {conditionTypes.map((type) => (
@@ -256,7 +277,7 @@ const AssignmentScenarioSettingsComponent: React.FC<
                         e.target.value ? Number(e.target.value) : null
                       )
                     }
-                    placeholder="Введите значение"
+                    placeholder={t("placeholder-settings-scenario-needle")}
                     aria-label={`Значение для условия ${index + 1}`}
                   />
                 </div>
@@ -277,7 +298,7 @@ const AssignmentScenarioSettingsComponent: React.FC<
                     }}
                   >
                     <SelectTrigger>
-                      <SelectValue placeholder="Выберите действие" />
+                      <SelectValue placeholder={t("option-scenario-action")} />
                     </SelectTrigger>
                     <SelectContent>
                       {scoreOptions.map((option) => (
@@ -315,7 +336,7 @@ const AssignmentScenarioSettingsComponent: React.FC<
           className="flex items-center"
           aria-describedby="scenario-settings-description" // Связывает кнопку с описанием
         >
-          Добавить условие
+          {t("btn-add-condition")}
         </Button>
       </div>
     </CollapsibleCard>

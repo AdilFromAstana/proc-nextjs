@@ -8,6 +8,7 @@ import TeacherListModalComponent from "./TeacherListModalComponent";
 import SelectedTeacherDisplay from "./SelectedTeacherDisplay";
 import ReviewerList from "./ReviewerList";
 import CollapsibleCard from "@/components/Oqylyk/Assignment/CollapsibleCard";
+import { useTranslations } from "next-intl";
 
 interface AssignmentTeacherReviewerComponent {
   assignment: AssignmentDetail;
@@ -17,6 +18,8 @@ interface AssignmentTeacherReviewerComponent {
 
 const AssignmentTeacherReviewerComponent: React.FC<AssignmentTeacherReviewerComponent> =
   React.memo(({ assignment, isManager, onAssignmentChange }) => {
+    const t = useTranslations();
+
     const [selectedTeacher, setSelectedTeacher] = useState<any | null>(
       assignment.owner || null
     );
@@ -99,21 +102,22 @@ const AssignmentTeacherReviewerComponent: React.FC<AssignmentTeacherReviewerComp
 
     return (
       <CollapsibleCard
-        title="Преподаватель и рецензенты"
-        description="Выберите преподавателя и рецензентов для задания"
+        title={t("label-assignment-teacher-title")}
+        description={t("label-assignment-teacher-description")}
         icon={<User className="h-5 w-5 text-blue-600" />}
       >
         {/* SELECT TEACHER */}
         <div>
-          <h4 className="text-sm font-medium mb-2">Преподаватель</h4>
-          <p className="text-xs text-gray-500 mb-3">Модератор и наблюдающие</p>
+          <h4 className="text-sm font-medium mb-2">
+            {t("label-assignment-teacher")}
+          </h4>
 
           <Button
             onClick={showTeacherListModal}
             className="flex items-center justify-center"
           >
             <User className="w-4 h-4 mr-2" />
-            Выбрать преподавателя
+            {t("btn-assignment-select-teacher")}
           </Button>
 
           {/* SELECTED TEACHER */}
@@ -125,8 +129,9 @@ const AssignmentTeacherReviewerComponent: React.FC<AssignmentTeacherReviewerComp
 
         {/* SELECT REVIEWERS */}
         <div>
-          <h4 className="text-sm font-medium mb-2">Ревьюеры</h4>
-          <p className="text-xs text-gray-500 mb-3">Список ревьюеров</p>
+          <h4 className="text-sm font-medium mb-2">
+            {t("label-assignment-reviewer-list")}
+          </h4>
 
           <div className="flex flex-wrap gap-2 items-center">
             <Button
@@ -134,7 +139,7 @@ const AssignmentTeacherReviewerComponent: React.FC<AssignmentTeacherReviewerComp
               className="flex items-center justify-center"
             >
               <Users className="w-4 h-4 mr-2" />
-              Добавить ревьюеров
+              {t("btn-assignment-select-reviewers")}
             </Button>
 
             {assignment.reviewers.length > 0 &&

@@ -12,6 +12,7 @@ import AssignmentStudentResultViewerComponent from "../AssignmentStudentResultVi
 import StudentResultsDisplay from "./StudentRowResultsDisplay";
 import StudentPointsOrScoreDisplay from "./StudentPointsOrScoreDisplay";
 import StudentCredibilityDisplay from "./StudentCredibilityDisplay";
+import { useTranslations } from "next-intl";
 
 const AssignmentStudentListComponent: React.FC<
   AssignmentStudentListComponentProps
@@ -34,6 +35,8 @@ const AssignmentStudentListComponent: React.FC<
   showLoader = () => null,
   hideLoader = () => null,
 }) => {
+  const t = useTranslations();
+
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
 
   const handleStudentClick = useCallback(
@@ -59,7 +62,7 @@ const AssignmentStudentListComponent: React.FC<
           if (isLoading) {
             return (
               <div className="flex justify-center items-center h-32">
-                <div>Загрузка студентов...</div>
+                <div>{t("label-upload")}</div>
               </div>
             );
           }
@@ -164,7 +167,7 @@ const AssignmentStudentListComponent: React.FC<
               disabled={page <= 1}
               className="px-3 py-1 rounded border disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-100"
             >
-              Назад
+              {t("btn-back")}
             </button>
             <span className="px-3 py-1">
               Страница {page} из {totalPages}

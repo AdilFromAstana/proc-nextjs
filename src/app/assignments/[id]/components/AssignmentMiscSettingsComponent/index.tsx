@@ -14,6 +14,7 @@ import { Cog } from "lucide-react";
 import CollapsibleCard from "@/components/Oqylyk/Assignment/CollapsibleCard";
 import { AssignmentDetail } from "@/types/assignment/detail";
 import { numericToBoolean } from "@/utils/numericToBoolean";
+import { useTranslations } from "next-intl";
 
 // interface AssignmentModel {
 //   id: number;
@@ -38,6 +39,8 @@ interface AssignmentMiscSettingsComponentProps {
 const AssignmentMiscSettingsComponent: React.FC<
   AssignmentMiscSettingsComponentProps
 > = ({ assignment, errors = {}, onAssignmentChange }) => {
+  const t = useTranslations();
+
   // Helper functions для проверки типа задания
   const isLessonType = useMemo(
     () => assignment.type === "lesson",
@@ -54,18 +57,18 @@ const AssignmentMiscSettingsComponent: React.FC<
 
   // Options
   const maxAttemptsOptions = [
-    { attempts: 0, label: "Без ограничений" },
-    { attempts: 1, label: "1 попытка" },
-    { attempts: 2, label: "2 попытки" },
-    { attempts: 3, label: "3 попытки" },
-    { attempts: 5, label: "5 попыток" },
-    { attempts: "custom", label: "Другое количество" },
+    { attempts: 0, label: t("option-assignment-attempts-unlimited") },
+    { attempts: 1, label: t("option-assignment-attempts-1") },
+    { attempts: 2, label: t("option-assignment-attempts-2") },
+    { attempts: 3, label: t("option-assignment-attempts-3") },
+    { attempts: 5, label: t("option-assignment-attempts-5") },
+    { attempts: "custom", label: t("option-assignment-attempts-custom") },
   ];
 
   const pointsMethodOptions = [
-    { raw: "nan", name: "По умолчанию" },
-    { raw: "sum", name: "Сумма баллов" },
-    { raw: "avg", name: "Среднее арифметическое" },
+    { raw: "nan", name: t("option-point-system-nan-method") },
+    { raw: "sum", name: t("option-point-system-sum-method") },
+    { raw: "avg", name: t("option-point-system-avg-method") },
   ];
 
   // Computed values
@@ -116,8 +119,8 @@ const AssignmentMiscSettingsComponent: React.FC<
 
   return (
     <CollapsibleCard
-      title="Дополнительные настройки"
-      description="Настройте дополнительные параметры задания"
+      title={t("label-assignment-misc-settings-title")}
+      description={t("label-assignment-misc-settings-description")}
       icon={<Cog className="h-5 w-5 text-blue-600" />}
       defaultCollapsed={true}
     >
@@ -126,8 +129,12 @@ const AssignmentMiscSettingsComponent: React.FC<
         {(isLessonType || isQuizType) && (
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">
-              Максимальное количество попыток
+              {t("label-assignment-max-attempts")}
             </Label>
+
+            <p className="text-sm text-gray-500 mt-1">
+              {t("hint-assignment-max-attempts")}
+            </p>
             <Select
               value={assignment.max_attempts?.toString() || "1"}
               onValueChange={handleMaxAttemptsChange}
@@ -157,15 +164,11 @@ const AssignmentMiscSettingsComponent: React.FC<
                       : ""
                   }
                   onChange={handleCustomMaxAttemptsChange}
-                  placeholder="Введите количество попыток"
+                  placeholder={t("placeholder-assignment-max-attempts-input")}
                   min="1"
                 />
               </div>
             )}
-
-            <p className="text-sm text-gray-500 mt-1">
-              Укажите максимальное количество попыток прохождения задания
-            </p>
           </div>
         )}
 
@@ -174,7 +177,7 @@ const AssignmentMiscSettingsComponent: React.FC<
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium text-gray-700">
-                Включить систему баллов
+                {t("btn-point-system-enable")}
               </Label>
               <Switch
                 checked={numericToBoolean(assignment.is_points_method)}
@@ -184,7 +187,7 @@ const AssignmentMiscSettingsComponent: React.FC<
               />
             </div>
             <p className="text-sm text-gray-500">
-              Активировать систему баллов для оценки задания
+              {t("hint-point-system-enable")}
             </p>
           </div>
         )}
@@ -193,8 +196,13 @@ const AssignmentMiscSettingsComponent: React.FC<
         {assignment.is_points_method && (
           <div className="space-y-2">
             <Label className="text-sm font-medium text-gray-700">
-              Метод расчета баллов
+              {t("label-point-system-calculate-method")}
             </Label>
+            {assignment.reviewers.length <= 0 && (
+              <p className="text-sm text-gray-500">
+                {t("hint-point-system-calculate-method")}
+              </p>
+            )}
             <div className="flex bg-gray-100 rounded-lg p-1">
               {pointsMethodOptions.map((option) => (
                 <button
@@ -216,14 +224,6 @@ const AssignmentMiscSettingsComponent: React.FC<
                 </button>
               ))}
             </div>
-            {assignment.reviewers.length <= 0 && (
-              <p className="text-sm text-gray-500">
-                Для выбора метода расчета необходимо назначить рецензентов
-              </p>
-            )}
-            <p className="text-sm text-gray-500">
-              Выберите метод расчета итогового балла
-            </p>
           </div>
         )}
 
@@ -231,7 +231,7 @@ const AssignmentMiscSettingsComponent: React.FC<
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium text-gray-700">
-              Показывать ответы сразу
+              {t("btn-show-answers-do")}
             </Label>
             <Switch
               checked={numericToBoolean(assignment.is_straight_answer)}
@@ -240,16 +240,14 @@ const AssignmentMiscSettingsComponent: React.FC<
               }
             />
           </div>
-          <p className="text-sm text-gray-500">
-            Ответы будут показываться студенту сразу после ответа на вопрос
-          </p>
+          <p className="text-sm text-gray-500">{t("hint-show-answers-do")}</p>
         </div>
 
         {/* SHOW ANSWERS AFTER */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium text-gray-700">
-              Показывать ответы после завершения
+              {t("btn-show-answers-after")}
             </Label>
             <Switch
               checked={numericToBoolean(
@@ -262,7 +260,7 @@ const AssignmentMiscSettingsComponent: React.FC<
             />
           </div>
           <p className="text-sm text-gray-500">
-            Ответы будут показываться студенту после завершения задания
+            {t("hint-show-answers-after")}
           </p>
         </div>
 
@@ -270,7 +268,7 @@ const AssignmentMiscSettingsComponent: React.FC<
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label className="text-sm font-medium text-gray-700">
-              Показывать результаты после завершения
+              {t("btn-show-results-after")}
             </Label>
             <Switch
               checked={numericToBoolean(
@@ -286,7 +284,7 @@ const AssignmentMiscSettingsComponent: React.FC<
             />
           </div>
           <p className="text-sm text-gray-500">
-            Результаты будут показываться студенту после завершения задания
+            {t("hint-show-results-after")}
           </p>
         </div>
 
@@ -295,7 +293,7 @@ const AssignmentMiscSettingsComponent: React.FC<
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label className="text-sm font-medium text-gray-700">
-                Скрыть имена студентов
+                {t("btn-hide-users")}
               </Label>
               <Switch
                 checked={numericToBoolean(assignment.is_hide_users)}
@@ -304,9 +302,7 @@ const AssignmentMiscSettingsComponent: React.FC<
                 }
               />
             </div>
-            <p className="text-sm text-gray-500">
-              Имена студентов будут скрыты при просмотре результатов
-            </p>
+            <p className="text-sm text-gray-500">{t("hint-hide-users")}</p>
           </div>
         )}
 

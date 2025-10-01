@@ -1,4 +1,5 @@
 import { QuestionType } from "@/types/quiz/quiz";
+import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 
 // Типы для пропсов
@@ -135,25 +136,26 @@ const ButtonsPanel = ({
   onOpenLibrary,
   onImportFromFile,
 }: ButtonsPanelProps) => {
+  const t = useTranslations();
   const [isHidden, setIsHidden] = useState(false);
 
   // Массив кнопок панели с переданными функциями
   const panelButtons: PanelButton[] = [
     {
       id: "test",
-      label: "Тестовый вопрос",
+      label: t("label-quiz-question"),
       icon: <TestIcon />,
       action: onCreateTestQuestion,
     },
     {
       id: "free",
-      label: "Открытый вопрос",
+      label: t("label-free-question"),
       icon: <OpenTestIcon />,
       action: onCreateOpenQuestion,
     },
     {
       id: "fill-blanks",
-      label: "Заполните пробелы",
+      label: t("label-fill-spaces"),
       icon: <FillBlanksIcon />,
       action: onCreateFillBlanksQuestion,
     },
@@ -165,13 +167,13 @@ const ButtonsPanel = ({
     },
     {
       id: "library",
-      label: "Выбрать из библиотеки",
+      label: t("btn-import-from-library"),
       icon: <LibraryIcon />,
       action: onOpenLibrary,
     },
     {
       id: "import",
-      label: "Импортировать из файла",
+      label: t("btn-import-from-file"),
       icon: <ImportIcon />,
       action: onImportFromFile,
     },

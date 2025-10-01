@@ -5,8 +5,10 @@ import { useParams, useRouter } from "next/navigation";
 import { QuizDetailResponse } from "@/types/quiz/quiz";
 import { fetchQuizById } from "@/api/quiz";
 import QuizEditor from "@/components/Quiz/QuizEditor";
+import { useTranslations } from "next-intl";
 
 export default function QuizItemPage() {
+  const t = useTranslations();
   const params = useParams();
   const router = useRouter();
   const [quizData, setQuizData] = useState<QuizDetailResponse | null>(null);
@@ -44,7 +46,7 @@ export default function QuizItemPage() {
       <div className="w-full m-8">
         <div className="text-center py-8">
           <div className="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-500"></div>
-          <p className="mt-2 text-gray-600">Загрузка теста...</p>
+          <p className="mt-2 text-gray-600">{t("label-upload")}</p>
         </div>
       </div>
     );

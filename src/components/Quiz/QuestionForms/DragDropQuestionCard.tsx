@@ -1,19 +1,18 @@
 import { UploadIcon } from "@/app/icons/UploadIcon";
 import { QuizQuestionItem } from "@/types/quiz/quiz";
+import { useTranslations } from "next-intl";
 
 export const DragDropQuestionCard = ({
   question,
 }: {
   question: QuizQuestionItem;
 }) => {
+  const t = useTranslations();
   const fileName = question.component.image || "Файл не загружен";
 
   return (
     <div>
       <div className="mb-4">
-        <label className="block text-sm font-medium text-gray-700 mb-1">
-          Файл для Drag & Drop
-        </label>
         <div className="p-4 border-2 border-dashed border-gray-300 rounded-md bg-gray-50 text-center">
           {!fileName ? (
             <UploadIcon className="w-8 h-8 text-gray-400 mx-auto mb-2" />
@@ -35,7 +34,9 @@ export const DragDropQuestionCard = ({
             >
               <span className="text-gray-700">{item.text}</span>
             </div>
-          )) || <p className="text-gray-500 text-sm">Нет элементов</p>}
+          )) || (
+            <p className="text-gray-500 text-sm">{t("label-empty-elements")}</p>
+          )}
         </div>
       </div>
     </div>

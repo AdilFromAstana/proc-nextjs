@@ -77,7 +77,9 @@ export default function LessonsList() {
   return (
     <div className="w-full m-8">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900"></h1>
+        <h1 className="text-2xl font-bold text-gray-900">
+          {t("page-lesson-index")}
+        </h1>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-8">
@@ -135,7 +137,7 @@ export default function LessonsList() {
                     {lesson.name}
                   </h3>
                   <p className="text-gray-500 text-sm mt-1 truncate">
-                    {lesson.description}
+                    {lesson.description || t("label-empty-description")}
                   </p>
                 </div>
               </div>

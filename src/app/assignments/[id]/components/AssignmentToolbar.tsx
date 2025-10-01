@@ -14,6 +14,7 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface AssignmentToolbarProps {
   assignment: any;
@@ -26,71 +27,73 @@ export default function AssignmentToolbar({
   isOwner,
   onAction,
 }: AssignmentToolbarProps) {
+  const t = useTranslations();
+
   const toolbarActions = [
     {
-      name: "Прокторинг",
+      name: t("btn-assignment-proctoring"),
       icon: <Monitor className="h-4 w-4" />,
       disabled: !assignment.id || !assignment.is_proctoring,
       visible: true,
       action: "proctoring",
     },
     {
-      name: "Вебинар",
+      name: t("btn-assignment-webinar"),
       icon: <Video className="h-4 w-4" />,
       disabled: !assignment.id || !assignment.is_webinar,
       visible: true,
       action: "webinar",
     },
     {
-      name: "Приостановить",
+      name: t("btn-assignment-suspend"),
       icon: <Pause className="h-4 w-4" />,
       disabled: !assignment.id || assignment.status === "suspended",
       visible: isOwner && assignment.status === "process",
       action: "suspend",
     },
     {
-      name: "Возобновить",
+      name: t("btn-assignment-resume"),
       icon: <Play className="h-4 w-4" />,
       disabled: !assignment.id || assignment.status === "process",
       visible: isOwner && assignment.status === "suspended",
       action: "resume",
     },
     {
-      name: "Завершить",
+      name: t("btn-assignment-finish"),
       icon: <Timer className="h-4 w-4" />,
       disabled: !assignment.id || assignment.status !== "suspended",
       visible: isOwner && assignment.status === "suspended",
       action: "complete",
     },
     {
-      name: "Экспорт",
+      name: t("btn-assignment-export"),
       icon: <DatabaseBackup className="h-4 w-4" />,
       disabled: !assignment.id,
       visible: isOwner && !!assignment.id,
       action: "export",
     },
     {
-      name: "Сохранить",
+      name: t("btn-save"),
       icon: <Save className="h-4 w-4" />,
       disabled: assignment.status === "completed",
       visible: isOwner,
       action: "save",
     },
     {
-      name: "Клонировать",
+      name: t("btn-clone"),
       icon: <Copy className="h-4 w-4" />,
       visible: isOwner,
       action: "clone",
     },
     {
-      name: "Удалить",
+      name: t("btn-delete"),
       icon: <Trash2 className="h-4 w-4" />,
       disabled: !assignment.id || assignment.status !== "completed",
       visible: isOwner,
       action: "delete",
     },
     {
-      name: "Закрыть",
+      name: t("btn-close"),
       icon: <X className="h-4 w-4" />,
       action: "close",
     },

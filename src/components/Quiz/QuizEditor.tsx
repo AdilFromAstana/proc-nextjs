@@ -31,6 +31,7 @@ import {
   getVariantQuestionType,
 } from "@/api/enum/listApi";
 import { QuestionSettings } from "@/types/quiz/addQuestion";
+import { useTranslations } from "next-intl";
 
 type Props = {
   quiz: QuizDetailResponse | null;
@@ -39,68 +40,14 @@ type Props = {
   onClose?: () => void;
 };
 
-const t = (key: string) => {
-  const translations: Record<string, string> = {
-    "label-import-quiz-type": "Тип вопроса",
-    "hint-import-quiz-type": "Выберите тип вопроса для импорта",
-    "label-import-quiz-file": "Файл",
-    "hint-import-quiz-file": "Выберите файл для импорта (.xls, .xlsx, .csv)",
-    "btn-upload-file": "Загрузить файл",
-    "label-import-quiz-settings": "Дополнительные настройки",
-    "btn-show-additional-settings": "Показать дополнительные настройки",
-    "label-import-quiz-offset": "Смещение строк",
-    "hint-import-quiz-offset": "Количество строк для пропуска в начале файла",
-    "placeholder-import-quiz-offset": "Введите смещение",
-    "label-allow-attachments": "Разрешить вложения",
-    "hint-allow-attachments": "Разрешить прикрепление файлов к ответам",
-    "label-enable-antiplagiarism": "Включить антиплагиат",
-    "hint-enable-antiplagiarism": "Проверять ответы на плагиат",
-    "label-fill-space-question-placeholder": "Плейсхолдер",
-    "hint-fill-space-question-placeholder":
-      "Текст плейсхолдера для заполнения пропусков",
-    "placeholder-fill-space-question-placeholder": "Введите плейсхолдер",
-    "label-import-quiz-difficult-group": "Группы сложности",
-    "hint-import-quiz-difficult-group": "Настройте группы сложности",
-    "placeholder-difficult-group": "Введите значение группы",
-    "label-import-quiz-variant-group": "Группы вариантов",
-    "hint-import-quiz-variant-group": "Настройте группы вариантов",
-    "placeholder-variant-group": "Введите значение варианта",
-    "label-import-quiz-rows": "Сопоставление колонок",
-    "hint-import-quiz-rows": "Сопоставьте буквы колонок с полями",
-    "placeholder-import-quiz-letter-value": "Выберите поле",
-    "btn-show-more": "Показать больше",
-    "btn-show-less": "Показать меньше",
-    "btn-start-import": "Начать импорт",
-    "btn-cancel": "Отмена",
-    "label-import-quiz-question": "Вопрос",
-    "label-import-quiz-answer-item": "Вариант ответа",
-    "label-import-quiz-answer-true": "Правильный ответ",
-    "label-import-quiz-answer": "Ответ",
-    "label-import-quiz-id": "ID",
-    "label-import-quiz-position": "Позиция",
-    "label-import-quiz-points-encouragement": "Баллы за правильный ответ",
-    "label-import-quiz-points-penalty": "Баллы за неправильный ответ",
-    "label-import-quiz-difficult": "Сложность",
-    "label-import-quiz-variant": "Вариант",
-    "confirm-import-task": "Вы уверены, что хотите начать импорт?",
-    "label-difficult-easy": "Легкий",
-    "label-difficult-medium": "Средний",
-    "label-difficult-hard": "Сложный",
-    "label-variant-a": "Вариант A",
-    "label-variant-b": "Вариант B",
-    "label-free-question": "Вопрос с выбором",
-    "label-open-question": "Открытый вопрос",
-    "label-fill-space-question": "Заполнение пропусков",
-  };
-  return translations[key] || key;
-};
-
 export default function QuizEditor({
   quiz,
   quizId,
   onUpdateQuiz,
   onClose,
 }: Props) {
+  const t = useTranslations();
+
   const [quizName, setQuizName] = useState(quiz?.entity.name || "");
   const [quizDescription, setQuizDescription] = useState(
     quiz?.entity.description || ""
@@ -338,8 +285,8 @@ export default function QuizEditor({
   const remainingChars = 200 - quizDescription.length;
 
   const sortOptions = [
-    { label: "По баллу (по возрастанию)", value: "score-asc" },
-    { label: "По баллу (по убыванию)", value: "score-desc" },
+    { label: t("label-quiz-points-sort-asc"), value: "score-asc" },
+    { label: t("label-quiz-points-sort-desc"), value: "score-desc" },
   ];
 
   if (!localQuiz) return null;
@@ -348,38 +295,38 @@ export default function QuizEditor({
     <div className="w-full m-8">
       <div className="flex items-center justify-between mb-6 pb-4 border-b border-gray-200">
         <h1 className="text-2xl text-gray-900">
-          {localQuiz.entity.name || "Новый тест"}
+          {localQuiz.entity.name || t("page-quiz-create")}
         </h1>
 
         <HeaderActions
           actions={[
             {
               icon: SaveIcon,
-              label: "Сохранить",
+              label: t("btn-save"),
               onClick: () => console.log("Сохранить"),
               className: "hover:text-blue-600 hover:bg-blue-50",
             },
             {
               icon: AppointIcon,
-              label: "Назначить",
+              label: t("btn-assign"),
               onClick: () => console.log("Назначить"),
               className: "hover:text-blue-600 hover:bg-blue-50",
             },
             {
               icon: CloneIcon,
-              label: "Клонировать",
+              label: t("btn-clone"),
               onClick: () => console.log("Клонировать"),
               className: "hover:text-blue-600 hover:bg-blue-50",
             },
             {
               icon: DeleteIcon,
-              label: "Удалить",
+              label: t("btn-delete"),
               onClick: () => console.log("Удалить"),
               className: "hover:text-red-600 hover:bg-red-50",
             },
             {
               icon: CloseIcon,
-              label: "Закрыть",
+              label: t("btn-close"),
               onClick: () => (onClose ? onClose() : console.log("Закрыть")),
               className: "hover:text-gray-800 hover:bg-gray-100",
             },
@@ -397,7 +344,7 @@ export default function QuizEditor({
             <div className="flex items-center space-x-2">
               <InfoIcon height={24} />
               <span className="text-gray-600 font-semibold">
-                Основная информация
+                {t("label-quiz-info-title")}
               </span>
             </div>
           </AccordionTrigger>
@@ -405,26 +352,26 @@ export default function QuizEditor({
           <AccordionContent className="px-6 pb-6 pt-0">
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Название теста
+                {t("label-quiz-name")}
               </label>
               <input
                 type="text"
                 value={quizName}
                 onChange={(e) => setQuizName(e.target.value)}
-                placeholder="Введите название теста"
+                placeholder={t("placeholder-quiz-name")}
                 className="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               />
             </div>
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Описание теста
+                {t("label-quiz-description")}
               </label>
               <textarea
                 value={quizDescription}
                 onChange={(e) => setQuizDescription(e.target.value)}
                 maxLength={200}
-                placeholder="Описание теста"
+                placeholder={t("placeholder-quiz-description")}
                 className="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-all"
                 rows={3}
               />
@@ -443,7 +390,9 @@ export default function QuizEditor({
           <AccordionTrigger className="flex items-center justify-between px-6 py-4 text-gray-500">
             <div className="flex items-center space-x-2">
               <FilterIcon height={24} />
-              <span className="text-gray-600 font-semibold">Фильтры</span>
+              <span className="text-gray-600 font-semibold">
+                {t("label-quiz-filter-title")}
+              </span>
             </div>
           </AccordionTrigger>
 
@@ -451,7 +400,7 @@ export default function QuizEditor({
             <div>
               <input
                 type="text"
-                placeholder="Поиск"
+                placeholder={t("placeholder-query")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
@@ -465,7 +414,7 @@ export default function QuizEditor({
                 className="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
                 disabled={isLoadingEnums}
               >
-                <option value="">Сложность</option>
+                <option value="">{t("placeholder-quiz-difficult")}</option>
                 {Array.isArray(difficultyOptions) &&
                   difficultyOptions.map((difficulty) => (
                     <option key={difficulty.raw} value={difficulty.name}>
@@ -482,7 +431,7 @@ export default function QuizEditor({
                 className="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
                 disabled={isLoadingEnums}
               >
-                <option value="">Вариант</option>
+                <option value="">{t("placeholder-quiz-variant")}</option>
                 {variantOptions.map((variant) => (
                   <option key={variant.raw} value={variant.name}>
                     {variant.name}
@@ -497,7 +446,7 @@ export default function QuizEditor({
                 onChange={(e) => setSortOption(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
               >
-                <option value="">Сортировать</option>
+                <option value="">{t("placeholder-quiz-points-sort")}</option>
                 {sortOptions.map((sort) => (
                   <option key={sort.value} value={sort.value}>
                     {sort.label}
@@ -550,7 +499,6 @@ export default function QuizEditor({
         onClose={() => setIsImportModalOpen(false)}
         onCreated={handleImportCreated}
         onFinished={handleImportFinished}
-        t={t} // функция перевода
       />
     </div>
   );

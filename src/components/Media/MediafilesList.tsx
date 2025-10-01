@@ -5,6 +5,7 @@ import { MediaFile } from "@/types/media";
 import FileDetailModal from "./FileDetailModal";
 import { UploadIcon } from "@/app/icons/UploadIcon";
 import UploadFileModal from "./UploadFileModal";
+import { useTranslations } from "next-intl";
 
 type Props = {
   mediafiles: MediaFile[];
@@ -23,6 +24,8 @@ export default function MediafilesList({
   currentFolderId,
   onFilesChange,
 }: Props) {
+  const t = useTranslations();
+
   const [selectedMediafile, setSelectedMediafile] = useState<MediaFile | null>(
     null
   );
@@ -48,7 +51,7 @@ export default function MediafilesList({
     return (
       <div>
         <div className="text-center py-12 text-[gray] text-2xl">
-          В этой директории еще ничего нет
+          {t("label-media-empty")}
         </div>
         <div className="flex justify-center">
           <button
@@ -56,7 +59,7 @@ export default function MediafilesList({
             onClick={handleUpload}
           >
             <UploadIcon height="24" />
-            <span>Загрузить</span>
+            <span>{t("btn-upload")}</span>
           </button>
         </div>
 

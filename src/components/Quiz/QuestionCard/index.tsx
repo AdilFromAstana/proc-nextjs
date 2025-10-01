@@ -4,17 +4,7 @@ import { QuizQuestionItem } from "@/types/quiz/quiz";
 import { deleteQuestionFromQuiz, updateQuestionInQuiz } from "@/api/quiz";
 import QuestionHeader from "./QuestionHeader/QuestionHeader";
 import QuestionBody from "./QuestionBody";
-
-// Мемоизированные маппинги
-const QUESTION_TYPE_MAP = {
-  FreeQuestionComponent: { type: "test", name: "Тестовый вопрос" },
-  OpenQuestionComponent: { type: "free", name: "Открытый вопрос" },
-  FillSpaceQuestionComponent: {
-    type: "fill-blanks",
-    name: "Заполните пробелы",
-  },
-  DragAndDropQuestionComponent: { type: "drag-drop", name: "Drag & Drop" },
-} as const;
+import { useTranslations } from "next-intl";
 
 interface QuestionCardProps {
   question: QuizQuestionItem;
@@ -24,8 +14,21 @@ interface QuestionCardProps {
 
 const QuestionCard: React.FC<QuestionCardProps> = React.memo(
   ({ question, onQuestionDeleted, onQuestionUpdated }) => {
+    const t = useTranslations();
+
     const [isEditing, setIsEditing] = useState(false);
     const [editedQuestion, setEditedQuestion] = useState(question);
+
+    // Мемоизированные маппинги
+    const QUESTION_TYPE_MAP = {
+      FreeQuestionComponent: { type: "test", name: t("label-quiz-question") },
+      OpenQuestionComponent: { type: "free", name: t("label-free-question") },
+      FillSpaceQuestionComponent: {
+        type: "fill-blanks",
+        name: t("label-fill-spaces"),
+      },
+      DragAndDropQuestionComponent: { type: "drag-drop", name: "Drag & Drop" },
+    } as const;
 
     const getQuestionInfo = useCallback(() => {
       console.log("question:", question);
@@ -34,7 +37,9 @@ const QuestionCard: React.FC<QuestionCardProps> = React.memo(
           question.component_type as keyof typeof QUESTION_TYPE_MAP
         ];
 
-      return questionTypeInfo || { type: "test", name: "Тестовый вопрос" };
+      return (
+        questionTypeInfo || { type: "test", name: t("label-quiz-question") }
+      );
     }, [question.component_type]);
 
     const questionInfo = getQuestionInfo();

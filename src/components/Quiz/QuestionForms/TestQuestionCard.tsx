@@ -7,6 +7,7 @@ export const TestQuestionCard = ({
   question: QuizQuestionItem;
 }) => {
   if (!question) return null;
+
   const questionText = question?.component?.question || "";
   const answers = question?.component?.options || [];
 

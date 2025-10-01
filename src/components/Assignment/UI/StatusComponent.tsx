@@ -3,6 +3,7 @@
 import React from "react";
 import { cn } from "@/lib/utils";
 import { useTranslation } from "next-i18next";
+import { useTranslations } from "next-intl";
 
 interface AssignmentStatusComponentProps {
   status: string | null;
@@ -22,8 +23,7 @@ const AssignmentStatusComponent: React.FC<AssignmentStatusComponentProps> = ({
   size = "big",
   className = "",
 }) => {
-  const { t } = useTranslation();
-
+  const t = useTranslations();
   if (!status) return null;
 
   const getStatusLabel = () => {

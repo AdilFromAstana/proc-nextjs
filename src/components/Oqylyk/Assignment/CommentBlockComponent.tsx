@@ -21,6 +21,7 @@ import {
   useUpdateComment,
   useDeleteComment,
 } from "@/hooks/useAssignmentComments";
+import { useTranslations } from "next-intl";
 
 // Интерфейсы для типов данных
 interface UserModel {
@@ -86,6 +87,8 @@ const AssignmentCommentBlockComponent: React.FC<
   result = null,
   disabled = false,
 }) => {
+  const t = useTranslations();
+
   // Auth context
   const authUser = {
     firstname: "Иван",
@@ -334,7 +337,7 @@ const AssignmentCommentBlockComponent: React.FC<
                 onChange={(e) =>
                   setComment({ ...comment, message: e.target.value })
                 }
-                placeholder="Введите сообщение"
+                placeholder={t("placeholder-chat-message")}
                 className="w-full min-h-[100px]"
                 disabled={disabled || !assignmentOpened}
               />
@@ -347,7 +350,7 @@ const AssignmentCommentBlockComponent: React.FC<
                 className="flex items-center"
               >
                 <Send className="w-4 h-4 mr-2" />
-                {editAction ? "Обновить" : "Отправить"}
+                {t("btn-send")}
               </Button>
 
               {editAction && (

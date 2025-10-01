@@ -15,6 +15,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { numericToBoolean } from "@/utils/numericToBoolean";
+import { useTranslations } from "next-intl";
 
 interface AssignmentProctoringComponentProps {
   assignment: AssignmentDetail;
@@ -136,6 +137,7 @@ const CameraParameter: React.FC<{
   onModeChange?: (mode: string) => void;
   additionalSettings?: {
     label: string;
+    description: string;
     value: boolean;
     hidden?: boolean;
     onCheckedChange?: (checked: boolean) => void;
@@ -224,6 +226,7 @@ const CameraParameter: React.FC<{
                     <SwitchParameter
                       key={index}
                       label={setting.label}
+                      description={setting.description}
                       checked={setting.value}
                       onCheckedChange={setting.onCheckedChange}
                     />
@@ -245,6 +248,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
   onOpenChange,
   onSettingsChange,
 }) => {
+  const t = useTranslations();
+
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [settings, setSettings] = useState(proctoringSettings);
   const [appType, setAppType] = useState(applicationType);
@@ -351,35 +356,37 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
     const settingsList = [
       {
-        label:
-          "Отслеживание действий (Client-Side): Включить отслеживание действий пользователя на стороне клиента",
+        label: t("label-proctoring-head-tracking-client"),
+        description: t("hint-proctoring-head-tracking-client"),
         value: numericToBoolean(settings.head_tracking_client),
         onCheckedChange: (checked: boolean) =>
           handleSwitchChange("head_tracking_client", checked),
       },
       {
-        label:
-          "Отслеживание действий (Post Server-Side): Включить отслеживание действий пользователя на стороне сервера (Post)",
+        label: t("label-proctoring-head-tracking-server-post"),
+        description: t("hint-proctoring-head-tracking-server-post"),
         value: numericToBoolean(settings.head_tracking_server_post),
         onCheckedChange: (checked: boolean) =>
           handleSwitchChange("head_tracking_server_post", checked),
       },
       {
-        label:
-          "Отслеживание действий (RealTime Server-Side): Включить отслеживание действий пользователя на стороне сервера (RealTime)",
+        label: t("label-proctoring-head-tracking-server-realtime"),
+        description: t("hint-proctoring-head-tracking-server-realtime"),
         value: numericToBoolean(settings.head_tracking_server_realtime),
         onCheckedChange: (checked: boolean) =>
           handleSwitchChange("head_tracking_server_realtime", checked),
         hidden: mainCameraMode !== "Стриминг",
       },
       {
-        label: "Eye Tracking: Отслеживание зрачков",
+        label: t("label-proctoring-eye-tracking"),
+        description: t("hint-proctoring-eye-tracking"),
         value: numericToBoolean(settings.head_tracking_server),
         onCheckedChange: (checked: boolean) =>
           handleSwitchChange("head_tracking_server", checked),
       },
       {
-        label: "Object Detection: Обнаружение предметов",
+        label: t("label-proctoring-object-detect"),
+        description: t("hint-proctoring-object-detect"),
         value: numericToBoolean(settings.object_detect),
         onCheckedChange: (checked: boolean) =>
           handleSwitchChange("object_detect", checked),
@@ -401,8 +408,10 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Прокторинг</DialogTitle>
-          <DialogDescription>Конфигурация параметров</DialogDescription>
+          <DialogTitle>{t("label-proctoring-modal-title")}</DialogTitle>
+          <DialogDescription>
+            {t("label-proctoring-modal-description")}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2">
@@ -420,8 +429,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
           {appType === "browser" && (
             <SelectParameter
-              label="Браузер"
-              description="Разрешенные браузеры"
+              label={t("label-assignment-browser-type")}
+              description={t("hint-assignment-browser-type")}
               value={settings.browser_type}
               options={[
                 { value: "*", label: "All" },
@@ -444,8 +453,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           )}
 
           <CameraParameter
-            label="Фронтальная камера"
-            description="Включить запись фронтальной камеры"
+            label={t("label-proctoring-camera-record")}
+            description={t("hint-proctoring-camera-record")}
             recordValue={numericToBoolean(settings.main_camera_record)}
             uploadValue={numericToBoolean(settings.main_camera_upload)}
             onModeChange={(mode) => handleCameraModeChange("main", mode)}
@@ -453,32 +462,32 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           />
 
           <CameraParameter
-            label="Внешняя камера"
-            description="Будет задействовано дополнительное устройство для записи. Захват видеопотока камеры мобильного устройства."
+            label={t("label-proctoring-second-camera")}
+            description={t("hint-proctoring-two-camera")}
             recordValue={numericToBoolean(settings.second_camera_record)}
             uploadValue={numericToBoolean(settings.second_camera_upload)}
             onModeChange={(mode) => handleCameraModeChange("second", mode)}
           />
 
           <CameraParameter
-            label="Экран"
-            description="Включить запись рабочего стола (экрана)"
+            label={t("label-proctoring-screen-record")}
+            description={t("hint-proctoring-screen-record")}
             recordValue={numericToBoolean(settings.screen_share_record)}
             uploadValue={numericToBoolean(settings.screen_share_upload)}
             onModeChange={(mode) => handleCameraModeChange("screen", mode)}
           />
 
           <CameraParameter
-            label="Детектор микронаушников"
-            description="Требуется обязательное подключение 'Детектор микронаушников У.М.' к устройству."
+            label={t("label-proctoring-antimicro-record")}
+            description={t("hint-proctoring-antimicro-record")}
             recordValue={numericToBoolean(settings.second_microphone_record)}
             uploadValue={numericToBoolean(settings.second_microphone_upload)}
             onModeChange={(mode) => handleCameraModeChange("microphone", mode)}
           />
 
           <SwitchParameter
-            label="Фото Идентификация"
-            description="Включить идентификацию лица по фотографии"
+            label={t("label-proctoring-photo-head-identity")}
+            description={t("hint-proctoring-photo-head-identity")}
             checked={numericToBoolean(settings.photo_head_identity)}
             onCheckedChange={(checked) =>
               handleSwitchChange("photo_head_identity", checked)
@@ -486,8 +495,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           />
 
           <SwitchParameter
-            label="Видео Идентификация"
-            description="Включить идентификацию лица по видео"
+            label={t("label-proctoring-video-head-identity")}
+            description={t("hint-proctoring-video-head-identity")}
             checked={numericToBoolean(settings.video_head_identity)}
             onCheckedChange={(checked) =>
               handleSwitchChange("video_head_identity", checked)
@@ -495,8 +504,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           />
 
           <SwitchParameter
-            label="Верификация"
-            description="Идентификация по удостоверению личности"
+            label={t("label-proctoring-id-verification")}
+            description={t("hint-proctoring-id-verification")}
             checked={numericToBoolean(settings.id_verification)}
             onCheckedChange={(checked) =>
               handleSwitchChange("id_verification", checked)
@@ -504,8 +513,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           />
 
           <SwitchParameter
-            label="Детекция шумов"
-            description="Включить детекцию шумов"
+            label={t("label-proctoring-noise-detector")}
+            description={t("hint-proctoring-noise-detector")}
             checked={numericToBoolean(settings.noise_detector)}
             onCheckedChange={(checked) =>
               handleSwitchChange("noise_detector", checked)
@@ -513,8 +522,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           />
 
           <SwitchParameter
-            label="Детекция голоса"
-            description="Включить детекцию голоса"
+            label={t("label-proctoring-voice-detector")}
+            description={t("hint-proctoring-voice-detector")}
             checked={numericToBoolean(settings.speech_detector)}
             onCheckedChange={(checked) =>
               handleSwitchChange("speech_detector", checked)
@@ -522,8 +531,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           />
 
           <SwitchParameter
-            label="Устройства отображения"
-            description="Включить проверку на наличие подключенных мониторов, проекторов, TV"
+            label={t("label-proctoring-displays-check")}
+            description={t("hint-proctoring-displays-check")}
             checked={numericToBoolean(settings.displays_check)}
             onCheckedChange={(checked) =>
               handleSwitchChange("displays_check", checked)
@@ -540,8 +549,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           />
 
           <SwitchParameter
-            label="Content Protect"
-            description="Запрет передачи содержимого вопроса от удаленных пользователей"
+            label={t("label-proctoring-content-protect")}
+            description={t("hint-proctoring-content-protect")}
             checked={numericToBoolean(settings.content_protect)}
             onCheckedChange={(checked) =>
               handleSwitchChange("content_protect", checked)
@@ -549,8 +558,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           />
 
           <SwitchParameter
-            label="Полноэкранный режим"
-            description="Включить полноэкранный режим"
+            label={t("label-proctoring-fullscreen-mode")}
+            description={t("hint-proctoring-fullscreen-mode")}
             checked={numericToBoolean(settings.fullscreen_mode)}
             onCheckedChange={(checked) =>
               handleSwitchChange("fullscreen_mode", checked)
@@ -558,8 +567,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           />
 
           <SwitchParameter
-            label="Буфер обмена"
-            description="Включить чтение буфера обмена"
+            label={t("label-proctoring-read-clipboard")}
+            description={t("hint-proctoring-read-clipboard")}
             checked={numericToBoolean(settings.read_clipboard)}
             onCheckedChange={(checked) =>
               handleSwitchChange("read_clipboard", checked)
@@ -567,8 +576,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           />
 
           <SwitchParameter
-            label="Фокус мыши"
-            description="Включить отслеживание фокуса мыши"
+            label={t("label-proctoring-focus-detector")}
+            description={t("hint-proctoring-focus-detector")}
             checked={numericToBoolean(settings.focus_detector)}
             onCheckedChange={(checked) =>
               handleSwitchChange("focus_detector", checked)
@@ -576,8 +585,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           />
 
           <SwitchParameter
-            label="Вспомогательные расширения"
-            description="Включить проверку на наличие вспомогательных расширений"
+            label={t("label-proctoring-extension-detector")}
+            description={t("hint-proctoring-extension-detector")}
             checked={numericToBoolean(settings.extension_detector)}
             onCheckedChange={(checked) =>
               handleSwitchChange("extension_detector", checked)
@@ -589,20 +598,18 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
             <button
               type="button"
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className="text-blue-600 hover:text-blue-800 font-medium text-lg"
+              className="text-blue-600 hover:text-blue-800"
             >
-              {showAdvanced
-                ? "Скрыть расширенные настройки"
-                : "Расширенные настройки"}
+              {t("btn-advanced-proctoring-settings")}
             </button>
 
             {showAdvanced && (
               <div className="mt-4 p-4 bg-gray-50 rounded-lg">
                 <InputParameter
-                  label="Интервал распознавания действий"
-                  description="Интервал распознавания действий в миллисекундах. Чем меньше значение, тем больше нагрузка на CPU/GPU (Client-Side)"
+                  label={t("label-proctoring-head-recognize-interval")}
+                  description={t("hint-proctoring-head-recognize-interval")}
                   value={settings.head_recognize_interval || ""}
-                  placeholder="Интервал распознавания действий"
+                  placeholder={t("label-proctoring-head-recognize-interval")}
                   type="number"
                   onValueChange={(value) =>
                     handleInputChange("head_recognize_interval", value)
@@ -611,10 +618,10 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
                 {/* 2. Интервал распознавания лица */}
                 <InputParameter
-                  label="Интервал распознавания лица"
-                  description="Интервал проверки подмены лица"
+                  label={t("label-proctoring-head-compare-interval")}
+                  description={t("hint-proctoring-head-compare-interval")}
                   value={settings.head_compare_interval || ""}
-                  placeholder="Интервал распознавания лица"
+                  placeholder={t("label-proctoring-head-compare-interval")}
                   type="number"
                   onValueChange={(value) =>
                     handleInputChange("head_compare_interval", value)
@@ -623,10 +630,10 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
                 {/* 3. Чувствительность поворота головы по X */}
                 <InputParameter
-                  label="Чувствительность поворота головы (X)"
-                  description="Допустимое значение поворота головы по оси X"
+                  label={t("label-proctoring-head-x-rotate-sensitivity")}
+                  description={t("hint-proctoring-head-x-rotate-sensitivity")}
                   value={settings.head_x_sensitivity || ""}
-                  placeholder="Чувствительность поворота головы по X"
+                  placeholder={t("label-proctoring-head-x-rotate-sensitivity")}
                   type="number"
                   onValueChange={(value) =>
                     handleInputChange("head_x_sensitivity", value)
@@ -635,10 +642,10 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
                 {/* 4. Чувствительность поворота головы по Y */}
                 <InputParameter
-                  label="Чувствительность поворота головы (Y)"
-                  description="Допустимое значение поворота головы по оси Y"
+                  label={t("hint-proctoring-head-y-rotate-sensitivity")}
+                  description={t("hint-proctoring-head-y-rotate-sensitivity")}
                   value={settings.head_y_sensitivity || ""}
-                  placeholder="Чувствительность поворота головы по Y"
+                  placeholder={t("hint-proctoring-head-y-rotate-sensitivity")}
                   type="number"
                   onValueChange={(value) =>
                     handleInputChange("head_y_sensitivity", value)
@@ -647,10 +654,10 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
                 {/* 5. Чувствительность отдаления головы */}
                 <InputParameter
-                  label="Чувствительность отдаления головы"
-                  description="Допустимое значение отдаления головы по оси Z"
+                  label={t("label-proctoring-head-depth-sensitivity")}
+                  description={t("hint-proctoring-head-depth-sensitivity")}
                   value={settings.head_depth_sensitivity || ""}
-                  placeholder="Чувствительность отдаления головы"
+                  placeholder={t("label-proctoring-head-depth-sensitivity")}
                   type="number"
                   onValueChange={(value) =>
                     handleInputChange("head_depth_sensitivity", value)
@@ -659,10 +666,10 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
                 {/* 6. Толерантность поворота головы */}
                 <InputParameter
-                  label="Толерантность поворота головы"
-                  description="Время в миллисекундах. При котором пользователю разрешено находиться в запрещенном положении. При достижении указанного значения, нарушение будет зафиксировано"
+                  label={t("label-proctoring-head-tolerance-seconds")}
+                  description={t("hint-proctoring-head-tolerance-seconds")}
                   value={settings.head_tolerance_seconds || ""}
-                  placeholder="Толерантность поворота головы"
+                  placeholder={t("label-proctoring-head-tolerance-seconds")}
                   type="number"
                   onValueChange={(value) =>
                     handleInputChange("head_tolerance_seconds", value)
@@ -671,10 +678,10 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
                 {/* 7. Чувствительность микрофона к шуму */}
                 <InputParameter
-                  label="Чувствительность микрофона к шуму"
-                  description="Чувствительность микрофона в децибелах (dB) к шуму. При превышении порога dB, сработает счетчик захвата кадров"
+                  label={t("label-proctoring-noise-sensitivity")}
+                  description={t("hint-proctoring-noise-sensitivity")}
                   value={settings.noise_sensitivity || ""}
-                  placeholder="Чувствительность микрофона к шуму"
+                  placeholder={t("label-proctoring-noise-sensitivity")}
                   type="number"
                   onValueChange={(value) =>
                     handleInputChange("noise_sensitivity", value)
@@ -683,10 +690,10 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
                 {/* 8. Счетчик кадров шума */}
                 <InputParameter
-                  label="Счетчик кадров шума"
-                  description="Счетчик захвата количества последовательных кадров превышения dB. При достижении значении счетчика сработает триггер нарушения"
+                  label={t("label-proctoring-noise-tolerance-frames")}
+                  description={t("hint-proctoring-noise-tolerance-frames")}
                   value={settings.noise_tolerance_frames || ""}
-                  placeholder="Счетчик кадров шума"
+                  placeholder={t("label-proctoring-noise-tolerance-frames")}
                   type="number"
                   onValueChange={(value) =>
                     handleInputChange("noise_tolerance_frames", value)
@@ -695,10 +702,10 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
                 {/* 9. Толерантность к шуму */}
                 <InputParameter
-                  label="Толерантность к шуму"
-                  description="Время в миллисекундах. В течении этого времени пользователю необходимо устранить все шумы, иначе будет зафиксировано нарушение"
+                  label={t("label-proctoring-noise-tolerance-seconds")}
+                  description={t("hint-proctoring-noise-tolerance-seconds")}
                   value={settings.noise_tolerance_seconds || ""}
-                  placeholder="Толерантность к шуму"
+                  placeholder={t("label-proctoring-noise-tolerance-seconds")}
                   type="number"
                   onValueChange={(value) =>
                     handleInputChange("noise_tolerance_seconds", value)
@@ -707,10 +714,10 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
                 {/* 10. Толерантность к потере фокуса */}
                 <InputParameter
-                  label="Толерантность к потере фокуса"
-                  description="Время в миллисекундах. В течении указанного времени, пользователю необходимо вернуть указатель (фокус) на вкладку с заданием, иначе будет зафиксировано нарушение"
+                  label={t("label-proctoring-focus-tolerance-seconds")}
+                  description={t("hint-proctoring-focus-tolerance-seconds")}
                   value={settings.focus_tolerance_seconds || ""}
-                  placeholder="Толерантность к потере фокуса"
+                  placeholder={t("label-proctoring-focus-tolerance-seconds")}
                   type="number"
                   onValueChange={(value) =>
                     handleInputChange("focus_tolerance_seconds", value)
@@ -719,10 +726,10 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
                 {/* 11. Таймаут подключения */}
                 <InputParameter
-                  label="Таймаут подключения"
-                  description="Время в миллисекундах. Таймаут подключения к серверу захвата видеопотока. При достижении указанного времени, функция записи камеры / рабочего стола будет отключена"
+                  label={t("label-proctoring-rtc-connection-timeout")}
+                  description={t("hint-proctoring-rtc-connection-timeout")}
                   value={settings.rtc_connection_timeout || ""}
-                  placeholder="Таймаут подключения"
+                  placeholder={t("label-proctoring-rtc-connection-timeout")}
                   type="number"
                   onValueChange={(value) =>
                     handleInputChange("rtc_connection_timeout", value)
@@ -731,10 +738,10 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
                 {/* 12. Таймаут инициализации */}
                 <InputParameter
-                  label="Таймаут инициализации"
-                  description="Таймаут инициализации библиотеки распознавания действий пользователя. При достижении указанного времени, функция идентификации и фиксации нарушений действий пользователя будет отключена"
+                  label={t("label-proctoring-identification-timeout")}
+                  description={t("hint-proctoring-identification-timeout")}
                   value={settings.facemodel_init_timeout || ""}
-                  placeholder="Таймаут инициализации"
+                  placeholder={t("label-proctoring-identification-timeout")}
                   type="number"
                   onValueChange={(value) =>
                     handleInputChange("facemodel_init_timeout", value)
@@ -786,6 +793,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 const AssignmentProctoringComponent: React.FC<
   AssignmentProctoringComponentProps
 > = ({ assignment, errors = {}, onAssignmentChange }) => {
+  const t = useTranslations();
+
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   // Определяем включен ли прокторинг
@@ -817,8 +826,8 @@ const AssignmentProctoringComponent: React.FC<
   return (
     <>
       <CollapsibleCard
-        title="Прокторинг"
-        description="Процедура наблюдения и контроля за дистанционным испытанием"
+        title={t("label-assignment-proctoring-title")}
+        description={t("label-assignment-proctoring-description")}
         icon={<Robot className="h-5 w-5 text-blue-600" />}
       >
         <div className="flex items-center justify-between">

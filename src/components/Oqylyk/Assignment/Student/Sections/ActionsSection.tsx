@@ -5,6 +5,7 @@ import SectionWrapper from "../../UI/SectionWrapper";
 import { AssignmentViolation } from "@/types/assignment/violations";
 import { useAssignmentStudentViolations } from "@/hooks/useAssignmentStudentViolations";
 import { Loader2 } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 interface ActionsSectionProps {
   assignmentId: number;
@@ -27,6 +28,8 @@ const ActionsSection: React.FC<ActionsSectionProps> = ({
   interval = 20000,
   onViolationSelected,
 }) => {
+  const t = useTranslations();
+
   const [page, setPage] = useState(1);
   const [allViolations, setAllViolations] = useState<AssignmentViolation[]>([]);
   const [hasMorePages, setHasMorePages] = useState(true);
@@ -202,8 +205,8 @@ const ActionsSection: React.FC<ActionsSectionProps> = ({
   return (
     <SectionWrapper
       icon={faClipboardList}
-      title="Лог"
-      hint="Список действий пользователя"
+      title={t("label-assignment-actions")}
+      hint={t("label-assignment-actions")}
     >
       <div className="relative assignment-actions-component w-full">
         {hasMorePages && allViolations.length > 0 && (

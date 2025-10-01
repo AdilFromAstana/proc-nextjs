@@ -20,6 +20,7 @@ import {
 import { Certificate } from "@/types/assignment/certificate"; // Импортируем тип Certificate
 import CollapsibleCard from "@/components/Oqylyk/Assignment/CollapsibleCard";
 import { Image } from "lucide-react";
+import { useTranslations } from "next-intl";
 
 // --- Вспомогательный компонент: Карточка Сертификата ---
 const SimpleCertificateCard: React.FC<{
@@ -57,7 +58,7 @@ const SimpleCertificateCard: React.FC<{
       </div>
     </div>
   </div>
-);  
+);
 // ----------------------------------------------------
 
 interface AssignmentCertificateComponentProps {
@@ -69,6 +70,8 @@ interface AssignmentCertificateComponentProps {
 const AssignmentCertificateComponent: React.FC<
   AssignmentCertificateComponentProps
 > = ({ assignment, errors = {}, onAssignmentChange }) => {
+  const t = useTranslations();
+
   const { toast } = useToast();
 
   // --- Состояния для модальных окон ---
@@ -185,8 +188,8 @@ const AssignmentCertificateComponent: React.FC<
 
   return (
     <CollapsibleCard
-      title="Сертификат"
-      description="Настройте выдачу сертификата для задания"
+      title={t("label-assignment-certificate-title")}
+      description={t("label-assignment-certificate-description")}
       icon={<Image className="h-5 w-5 text-blue-600" />}
     >
       <div className="space-y-4">
@@ -194,13 +197,13 @@ const AssignmentCertificateComponent: React.FC<
         <div className="flex flex-wrap gap-2">
           <Button onClick={showCertificateListModal}>
             {/* <Menu className="mr-2 h-4 w-4" /> */}
-            Выбрать сертификат
+            {t("btn-course-select-certificate")}
           </Button>
 
           {assignment.certificate_id && (
             <Button variant="outline" onClick={onCertificateDetached}>
               {/* <LinkOff className="mr-2 h-4 w-4" /> */}
-              Открепить сертификат
+              {t("btn-course-detach-certificate")}
             </Button>
           )}
         </div>
@@ -209,7 +212,7 @@ const AssignmentCertificateComponent: React.FC<
         {isCertificateLoading && assignment.certificate_id && (
           <div className="flex items-center justify-center p-4">
             <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-500"></div>
-            <span className="ml-2">Загрузка сертификата...</span>
+            <span className="ml-2">{t("label-upload")}</span>
           </div>
         )}
 
@@ -274,16 +277,6 @@ const AssignmentCertificateComponent: React.FC<
               </div>
             </div>
           </>
-        )}
-
-        {/* NO CERTIFICATE SELECTED */}
-        {!assignment.certificate_id && !isCertificateLoading && (
-          <div className="text-center py-6 text-gray-500">
-            <p>Сертификат не выбран.</p>
-            <p className="text-sm mt-1">
-              Нажмите "Выбрать сертификат", чтобы назначить его этому заданию.
-            </p>
-          </div>
         )}
       </div>
 
