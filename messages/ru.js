@@ -213,6 +213,9 @@ export default {
   "btn-assignment-finish": "Завершить",
   "btn-assignment-export": "Экспорт",
 
+  "btn-assignment-show-previous-actions": "Показать предыдущие действия",
+  "btn-assignment-show-previous-violations": "Показать предыдущие нарушения",
+
   /**
    * Classes Index
    */
@@ -1149,9 +1152,23 @@ export default {
    * Assignment Proctoring Settings Modal Component
    */
 
+  "label-webinar-record-type-disabled": "Отключено",
+  "label-webinar-record-type-streaming": "Стриминг",
+  "label-webinar-record-type-recording": "Запись",
+
+  "hint-webinar-record-type-streaming":
+    "В данном режиме будет осуществлена прямая трансляция (SFU) и запись. Требуется стабильное интернет-соединение",
+  "hint-webinar-record-type-recording":
+    "В данном режиме будет осуществлена прямая трансляция (P2P) и запись. Не зависит от качества интернет-соединения",
+
   "label-proctoring-modal-title": "Прокторинг",
   "label-proctoring-modal-description": "Конфигурация параметров",
   "label-assignment-browser-type": "Браузер",
+
+  "label-assignment-application-type": "Приложение",
+  "hint-assignment-application-type": "Выберите тип приложения",
+  "hint-assignment-application-type-alt":
+    "Перед началом экзамена, потребуется загрузить и установить приложение",
 
   "label-proctoring-camera-record": "Фронтальная камера",
   "label-proctoring-two-camera": "Внешняя камера",
@@ -1247,6 +1264,14 @@ export default {
     "Таймаут инициализации библиотеки распознавания действий пользователя. При достижении указанного времени, функция идентификации и фиксации нарушений действий пользователя будет отключена.",
 
   "placeholder-proctoring-head-compare-interval": "Введите значение в мс.",
+
+  "label-proctoring-mobile-restrict": "Mobile Restrict",
+  "hint-proctoring-mobile-restrict":
+    "Запретить сдачу через мобильные устройства (веб-браузер)",
+
+  "label-proctoring-fallback-allow": "Fallback",
+  "hint-proctoring-fallback-allow":
+    "При невозможности подключения выше активированных опций у пользователя - пропускать шаг",
 
   "btn-advanced-proctoring-settings": "Расширенные настройки",
 
@@ -2362,9 +2387,4 @@ export default {
   /**
    * NEW WORDS
    */
-
-  "hint-webinar-record-type-streaming":
-    "В данном режиме будет осуществлена прямая трансляция (SFU) и запись. Требуется стабильное интернет-соединение",
-  "hint-webinar-record-type-recording":
-    "В данном режиме будет осуществлена прямая трансляция (P2P) и запись. Не зависит от качества интернет-соединения",
 };

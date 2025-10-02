@@ -205,8 +205,8 @@ const ActionsSection: React.FC<ActionsSectionProps> = ({
   return (
     <SectionWrapper
       icon={faClipboardList}
-      title={t("label-assignment-actions")}
-      hint={t("label-assignment-actions")}
+      title={t("label-assignment-user-actions")}
+      hint={t("hint-assignment-user-actions")}
     >
       <div className="relative assignment-actions-component w-full">
         {hasMorePages && allViolations.length > 0 && (
@@ -214,7 +214,7 @@ const ActionsSection: React.FC<ActionsSectionProps> = ({
             className="absolute cursor-pointer w-auto text-gray-700 text-xs font-semibold py-2.5 px-2.5 bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.2)] rounded-b-[3px] whitespace-nowrap inline-block absolute top-0 left-1/2 transform -translate-x-1/2 z-10"
             onClick={handleShowPrevious}
           >
-            Показать предыдущие нарушения
+            {t("btn-assignment-show-previous-violations")}
           </div>
         )}
 

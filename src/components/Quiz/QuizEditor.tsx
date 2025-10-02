@@ -13,7 +13,11 @@ import {
 import React, { useEffect, useState } from "react";
 import QuestionCard from "./QuestionCard";
 import ButtonsPanel from "./ButtonsPanel";
-import { addQuestionToQuiz, fetchQuizById } from "@/api/quiz";
+import {
+  addQuestionToQuiz,
+  deleteQuestionFromQuiz,
+  fetchQuizById,
+} from "@/api/quiz";
 import LibraryOfQuestions from "./Modals/LibraryOfQuestions";
 import QuizComponentImportModal from "./Modals/QuizComponentImportModal/index";
 import { InfoIcon } from "@/app/icons/InfoIcon";
@@ -25,13 +29,9 @@ import { DeleteIcon } from "@/app/icons/Quiz/QuizHeaderIcons/DeleteIcon";
 import { CloseIcon } from "@/app/icons/Quiz/QuizHeaderIcons/CloseIcon";
 import { HeaderActions } from "./HeaderActions";
 
-import { EnumOption } from "@/types/enum";
-import {
-  getDifficultLevelQuestionType,
-  getVariantQuestionType,
-} from "@/api/enum/listApi";
 import { QuestionSettings } from "@/types/quiz/addQuestion";
 import { useTranslations } from "next-intl";
+import { useEnums } from "@/hooks/useEnums";
 
 type Props = {
   quiz: QuizDetailResponse | null;
@@ -47,6 +47,10 @@ export default function QuizEditor({
   onClose,
 }: Props) {
   const t = useTranslations();
+  const { getEnumOptions, loading } = useEnums();
+
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [questionToDelete, setQuestionToDelete] = useState<number | null>(null);
 
   const [quizName, setQuizName] = useState(quiz?.entity.name || "");
   const [quizDescription, setQuizDescription] = useState(
@@ -62,31 +66,8 @@ export default function QuizEditor({
   const [isLibraryModalOpen, setIsLibraryModalOpen] = useState(false);
   const [isImportModalOpen, setIsImportModalOpen] = useState(false);
 
-  const [difficultyOptions, setDifficultyOptions] = useState<EnumOption[]>([]);
-  const [variantOptions, setVariantOptions] = useState<EnumOption[]>([]);
-  const [isLoadingEnums, setIsLoadingEnums] = useState(true);
-
-  useEffect(() => {
-    const fetchEnums = async () => {
-      try {
-        setIsLoadingEnums(true);
-
-        const difficultyData = await getDifficultLevelQuestionType();
-        setDifficultyOptions(difficultyData);
-
-        const variantData = await getVariantQuestionType();
-        setVariantOptions(variantData);
-      } catch (error) {
-        console.error("Ошибка при загрузке enum данных:", error);
-        setDifficultyOptions([]);
-        setVariantOptions([]);
-      } finally {
-        setIsLoadingEnums(false);
-      }
-    };
-
-    fetchEnums();
-  }, []);
+  const difficultyOptions = getEnumOptions("DifficultLevelQuestionType");
+  const variantOptions = getEnumOptions("QuestionType");
 
   const reverseDifficultyMap: Record<string, string> = {};
   if (Array.isArray(difficultyOptions)) {
@@ -257,6 +238,47 @@ export default function QuizEditor({
     }
   }, [quiz]);
 
+  // Функция для открытия модального окна подтверждения
+  const handleDeleteClick = (componentId: number) => {
+    setQuestionToDelete(componentId);
+    setDeleteModalOpen(true);
+  };
+
+  // Функция для подтверждения удаления
+  // В компоненте QuizEditor обновите функцию handleConfirmDelete:
+
+  const handleConfirmDelete = async () => {
+    if (questionToDelete !== null) {
+      try {
+        // Используем функцию deleteQuestionFromQuiz для удаления через API
+        const updatedQuiz = await deleteQuestionFromQuiz(
+          quizId,
+          questionToDelete
+        );
+
+        // Обновляем локальное состояние
+        setLocalQuiz(updatedQuiz);
+
+        // Вызываем колбэк для обновления родительского компонента
+        onUpdateQuiz(updatedQuiz);
+
+        console.log("Вопрос успешно удален");
+      } catch (error) {
+        console.error("Ошибка при удалении вопроса:", error);
+        // Здесь можно добавить уведомление об ошибке
+      } finally {
+        setQuestionToDelete(null);
+        setDeleteModalOpen(false);
+      }
+    }
+  };
+
+  // Функция для отмены удаления
+  const handleCancelDelete = () => {
+    setQuestionToDelete(null);
+    setDeleteModalOpen(false);
+  };
+
   const handleQuestionDeleted = (componentId: number) => {
     if (localQuiz) {
       const updatedComponents = localQuiz.entity.components.filter(
@@ -412,7 +434,7 @@ export default function QuizEditor({
                 value={difficultyFilter}
                 onChange={(e) => setDifficultyFilter(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
-                disabled={isLoadingEnums}
+                disabled={loading}
               >
                 <option value="">{t("placeholder-quiz-difficult")}</option>
                 {Array.isArray(difficultyOptions) &&
@@ -429,7 +451,7 @@ export default function QuizEditor({
                 value={variantFilter}
                 onChange={(e) => setVariantFilter(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-200 rounded-md bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
-                disabled={isLoadingEnums}
+                disabled={loading}
               >
                 <option value="">{t("placeholder-quiz-variant")}</option>
                 {variantOptions.map((variant) => (
@@ -463,7 +485,7 @@ export default function QuizEditor({
           <QuestionCard
             key={q.component_id}
             question={q}
-            onQuestionDeleted={handleQuestionDeleted}
+            onDeleteRequest={handleDeleteClick}
             onQuestionUpdated={handleQuestionUpdated}
           />
         ))}
@@ -500,6 +522,34 @@ export default function QuizEditor({
         onCreated={handleImportCreated}
         onFinished={handleImportFinished}
       />
+
+      {/* Модальное окно подтверждения удаления */}
+      {deleteModalOpen && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-sm w-full">
+            <h2 className="text-lg font-bold mb-4">
+              {t("label-confirm-modal-title")}
+            </h2>
+            <p className="mb-6 text-gray-600">
+              {t("label-confirm-modal-description")}
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={handleCancelDelete}
+                className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                {t("btn-no")}
+              </button>
+              <button
+                onClick={handleConfirmDelete}
+                className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+              >
+                {t("btn-confirm")}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

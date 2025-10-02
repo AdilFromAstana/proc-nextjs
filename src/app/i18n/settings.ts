@@ -1,8 +1,9 @@
-export const languages = ["ru", "en"] as const;
+export const languages = ["ru", "kz", "en"] as const;
 export const defaultLanguage = "ru";
 
 export const languageNames = {
   ru: "Русский",
+  kz: "Қазақ",
   en: "English",
 } as const;
 

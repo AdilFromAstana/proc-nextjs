@@ -9,6 +9,7 @@ import ProductListComponent from "./ProductListComponent";
 import { Button } from "@/components/ui/button";
 import CollapsibleCard from "@/components/Oqylyk/Assignment/CollapsibleCard";
 import { useTranslations } from "next-intl";
+import { useEnums } from "@/hooks/useEnums";
 
 interface AccessTypeOption {
   id: string;
@@ -32,20 +33,9 @@ const AssignmentAccessTypeComponent: React.FC<
 > = ({ assignment, errors = {}, onAssignmentChange }) => {
   const t = useTranslations();
 
-  // State
-  const [accessTypes, setAccessTypes] = useState<AssignmentAccessTypeList>({
-    models: [],
-    fetch: async () => {
-      setAccessTypes({
-        models: [
-          { id: "free", name: t(""), raw: "free" },
-          { id: "private", name: "Приватный", raw: "private" },
-          { id: "prepaid", name: "По предоплате", raw: "prepaid" },
-        ],
-        fetch: async () => {},
-      });
-    },
-  });
+  const { getEnumOptions, loading } = useEnums();
+
+  const accessTypes = getEnumOptions("AssignmentAccessType");
 
   const [inviteCodeModalOpen, setInviteCodeModalOpen] = useState(false);
   const [productModalOpen, setProductModalOpen] = useState(false);
@@ -111,7 +101,7 @@ const AssignmentAccessTypeComponent: React.FC<
     setProductModalOpen(false);
   };
 
-  const handleAccessTypeChange = (value: "free" | "private" | "prepaid") => {
+  const handleAccessTypeChange = (value: string) => {
     const newAssignment = {
       ...assignment,
       access_type: value,
@@ -129,11 +119,6 @@ const AssignmentAccessTypeComponent: React.FC<
     }
   };
 
-  // Effects
-  useEffect(() => {
-    accessTypes.fetch();
-  }, []);
-
   return (
     <CollapsibleCard
       title={t("label-assignment-access-type-title")}
@@ -146,9 +131,9 @@ const AssignmentAccessTypeComponent: React.FC<
       {/* ACCESS TYPE */}
       <div className="space-y-2">
         <div className="flex bg-gray-100 rounded-lg p-1 w-fit">
-          {accessTypes.models.map((option) => (
+          {accessTypes.map((option) => (
             <Button
-              key={option.id}
+              key={option.raw}
               variant={
                 assignment.access_type === option.raw ? "default" : "outline"
               }

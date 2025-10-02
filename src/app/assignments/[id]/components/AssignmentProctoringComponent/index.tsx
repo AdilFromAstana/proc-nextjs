@@ -150,14 +150,17 @@ const CameraParameter: React.FC<{
   onModeChange,
   additionalSettings,
 }) => {
+  const t = useTranslations();
   const [showSettings, setShowSettings] = useState(false);
 
   const getCameraMode = () => {
-    if (!recordValue && !uploadValue) return "Отключено";
-    if (recordValue && !uploadValue) return "Стриминг";
-    if (!recordValue && uploadValue) return "Запись";
-    if (recordValue && uploadValue) return "Стриминг"; // Если оба true, считаем стримингом
-    return "Отключено";
+    if (!recordValue && !uploadValue)
+      return t("label-webinar-record-type-disabled");
+    if (recordValue && !uploadValue)
+      return t("label-webinar-record-type-streaming");
+    if (!recordValue && uploadValue)
+      return t("label-webinar-record-type-recording");
+    return t("label-webinar-record-type-disabled");
   };
 
   const mode = getCameraMode();
@@ -167,11 +170,11 @@ const CameraParameter: React.FC<{
   };
 
   const getModeDescription = () => {
-    if (mode === "Стриминг") {
-      return "В данном режиме будет осуществлена прямая трансляция (SFU) и запись. Требуется стабильное интернет-соединение";
+    if (mode === t("label-webinar-record-type-streaming")) {
+      return t("hint-webinar-record-type-streaming");
     }
-    if (mode === "Запись") {
-      return "В данном режиме будет осуществлена прямая трансляция (P2P) и запись. Не зависит от качества интернет-соединения";
+    if (mode === t("label-webinar-record-type-recording")) {
+      return t("hint-webinar-record-type-recording");
     }
     return null;
   };
@@ -188,7 +191,11 @@ const CameraParameter: React.FC<{
       )}
 
       <div className="flex gap-2 mb-2">
-        {["Отключено", "Стриминг", "Запись"].map((option) => (
+        {[
+          t("label-webinar-record-type-disabled"),
+          t("label-webinar-record-type-streaming"),
+          t("label-webinar-record-type-recording"),
+        ].map((option) => (
           <button
             key={option}
             type="button"
@@ -204,7 +211,7 @@ const CameraParameter: React.FC<{
         ))}
       </div>
 
-      {mode !== "Отключено" && (
+      {mode !== t("label-webinar-record-type-disabled") && (
         <>
           <div className="py-1 px-2 bg-yellow-50 border border-yellow-200 rounded-md mb-2">
             <div className="text-sm text-gray-500">{getModeDescription()}</div>
@@ -217,7 +224,7 @@ const CameraParameter: React.FC<{
                 onClick={() => setShowSettings(!showSettings)}
                 className="text-blue-600 hover:text-blue-800 text-sm font-medium mb-2"
               >
-                {showSettings ? "Скрыть настройки" : "Настройки"}
+                {t("btn-settings")}
               </button>
 
               {showSettings && (
@@ -277,7 +284,7 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
     const newSettings = { ...settings };
 
     switch (mode) {
-      case "Отключено":
+      case t("label-webinar-record-type-disabled"):
         if (cameraType === "main") {
           newSettings.main_camera_record = false;
           newSettings.main_camera_upload = false;
@@ -292,7 +299,7 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           newSettings.second_microphone_upload = false;
         }
         break;
-      case "Стриминг":
+      case t("label-webinar-record-type-streaming"):
         if (cameraType === "main") {
           newSettings.main_camera_record = true;
           newSettings.main_camera_upload = false;
@@ -307,7 +314,7 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           newSettings.second_microphone_upload = false;
         }
         break;
-      case "Запись":
+      case t("label-webinar-record-type-recording"):
         if (cameraType === "main") {
           newSettings.main_camera_record = false;
           newSettings.main_camera_upload = true;
@@ -393,15 +400,17 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
       },
     ];
 
-    return mainCameraMode === "Отключено" ? [] : settingsList;
+    return mainCameraMode === t("label-webinar-record-type-disabled")
+      ? []
+      : settingsList;
   };
 
   // Вспомогательная функция для определения режима камеры
   const getCameraMode = (record: boolean, upload: boolean) => {
-    if (!record && !upload) return "Отключено";
-    if (record && !upload) return "Стриминг";
-    if (!record && upload) return "Запись";
-    return "Стриминг";
+    if (!record && !upload) return t("label-webinar-record-type-disabled");
+    if (record && !upload) return t("label-webinar-record-type-streaming");
+    if (!record && upload) return t("label-webinar-record-type-recording");
+    return t("label-webinar-record-type-disabled");
   };
 
   return (
@@ -416,8 +425,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
         <div className="space-y-2">
           <SelectParameter
-            label="Приложение"
-            description="Выберите тип приложения"
+            label={t("label-assignment-application-type")}
+            description={t("hint-assignment-application-type")}
             value={appType}
             options={[
               { value: "browser", label: "Браузер" },
@@ -446,8 +455,7 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           {(appType === "desktop" || appType === "tray") && (
             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-md">
               <div className="text-sm text-yellow-800">
-                Перед началом экзамена, потребуется загрузить и установить
-                приложение
+                {t("hint-assignment-application-type-alt")}
               </div>
             </div>
           )}
@@ -751,8 +759,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
                 {/* 13. Mobile Restrict */}
                 <div className="col-span-2">
                   <SwitchParameter
-                    label="Mobile Restrict"
-                    description="Запретить сдачу через мобильные устройства (веб-браузер)"
+                    label={t("label-proctoring-mobile-restrict")}
+                    description={t("hint-proctoring-mobile-restrict")}
                     checked={numericToBoolean(
                       settings.proctoring_mobile_restrict
                     )}
@@ -765,8 +773,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
                 {/* 14. Fallback */}
                 <div className="col-span-2">
                   <SwitchParameter
-                    label="Fallback"
-                    description="При невозможности подключения выше активированных опций у пользователя - пропускать шаг"
+                    label={t("label-proctoring-fallback-allow")}
+                    description={t("hint-proctoring-fallback-allow")}
                     checked={numericToBoolean(
                       settings.proctoring_fallback_allow
                     )}
@@ -782,7 +790,7 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
 
         <div className="flex justify-end gap-2 pt-4 border-t mt-4">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Закрыть
+            {t("btn-close")}
           </Button>
         </div>
       </DialogContent>
@@ -840,7 +848,7 @@ const AssignmentProctoringComponent: React.FC<
         {isProctoringEnable && (
           <div className="space-y-4 py-2">
             <Button onClick={() => setIsModalOpen(true)}>
-              Настройки прокторинга
+              {t("btn-settings")}
             </Button>
           </div>
         )}

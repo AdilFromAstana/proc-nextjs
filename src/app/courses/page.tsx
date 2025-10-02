@@ -2,6 +2,7 @@
 
 import { fetchCoursesList } from "@/api/courses";
 import CoursesList from "@/components/Courses/CoursesList";
+import { useEnums } from "@/hooks/useEnums";
 import { FilterOption } from "@/types/common";
 import { CourseItemInList } from "@/types/courses/courses";
 import { useTranslations } from "next-intl";
@@ -10,23 +11,17 @@ import React, { useState, useEffect } from "react";
 export default function CoursesPage() {
   const t = useTranslations();
 
+  const { getEnumOptions, loading } = useEnums();
+
   const [courses, setCourses] = useState<CourseItemInList[]>([]);
-  const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [typeFilter, setTypeFilter] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<string>("name_asc");
 
-  const statusFilters: FilterOption[] = [
-    { key: "published", label: t("label-course-status-draft") },
-    { key: "draft", label: t("label-course-status-published") },
-  ];
+  const statusFilters = getEnumOptions("CourseStatusType");
 
-  const typeFilters: FilterOption[] = [
-    { key: "free", label: "Бесплатные" },
-    { key: "paid", label: "По предоплате" },
-    { key: "private", label: "Приватные" },
-  ];
+  const typeFilters = getEnumOptions("CourseAvailabilityType");
 
   const sortOptions: FilterOption[] = [
     { key: "date_newest", label: t("option-before-new") },
@@ -36,13 +31,11 @@ export default function CoursesPage() {
   useEffect(() => {
     const loadCourses = async () => {
       try {
-        setLoading(true);
         const response = await fetchCoursesList({ page: 1 });
         setCourses(response.entities.data);
       } catch (err) {
         console.error(err);
       } finally {
-        setLoading(false);
       }
     };
 
@@ -102,8 +95,8 @@ export default function CoursesPage() {
                 className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 {statusFilters.map((filter) => (
-                  <option key={filter.key} value={filter.key}>
-                    {filter.label}
+                  <option key={filter.raw} value={filter.raw}>
+                    {filter.name}
                   </option>
                 ))}
               </select>
@@ -116,8 +109,8 @@ export default function CoursesPage() {
                 className="w-full pl-3 pr-10 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 {typeFilters.map((filter) => (
-                  <option key={filter.key} value={filter.key}>
-                    {filter.label}
+                  <option key={filter.raw} value={filter.raw}>
+                    {filter.name}
                   </option>
                 ))}
               </select>

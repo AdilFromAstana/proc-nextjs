@@ -1,8 +1,12 @@
 // components/ViolationsSection.tsx
 import React from "react";
-import { faExclamationTriangle, faVideoCamera } from "@fortawesome/free-solid-svg-icons";
+import {
+  faExclamationTriangle,
+  faVideoCamera,
+} from "@fortawesome/free-solid-svg-icons";
 import SectionWrapper from "../../UI/SectionWrapper";
 import VideoSessionListComponent from "../VideoSessionList";
+import { useTranslations } from "next-intl";
 
 interface VideoRecordsSectionProps {
   assignment: any;
@@ -17,6 +21,8 @@ const VideoRecordsSection: React.FC<VideoRecordsSectionProps> = ({
   onViolationSelected,
   student,
 }) => {
+  const t = useTranslations();
+
   const shouldShow = isManager;
   // isManager ||
   // !assignment.isHideUsersEnabled?.() ||
@@ -25,8 +31,8 @@ const VideoRecordsSection: React.FC<VideoRecordsSectionProps> = ({
   return (
     <SectionWrapper
       icon={faVideoCamera}
-      title="Видео"
-      hint="Видеозапись прохождения задания"
+      title={t("label-assignment-records")}
+      hint={t("hint-assignment-records")}
       showSection={shouldShow}
     >
       <VideoSessionListComponent assignment={assignment} student={student} />

@@ -6,6 +6,7 @@ import SectionWrapper from "../../UI/SectionWrapper";
 import ResultChartComponent from "../../UI/ResultChartComponent";
 import { Assessment, AssignmentResult } from "@/types/assignment/results";
 import { StudentAssessment } from "@/types/assignment/studentResult";
+import { useTranslations } from "next-intl";
 
 interface ResultsSectionProps {
   assignment: any;
@@ -34,6 +35,8 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
   disabled,
   onResultUpdated,
 }) => {
+  const t = useTranslations();
+
   const shouldShow = true;
   // results.length > 0 &&
   // (isOwner || isReviewer) &&
@@ -44,8 +47,8 @@ const ResultsSection: React.FC<ResultsSectionProps> = ({
   return (
     <SectionWrapper
       icon={faTasks}
-      title="Результаты"
-      hint="Подсказка по результатам"
+      title={t("label-assignment-results")}
+      hint={t("hint-assignment-results")}
       showSection={shouldShow}
     >
       {components.length <= 0 ? (

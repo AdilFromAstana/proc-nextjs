@@ -3,7 +3,7 @@
 import { ChevronDown, Menu, X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import { ModeToggle } from "@/components/registry/theme-toggle";
 import { Button } from "@/components/ui/button";
@@ -26,24 +26,25 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { getBlocks, getComponents, getUIPrimitives } from "@/lib/registry";
 import Logo from "../logo";
 import { GroupsIcon } from "./icons/GroupsIcon";
 import { LibraryIcon } from "./icons/LibraryIcon";
 import { InfoIcon } from "./icons/InfoIcon";
 
-const uiItems = getUIPrimitives();
-const componentItems = getComponents();
-const blockItems = getBlocks();
-
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter } from "next/navigation";
 
 export function MobileSidebarTrigger() {
   const { setOpenMobile } = useSidebar();
 
   return (
     <div className="absolute top-8 right-4 md:hidden">
-      <Button aria-label="Open menu" onClick={() => setOpenMobile(true)}>
+      <Button
+        aria-label="Open menu"
+        onClick={() => setOpenMobile(true)}
+        variant="ghost"
+        size="icon"
+      >
         <Menu className="size-5" />
       </Button>
     </div>
@@ -52,72 +53,50 @@ export function MobileSidebarTrigger() {
 
 export function RegistrySidebar() {
   const t = useTranslations();
-
+  const locale = useLocale();
+  const router = useRouter();
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredUiItems, setFilteredUiItems] = useState(uiItems);
-  const [filteredComponents, setFilteredComponents] = useState(componentItems);
-  const [filteredBlocks, setFilteredBlocks] = useState(blockItems);
+  // Мемоизированные данные для навигации
+  const libraryItems = useMemo(
+    () => [
+      { title: t("page-main-page"), path: "/" },
+      { title: t("page-assignment-index"), path: "/assignments" },
+      { title: t("page-lesson-index"), path: "/lessons" },
+      { title: t("page-quiz-index"), path: "/quiz" },
+      { title: t("page-course-index"), path: "/courses" },
+      { title: t("page-media-index"), path: "/media" },
+    ],
+    [t]
+  );
 
-  const libraryItems = [
-    { title: t("page-main-page"), path: "/" },
-    { title: t("page-assignment-index"), path: "/assignments" },
-    { title: t("page-lesson-index"), path: "/lessons" },
-    { title: t("page-quiz-index"), path: "/quiz" },
-    { title: t("page-course-index"), path: "/courses" },
-    { title: t("page-media-index"), path: "/media" },
-  ];
+  const groupsItems = useMemo(
+    () => [
+      { title: t("page-class-create"), path: "/classes/create" },
+      { title: t("page-class-index"), path: "/classes" },
+      { title: t("page-rooms-index"), path: "/rooms" },
+      { title: t("page-invite-index"), path: "/invites" },
+    ],
+    [t]
+  );
 
-  const groupsItems = [
-    { title: t("page-class-create"), path: "/classes/create" },
-    { title: t("page-class-index"), path: "/classes" },
-    { title: t("page-rooms-index"), path: "/rooms" },
-    { title: t("page-invite-index"), path: "/invites" },
-  ];
+  // Функция для получения следующей локали
+  const getNextLocale = useCallback((current: string) => {
+    switch (current) {
+      case "ru":
+        return "en";
+      case "en":
+        return "kz";
+      case "kz":
+        return "ru";
+      default:
+        return "ru";
+    }
+  }, []);
 
-  const switchLanguage = () => {
-    const currentLocale =
-      document.cookie
-        .split("; ")
-        .find((row) => row.startsWith("locale="))
-        ?.split("=")[1] || "ru";
-
-    // Определяем следующий язык по кругу: ru -> en -> kz -> ru
-    const getNextLocale = (current: string) => {
-      switch (current) {
-        case "ru":
-          return "en";
-        case "en":
-          return "kz";
-        case "kz":
-          return "ru";
-        default:
-          return "ru";
-      }
-    };
-
-    const newLocale = getNextLocale(currentLocale);
-
-    document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
-
-    // Перезагружаем страницу для применения нового языка
-    window.location.reload();
-  };
-
-  const getCurrentLanguage = () => {
-    if (typeof document === "undefined") return "ru";
-
-    const locale = document.cookie
-      .split("; ")
-      .find((row) => row.startsWith("locale="))
-      ?.split("=")[1];
-
-    return locale || "ru";
-  };
-
-  const getLanguageLabel = (locale: string) => {
+  // Функция для получения метки языка
+  const getLanguageLabel = useCallback((locale: string) => {
     switch (locale) {
       case "kz":
         return "ҚАЗ";
@@ -128,175 +107,139 @@ export function RegistrySidebar() {
       default:
         return "РУС";
     }
-  };
+  }, []);
 
-  useEffect(() => {
-    if (searchTerm) {
-      setFilteredUiItems(
-        uiItems.filter((item) =>
-          item.title.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-      setFilteredComponents(
-        componentItems.filter((item) =>
-          item.title.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-      setFilteredBlocks(
-        blockItems.filter((item) =>
-          item.title.toLowerCase().includes(searchTerm.toLowerCase())
-        )
-      );
-    } else {
-      setFilteredUiItems(uiItems);
-      setFilteredComponents(componentItems);
-      setFilteredBlocks(blockItems);
-    }
-  }, [searchTerm]);
+  // Смена языка без перезагрузки страницы
+  const switchLanguage = useCallback(() => {
+    const newLocale = getNextLocale(locale);
+
+    // Обновляем куки
+    document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
+
+    router.refresh();
+  }, [locale, pathname, getNextLocale, router]);
+
+  // Компонент для пунктов навигации
+  const NavItem = useCallback(
+    ({ item }: { item: { title: string; path: string } }) => (
+      <SidebarMenuItem key={item.path}>
+        <SidebarMenuButton asChild isActive={pathname === item.path}>
+          <Link
+            onClick={() => setOpenMobile(false)}
+            href={item.path}
+            className="transition-colors hover:text-primary"
+          >
+            {item.title}
+          </Link>
+        </SidebarMenuButton>
+      </SidebarMenuItem>
+    ),
+    [pathname, setOpenMobile]
+  );
+
+  // Компонент для секций сайдбара
+  const SidebarSection = useCallback(
+    ({
+      defaultOpen = true,
+      icon: Icon,
+      label,
+      items,
+    }: {
+      defaultOpen?: boolean;
+      icon: React.ComponentType<{ className?: string }>;
+      label: string;
+      items: Array<{ title: string; path: string }>;
+    }) => (
+      <Collapsible defaultOpen={defaultOpen} className="group/collapsible">
+        <SidebarGroup>
+          <CollapsibleTrigger className="w-full">
+            <SidebarGroupLabel className="flex cursor-pointer items-center justify-between p-2 hover:bg-accent/50 rounded-lg transition-colors">
+              <div className="flex min-w-0 items-center">
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                <span className="ml-2 opacity-100 transition-all duration-200 text-sm font-medium">
+                  {label}
+                </span>
+              </div>
+              <ChevronDown className="size-4 flex-shrink-0 opacity-70 transition-all duration-200 group-data-[state=open]/collapsible:rotate-180" />
+            </SidebarGroupLabel>
+          </CollapsibleTrigger>
+
+          <CollapsibleContent>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {items.map((item) => (
+                  <NavItem key={item.path} item={item} />
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </CollapsibleContent>
+        </SidebarGroup>
+      </Collapsible>
+    ),
+    [NavItem]
+  );
 
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
         <div className="flex items-center justify-between px-2 py-2">
-          <Link href="/" className="flex min-w-0 items-center">
+          <Link
+            href="/"
+            className="flex min-w-0 items-center hover:opacity-80 transition-opacity"
+            onClick={() => setOpenMobile(false)}
+          >
             <Logo />
           </Link>
 
           <Button
             variant="ghost"
+            size="icon"
             className="md:hidden"
             onClick={() => setOpenMobile(false)}
           >
-            <X />
+            <X className="size-4" />
           </Button>
         </div>
       </SidebarHeader>
 
       <SidebarContent>
         <ScrollArea className="h-full w-full pr-2">
-          <Collapsible defaultOpen={true} className="group/collapsible">
-            <SidebarGroup>
-              <CollapsibleTrigger className="w-full">
-                <SidebarGroupLabel className="flex cursor-pointer items-center justify-between">
-                  <div className="flex min-w-0 items-center">
-                    <LibraryIcon className="w-5 h-5" />
-                    <span className="ml-2 opacity-100 transition-all duration-200">
-                      {t("label-library")}
-                    </span>
-                  </div>
-                  <ChevronDown className="size-4 flex-shrink-0 opacity-100 transition-all duration-200 group-data-[state=open]/collapsible:rotate-180" />
-                </SidebarGroupLabel>
-              </CollapsibleTrigger>
+          <div className="space-y-1">
+            <SidebarSection
+              icon={LibraryIcon}
+              label={t("label-library")}
+              items={libraryItems}
+            />
 
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {libraryItems.map((item) => (
-                      <SidebarMenuItem key={item.path}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathname === item.path}
-                        >
-                          <Link
-                            onClick={() => setOpenMobile(false)}
-                            href={item.path}
-                          >
-                            {item.title}
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
+            <SidebarSection
+              icon={GroupsIcon}
+              label={t("label-group-list")}
+              items={groupsItems}
+            />
 
-          <Collapsible defaultOpen={true} className="group/collapsible">
-            <SidebarGroup>
-              <CollapsibleTrigger className="w-full">
-                <SidebarGroupLabel className="flex cursor-pointer items-center justify-between">
-                  <div className="flex min-w-0 items-center">
-                    <GroupsIcon className="w-5 h-5" />
-                    <span className="ml-2 opacity-100 transition-all duration-200">
-                      {t("label-group-list")}
-                    </span>
-                  </div>
-                  <ChevronDown className="size-4 flex-shrink-0 opacity-100 transition-all duration-200 group-data-[state=open]/collapsible:rotate-180" />
-                </SidebarGroupLabel>
-              </CollapsibleTrigger>
-
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {groupsItems.map((item) => (
-                      <SidebarMenuItem key={item.path}>
-                        <SidebarMenuButton
-                          asChild
-                          isActive={pathname === item.path}
-                        >
-                          <Link
-                            onClick={() => setOpenMobile(false)}
-                            href={item.path}
-                          >
-                            {item.title}
-                          </Link>
-                        </SidebarMenuButton>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
-
-          <Collapsible defaultOpen={true} className="group/collapsible">
-            <SidebarGroup>
-              <CollapsibleTrigger className="w-full">
-                <SidebarGroupLabel className="flex cursor-pointer items-center justify-between">
-                  <div className="flex min-w-0 items-center">
-                    <InfoIcon className="w-5 h-5" />
-                    <span className="ml-2 opacity-100 transition-all duration-200">
-                      {t("label-resources")}
-                    </span>
-                  </div>
-                  <ChevronDown className="size-4 flex-shrink-0 opacity-100 transition-all duration-200 group-data-[state=open]/collapsible:rotate-180" />
-                </SidebarGroupLabel>
-              </CollapsibleTrigger>
-
-              <CollapsibleContent>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    <SidebarMenuItem key={"/resources"}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={pathname === "/resources"}
-                      >
-                        <Link
-                          onClick={() => setOpenMobile(false)}
-                          href={"/resources"}
-                        >
-                          {t("label-digital-library")}
-                        </Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </CollapsibleContent>
-            </SidebarGroup>
-          </Collapsible>
+            <SidebarSection
+              icon={InfoIcon}
+              label={t("label-resources")}
+              items={[
+                { title: t("label-digital-library"), path: "/resources" },
+              ]}
+            />
+          </div>
         </ScrollArea>
       </SidebarContent>
 
       <SidebarFooter>
-        <div className="flex justify-between items-center w-full">
+        <div className="flex justify-between items-center w-full p-2">
           <Button
             variant="ghost"
             size="sm"
             onClick={switchLanguage}
-            className="flex items-center gap-2"
+            className="flex items-center gap-2 hover:bg-accent/50 transition-colors"
+            title={t("switch-language") || "Switch language"}
           >
-            <span>{getLanguageLabel(getCurrentLanguage())}</span>
+            <span className="text-sm font-medium">
+              {getLanguageLabel(locale)}
+            </span>
           </Button>
           <ModeToggle />
         </div>

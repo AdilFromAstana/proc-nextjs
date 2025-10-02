@@ -8,6 +8,7 @@ import {
   WebinarSession,
   WebinarSessionGroup,
 } from "@/types/assignment/webinar";
+import { useTranslations } from "next-intl";
 
 interface Assignment {
   id: number;
@@ -79,6 +80,8 @@ const VideoSessionListComponent: React.FC<VideoSessionListComponentProps> = ({
   student,
   onSelected,
 }) => {
+  const t = useTranslations();
+
   const {
     data: sessionsData,
     isLoading,
@@ -154,7 +157,7 @@ const VideoSessionListComponent: React.FC<VideoSessionListComponentProps> = ({
   if (!groups || groups.length === 0) {
     return (
       <div className="empty-session-list text-gray-500 text-base text-center">
-        Нет записей вебинара
+        {t("label-assignment-records-empty")}
       </div>
     );
   }

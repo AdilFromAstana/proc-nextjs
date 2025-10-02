@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Clock, History, StopCircle, PlayCircle } from "lucide-react";
 import ConfirmModalComponent from "@/components/Chunks/ConfirmModalComponent";
 import { Student } from "@/types/students";
+import { useTranslations } from "next-intl";
 
 interface Assignment {
   id: number;
@@ -38,6 +39,8 @@ const TimeStatesComponent: React.FC<
   is_finished = false,
   onChanged,
 }) => {
+  const t = useTranslations();
+
   const [confirmModalOpen, setConfirmModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState<{
     type: "time" | "assignment";
@@ -159,7 +162,7 @@ const TimeStatesComponent: React.FC<
       {available_time !== null && (
         <div className="available-time-settings">
           <div className="available-time-label text-gray-700 font-medium mb-2">
-            Доступное время
+            {t("label-available-time")}
           </div>
 
           <div className="available-time-value mb-4">
@@ -188,7 +191,7 @@ const TimeStatesComponent: React.FC<
               className="border-green-200 text-green-700 hover:bg-green-50"
             >
               <Clock className="h-4 w-4 mr-2" />
-              Увеличить время
+              {t("btn-increase-time")}
             </Button>
 
             {/* DECREASE TIME */}
@@ -200,7 +203,7 @@ const TimeStatesComponent: React.FC<
               className="border-red-200 text-red-700 hover:bg-red-50"
             >
               <Clock className="h-4 w-4 mr-2" />
-              Уменьшить время
+              {t("btn-decrease-time")}
             </Button>
 
             {/* RESET TIME */}
@@ -212,7 +215,7 @@ const TimeStatesComponent: React.FC<
               className="border-blue-200 text-blue-700 hover:bg-blue-50"
             >
               <History className="h-4 w-4 mr-2" />
-              Сбросить время
+              {t("btn-reset-time")}
             </Button>
           </div>
         </div>
@@ -222,7 +225,7 @@ const TimeStatesComponent: React.FC<
         {/* FINISH ATTEMPT ACTION */}
         <div className="space-y-2">
           <div className="text-gray-700 font-medium">
-            Завершить задание студента
+            {t("label-finish-student-assignment")}
           </div>
           <Button
             onClick={() => changeAssignmentState("finish")}
@@ -231,14 +234,14 @@ const TimeStatesComponent: React.FC<
             size="sm"
           >
             <StopCircle className="h-4 w-4 mr-2" />
-            Завершить задание
+            {t("btn-finish-assignment")}
           </Button>
         </div>
 
         {/* RESTORE ATTEMPT ACTION */}
         <div className="space-y-2">
           <div className="text-gray-700 font-medium">
-            Восстановить задание студента
+            {t("label-restore-student-assignment")}
           </div>
           <Button
             onClick={() => changeAssignmentState("restore")}
@@ -247,7 +250,7 @@ const TimeStatesComponent: React.FC<
             size="sm"
           >
             <PlayCircle className="h-4 w-4 mr-2" />
-            Восстановить задание
+            {t("btn-restore-assignment")}
           </Button>
         </div>
       </div>
@@ -256,7 +259,10 @@ const TimeStatesComponent: React.FC<
       {confirmModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-lg font-semibold mb-4">Подтвердить действие</h3>
+            <h3 className="text-lg font-semibold mb-4">
+              {t("prompt-confirm-action")}
+            </h3>
+
             <div className="flex justify-end gap-2">
               <Button
                 variant="outline"
@@ -265,9 +271,9 @@ const TimeStatesComponent: React.FC<
                   setPendingAction(null);
                 }}
               >
-                Отмена
+                {t("btn-no")}
               </Button>
-              <Button onClick={handleConfirm}>Подтвердить</Button>
+              <Button onClick={handleConfirm}> {t("btn-confirm")}</Button>
             </div>
           </div>
         </div>

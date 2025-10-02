@@ -5,6 +5,7 @@ import React, { useState, useCallback, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { AssignmentViolation } from "@/types/assignment/violations";
 import { useAssignmentStudentViolations } from "@/hooks/useAssignmentStudentViolations";
+import { useTranslations } from "next-intl";
 
 interface AssignmentViolationsComponentProps {
   assignmentId: number;
@@ -27,6 +28,8 @@ const AssignmentViolationsComponent: React.FC<
   interval = 20000,
   onViolationSelected,
 }) => {
+  const t = useTranslations();
+
   const [page, setPage] = useState(1);
   const [allViolations, setAllViolations] = useState<AssignmentViolation[]>([]);
   const [hasMorePages, setHasMorePages] = useState(true);
@@ -85,6 +88,7 @@ const AssignmentViolationsComponent: React.FC<
       if (page === 1) {
         // Первая страница - заменяем все данные
         setAllViolations(newViolations);
+        console.log("newViolations: ", newViolations);
       } else {
         // Следующие страницы - добавляем к существующим
         setAllViolations((prev) => [...prev, ...newViolations]);
@@ -137,7 +141,7 @@ const AssignmentViolationsComponent: React.FC<
           className="cursor-pointer w-auto text-gray-700 text-xs font-semibold py-2.5 px-2.5 bg-white shadow-[0px_1px_3px_0px_rgba(0,0,0,0.2)] rounded-b-[3px] whitespace-nowrap inline-block absolute top-0 left-1/2 transform -translate-x-1/2 z-10"
           onClick={handleShowPrevious}
         >
-          Показать предыдущие действия
+          {t("btn-assignment-show-previous-actions")}
         </div>
       )}
 

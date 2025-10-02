@@ -1,38 +1,63 @@
-import { EnumOption } from "@/types/enum";
+import { EnumOption, EnumsResponse } from "@/types/enum";
 import axiosClient from "../axiosClient";
 
-export const getVariantQuestionType = async (): Promise<EnumOption[]> => {
-  const response = await axiosClient.get<EnumOption[]>(
-    "/enum/VariantQuestionType.json"
-  );
-  return response.data["VariantQuestionType"];
-};
+class EnumService {
+  private cache: EnumsResponse["enumerations"] | null = null;
+  private loading: boolean = false;
+  private loadPromise: Promise<EnumsResponse["enumerations"]> | null = null;
 
-export const getGuardType = async (): Promise<EnumOption[]> => {
-  const response = await axiosClient.get<EnumOption[]>("/enum/GuardType.json");
-  return response.data["GuardType"];
-};
+  async getAllEnums(
+    forceRefresh: boolean = false
+  ): Promise<EnumsResponse["enumerations"]> {
+    // Возвращаем кэш если есть и не форсируем обновление
+    if (this.cache && !forceRefresh) {
+      return this.cache;
+    }
 
-export const getChatMessageActionType = async (): Promise<EnumOption[]> => {
-  const response = await axiosClient.get<EnumOption[]>(
-    "/enum/ChatMessageActionType.json"
-  );
-  return response.data["ChatMessageActionType"];
-};
+    // Возвращаем существующий промис если уже загружаем
+    if (this.loading && this.loadPromise) {
+      return this.loadPromise;
+    }
 
-export const getDifficultLevelQuestionType = async (): Promise<
-  EnumOption[]
-> => {
-  const response = await axiosClient.get<EnumOption[]>(
-    "/enum/DifficultLevelQuestionType.json"
-  );
+    this.loading = true;
+    this.loadPromise = this.fetchEnums();
 
-  return response.data["DifficultLevelQuestionType"];
-};
+    try {
+      const enums = await this.loadPromise;
+      this.cache = enums;
+      return enums;
+    } catch (error) {
+      throw error;
+    } finally {
+      this.loading = false;
+      this.loadPromise = null;
+    }
+  }
 
-export const getQuestionType = async (): Promise<EnumOption[]> => {
-  const response = await axiosClient.get<EnumOption[]>(
-    "/enum/QuestionType.json"
-  );
-  return response.data["QuestionType"];
-};
+  async getEnum<T = EnumOption[]>(enumName: string): Promise<T> {
+    const enums = await this.getAllEnums();
+    return enums[enumName] as T;
+  }
+
+  private async fetchEnums(): Promise<EnumsResponse["enumerations"]> {
+    try {
+      const response = await axiosClient.get<EnumsResponse>("/enums.json");
+
+      if (response.data.status !== "success") {
+        throw new Error("Failed to fetch enums");
+      }
+
+      return response.data.enumerations;
+    } catch (error) {
+      console.error("Error fetching enums:", error);
+      throw error;
+    }
+  }
+
+  // Очистка кэша
+  clearCache(): void {
+    this.cache = null;
+  }
+}
+
+export const enumService = new EnumService();

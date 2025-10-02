@@ -1,19 +1,20 @@
 // src/components/Quiz/QuestionCard/QuestionCard.tsx
 import React, { useState, useCallback } from "react";
 import { QuizQuestionItem } from "@/types/quiz/quiz";
-import { deleteQuestionFromQuiz, updateQuestionInQuiz } from "@/api/quiz";
+import { updateQuestionInQuiz } from "@/api/quiz";
 import QuestionHeader from "./QuestionHeader/QuestionHeader";
 import QuestionBody from "./QuestionBody";
 import { useTranslations } from "next-intl";
 
 interface QuestionCardProps {
   question: QuizQuestionItem;
-  onQuestionDeleted: (componentId: number) => void;
+  onDeleteRequest: (componentId: number) => void; // Изменили эту строку
   onQuestionUpdated: () => void;
 }
 
 const QuestionCard: React.FC<QuestionCardProps> = React.memo(
-  ({ question, onQuestionDeleted, onQuestionUpdated }) => {
+  ({ question, onDeleteRequest, onQuestionUpdated }) => {
+    // И здесь изменили
     const t = useTranslations();
 
     const [isEditing, setIsEditing] = useState(false);
@@ -70,19 +71,6 @@ const QuestionCard: React.FC<QuestionCardProps> = React.memo(
       }
     }, [question, editedQuestion, onQuestionUpdated]);
 
-    const handleDeleteQuestion = useCallback(
-      async (componentId: number) => {
-        try {
-          const quizId = question.quiz_id;
-          await deleteQuestionFromQuiz(quizId, componentId);
-          onQuestionDeleted(componentId);
-        } catch (error) {
-          console.error("Ошибка при удалении вопроса:", error);
-        }
-      },
-      [question, onQuestionDeleted]
-    );
-
     const updateComponent = useCallback((updates: any) => {
       setEditedQuestion((prev) => ({
         ...prev,
@@ -112,7 +100,7 @@ const QuestionCard: React.FC<QuestionCardProps> = React.memo(
           score={question.settings?.score_encouragement}
           isEditing={isEditing}
           onEditClick={handleEditClick}
-          onDeleteClick={() => handleDeleteQuestion(question.component_id)}
+          onDeleteClick={() => onDeleteRequest(question.component_id)}
           onSaveClick={handleSave}
           onCancelClick={handleCancel}
         />

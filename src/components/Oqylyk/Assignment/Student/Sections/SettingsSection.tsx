@@ -3,6 +3,7 @@ import React from "react";
 import { faCog } from "@fortawesome/free-solid-svg-icons";
 import TimeStatesComponent from "../TimeStatesComponent";
 import SectionWrapper from "../../UI/SectionWrapper";
+import { useTranslations } from "next-intl";
 
 interface SettingsSectionProps {
   assignment: any;
@@ -21,11 +22,12 @@ const SettingsSection: React.FC<SettingsSectionProps> = ({
   is_finished,
   onSettingsChange,
 }) => {
+  const t = useTranslations();
   return (
     <SectionWrapper
       icon={faCog}
-      title="Настройки"
-      hint="Подсказка по настройкам"
+      title={t("label-assignment-student-settings")}
+      hint={t("hint-assignment-student-settings")}
     >
       <TimeStatesComponent
         assignment={assignment}

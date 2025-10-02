@@ -183,3 +183,66 @@ export interface QuizAttemptsResponse {
   status_code: string;
   result: null;
 }
+
+export interface FinishAssignmentActionResponse {
+  actions: FinishAssignmentAction[];
+}
+
+// Тип для действия завершения теста
+export interface FinishAssignmentAction {
+  action_type: "finished";
+  assignment_attempt_id: number;
+  assignment_id: number;
+  id: null;
+  initiator_id: null;
+  student_id: null;
+  webinar_session_id: null;
+  screenshot: null;
+  screenshots: null;
+  is_warning: boolean;
+  is_archived: boolean;
+  description: null;
+  created_at: null;
+  diff: null;
+  user: {
+    REQUEST_CONTINUE: number;
+    REQUEST_REDUNDANT: number;
+    REQUEST_SKIP: number;
+    id: null;
+    school_id: null;
+    auth_type: null;
+    group: null;
+    photo: null;
+    photo_thumb: {};
+    color: null;
+    firstname: null;
+    lastname: null;
+    patronymic: null;
+    email: null;
+    phone: null;
+    username: null;
+    description: null;
+    password: null;
+    school: {
+      REQUEST_CONTINUE: number;
+      REQUEST_REDUNDANT: number;
+      REQUEST_SKIP: number;
+      id: null;
+      type: null;
+      name: null;
+      logo: null;
+      logo_thumb: {};
+      website: null;
+      email: null;
+    };
+    register_date: null;
+    last_activity_date: null;
+    additional: {
+      almaty_daryn_school_id: null;
+      almaty_daryn_teacher_name: null;
+    };
+    is_online: boolean;
+    is_need_complete_challenge: boolean;
+    is_multiple_schools: boolean;
+  };
+}

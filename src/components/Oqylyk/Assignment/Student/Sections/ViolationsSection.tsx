@@ -3,6 +3,7 @@ import React from "react";
 import { faExclamationTriangle } from "@fortawesome/free-solid-svg-icons";
 import ViolationsComponent from "../ViolationsComponent";
 import SectionWrapper from "../../UI/SectionWrapper";
+import { useTranslations } from "next-intl";
 
 interface ViolationsSectionProps {
   assignment: any;
@@ -17,6 +18,8 @@ const ViolationsSection: React.FC<ViolationsSectionProps> = ({
   violations,
   onViolationSelected,
 }) => {
+  const t = useTranslations();
+
   const shouldShow = isManager;
   // isManager ||
   // !assignment.isHideUsersEnabled?.() ||
@@ -25,8 +28,8 @@ const ViolationsSection: React.FC<ViolationsSectionProps> = ({
   return (
     <SectionWrapper
       icon={faExclamationTriangle}
-      title="Нарушения"
-      hint="Подсказка по нарушениям"
+      title={t("label-assignment-violations")}
+      hint={t("hint-assignment-violations")}
       showSection={shouldShow}
     >
       {violations && violations.length > 0 ? (
