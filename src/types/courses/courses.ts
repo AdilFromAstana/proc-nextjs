@@ -37,14 +37,13 @@ export interface CourseItemResponse {
   entity: CourseItem;
 }
 
-// types/courses/courses.ts
 export interface CourseItem {
   id: number;
   owner_id: number;
   invite_code_id: number | null;
   certificate_id: number | null;
-  status: string;
-  availability_type: string;
+  status: "published" | "draft";
+  availability_type: "free" | "private" | "prepaid";
   image: string;
   name: string;
   description: string;
@@ -67,8 +66,8 @@ export interface CourseItemEdit {
   owner_id: number;
   invite_code_id: number | null;
   certificate_id: number | null;
-  status: string;
-  availability_type: string;
+  status: "published" | "draft";
+  availability_type: "free" | "private" | "prepaid";
   image: string;
   name: string;
   description: string;

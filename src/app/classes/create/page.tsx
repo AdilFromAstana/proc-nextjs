@@ -15,6 +15,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { useTranslations } from "next-intl";
 
 export default function CreateClassPage() {
   const [isEditing] = React.useState(true); // Всегда в режиме редактирования
@@ -236,6 +237,8 @@ export function CollapsibleCard({
   onOpen,
   className = "",
 }: CollapsibleCardProps) {
+  const t = useTranslations();
+
   const [imgError, setImgError] = useState(false);
 
   const defaultAvatar =
@@ -272,7 +275,7 @@ export function CollapsibleCard({
               onOpen?.(item.id);
             }}
           >
-            Открыть
+            {t("btn-open")}
           </button>
         </div>
       </CollapsibleContent>

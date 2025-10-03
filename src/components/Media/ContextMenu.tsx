@@ -5,6 +5,7 @@ import { EyeIcon } from "@/app/icons/EyeIcon";
 import { CutIcon } from "@/app/icons/CutIcon";
 import { RenameIcon } from "@/app/icons/RenameIcon";
 import { DeleteIcon } from "@/app/icons/DeleteIcon";
+import { useTranslations } from "next-intl";
 
 interface FileContextMenuProps {
   x: number;
@@ -25,6 +26,8 @@ const FileContextMenu = ({
   onOpenFolder,
   onFilesChange,
 }: FileContextMenuProps) => {
+  const t = useTranslations();
+
   const menuRef = useRef<HTMLDivElement>(null);
   const [showRenameInput, setShowRenameInput] = useState(false);
   const [newName, setNewName] = useState(mediafile.name);
@@ -151,7 +154,7 @@ const FileContextMenu = ({
         onClick={handleOpenClick}
       >
         <EyeIcon width={18} className="mr-2" />
-        Открыть
+        {t("btn-open")}
       </button>
 
       <button
@@ -162,7 +165,7 @@ const FileContextMenu = ({
         }}
       >
         <CutIcon width={18} className="mr-2" />
-        Вырезать
+        {t("btn-cut")}
       </button>
 
       <button
@@ -170,7 +173,7 @@ const FileContextMenu = ({
         onClick={() => setShowRenameInput(true)}
       >
         <RenameIcon width={18} className="mr-2" />
-        Переименовать
+        {t("btn-rename")}
       </button>
 
       <hr className="my-1" />
@@ -180,7 +183,7 @@ const FileContextMenu = ({
         onClick={handleDelete}
       >
         <DeleteIcon width={18} className="mr-2" />
-        Удалить
+        {t("btn-delete")}
       </button>
     </div>
   );

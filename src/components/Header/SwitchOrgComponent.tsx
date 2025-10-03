@@ -34,7 +34,6 @@ const SwitchOrgComponent = forwardRef<SwitchOrgRef, Props>(
       <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
         {/* Первое модальное окно */}
         <div className="w-full h-full max-h-screen mx-auto overflow-hidden bg-white border rounded-lg shadow-lg relative">
-          {/* Закрыть */}
           <button
             onClick={() => {
               setIsOpen(false);

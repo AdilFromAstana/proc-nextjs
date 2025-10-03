@@ -309,12 +309,6 @@ export interface SortOption {
   name: string;
 }
 
-export const studentSortByOptions: SortOption[] = [
-  { id: "lastname", name: "По фамилии" },
-  { id: "results", name: "По результатам" },
-  { id: "credibility", name: "По надежности" },
-];
-
 // Хелперы для фильтрации
 export const getStudentFilterFields = (
   assignment: AssignmentDetail

@@ -5,6 +5,27 @@ import { FileDocumentIcon } from "@/app/icons/FileDocumentIcon";
 import { VideoIcon } from "@/app/icons/VideoIcon";
 import { AudioIcon } from "@/app/icons/AudioIcon";
 import ContextMenu from "./ContextMenu";
+import { useTranslations } from "next-intl";
+import { useEnums } from "@/hooks/useEnums";
+
+const FILE_ICON_CONFIG = {
+  folder: {
+    icon: FolderIcon,
+    color: "#2563EB",
+  },
+  document: {
+    icon: FileDocumentIcon,
+    color: "#2563EB",
+  },
+  video: {
+    icon: VideoIcon,
+    color: "#2563EB",
+  },
+  audio: {
+    icon: AudioIcon,
+    color: "#2563EB",
+  },
+};
 
 const MediafilesListItem = ({
   mediafile,
@@ -17,11 +38,16 @@ const MediafilesListItem = ({
   onOpenFolder: (folderId: number) => void;
   onFilesChange: () => void;
 }) => {
+  const t = useTranslations();
+  const { getEnumOptions, loading } = useEnums();
+
   const [contextMenu, setContextMenu] = useState<{
     x: number;
     y: number;
     visible: boolean;
   }>({ x: 0, y: 0, visible: false });
+
+  const mediaTypes = getEnumOptions("MediaTypes");
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -32,7 +58,7 @@ const MediafilesListItem = ({
     });
   };
 
-  const getImagePreview = () => {
+  const getImagePreview = (): string => {
     if (mediafile.type === "image" && mediafile.thumbs) {
       return mediafile.src;
     }
@@ -60,69 +86,56 @@ const MediafilesListItem = ({
     });
   };
 
-  const getFileType = (): string => {
-    switch (mediafile.type) {
-      case "folder":
-        return "Папка";
-      case "image":
-        return "Изображение";
-      case "document":
-        return "Документ";
-      case "video":
-        return "Видео";
-      case "audio":
-        return "Аудио";
-      default:
-        return mediafile.mime_type || "Файл";
+  // Функция для получения названия типа файла из enum MediaTypes
+  const getFileTypeLabel = (): string => {
+    if (!mediaTypes || loading) {
+      return mediafile.mime_type || "Файл";
     }
+
+    // Ищем соответствующий тип в enum MediaTypes
+    const mediaType = mediaTypes.find(
+      (option) => option.raw === mediafile.type
+    );
+
+    return mediaType ? mediaType.name : mediafile.mime_type || "Файл";
   };
 
   const getFileIcon = () => {
-    switch (mediafile.type) {
-      case "folder":
-        return (
-          <div className="w-12 h-12 flex items-center justify-center">
-            <FolderIcon color="#2563EB" height="24px" />
-          </div>
-        );
-      case "document":
-        return (
-          <div className="w-12 h-12 flex items-center justify-center">
-            <FileDocumentIcon color="#2563EB" height="24px" />
-          </div>
-        );
-      case "video":
-        return (
-          <div className="w-12 h-12 flex items-center justify-center">
-            <VideoIcon color="#2563EB" height="24px" />
-          </div>
-        );
-      case "audio":
-        return (
-          <div className="w-12 h-12 flex items-center justify-center">
-            <AudioIcon color="#2563EB" height="24px" />
-          </div>
-        );
-      case "image":
-        return (
-          <div className="w-12 h-12 flex items-center justify-center">
-            <img
-              src={getImagePreview() || ""}
-              alt={mediafile.name}
-              className="max-h-12 object-contain"
-              width="24"
-              height="24"
-            />
-          </div>
-        );
-      default:
-        return (
-          <div className="w-12 h-12 flex items-center justify-center">
-            <FileDocumentIcon color="#2563EB" height="24px" />
-          </div>
-        );
+    // Для изображений показываем превью
+    if (mediafile.type === "image") {
+      return (
+        <div className="w-12 h-12 flex items-center justify-center">
+          <img
+            src={getImagePreview() || ""}
+            alt={mediafile.name}
+            className="max-h-12 object-contain"
+            width="24"
+            height="24"
+          />
+        </div>
+      );
     }
+
+    const config =
+      FILE_ICON_CONFIG[mediafile.type as keyof typeof FILE_ICON_CONFIG];
+
+    if (config && config.icon) {
+      const IconComponent = config.icon;
+      return (
+        <div className="w-12 h-12 flex items-center justify-center">
+          <IconComponent color={config.color} height="24px" />
+        </div>
+      );
+    }
+
+    return (
+      <div className="w-12 h-12 flex items-center justify-center">
+        <FileDocumentIcon color="#2563EB" height="24px" />
+      </div>
+    );
   };
+
+  const isFolder = mediafile.type === "folder";
 
   return (
     <div
@@ -130,27 +143,31 @@ const MediafilesListItem = ({
       onClick={onOpenDetails}
       onContextMenu={handleContextMenu}
       onDoubleClick={() => {
-        if (mediafile.type === "folder") {
+        if (isFolder) {
           onOpenFolder(mediafile.id);
         }
       }}
     >
       {getFileIcon()}
+
       <div className="flex-1 min-w-0">
         <h3 className="font-semibold text-gray-900 truncate">
           {mediafile.name}
         </h3>
       </div>
+
       <div className="flex-1 min-w-0">
-        <h3 className="text-gray-600">{getFileType()}</h3>
+        <h3 className="text-gray-600">{getFileTypeLabel()}</h3>
       </div>
+
       <div className="flex-1 min-w-0">
-        {mediafile.type !== "folder" ? (
+        {!isFolder && (
           <h3 className="text-gray-600">
             {formatFileSize(mediafile.file_size)}
           </h3>
-        ) : null}
+        )}
       </div>
+
       <div className="flex-1 min-w-0">
         <h3 className="text-gray-600">{formatDate(mediafile.created_at)}</h3>
       </div>

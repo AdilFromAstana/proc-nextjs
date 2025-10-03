@@ -1,8 +1,10 @@
 import axiosClient from "../axiosClient";
-import { LessonDetailResponse } from "@/types/lessons/lessonQuestions";
 import {
+  ClassEntityResponse,
   ClassesListResponse,
   FetchClassesListParams,
+  FetchStudentsNTeachersParams,
+  StudentsNTeachersResponse,
 } from "@/types/classes/classes";
 
 export const fetchClassesList = async (
@@ -25,7 +27,7 @@ export const fetchClassesList = async (
 
 export const fetchClassById = async (
   id: number
-): Promise<LessonDetailResponse> => {
+): Promise<ClassEntityResponse> => {
   let fields = [
     "id",
     "name",
@@ -34,7 +36,7 @@ export const fetchClassById = async (
     "teachers_count",
   ];
 
-  const response = await axiosClient.get<LessonDetailResponse>(
+  const response = await axiosClient.get<ClassEntityResponse>(
     `/classes/${id}`,
     {
       headers: { "X-Requested-Fields": fields.join(",") },
@@ -44,38 +46,47 @@ export const fetchClassById = async (
   return response.data;
 };
 
+let userFields = [
+  "id",
+  "user_id",
+  "id",
+  "user:photo",
+  "user:color",
+  "user:photo_thumb:big",
+  "user:photo_thumb:medium",
+  "user:photo_thumb:small",
+  "user:firstname",
+  "user:lastname",
+  "user:last_activity_date",
+  "user:is_online",
+];
+
 export const fetchStudents = async (
-  params: FetchClassesListParams
-): Promise<ClassesListResponse> => {
-  const cleanedParams = Object.fromEntries(
-    Object.entries(params).filter(
-      ([_, value]) => value !== undefined && value !== null && value !== "all"
-    )
+  params: FetchStudentsNTeachersParams
+): Promise<StudentsNTeachersResponse> => {
+  const response = await axiosClient.get<StudentsNTeachersResponse>(
+    "/students",
+
+    {
+      headers: { "X-Requested-Fields": userFields.join(",") },
+      params: params,
+    }
   );
-
-  const response = await axiosClient.get<ClassesListResponse>("/students", {
-    params: cleanedParams,
-  });
-
-  console.log(`fetchClassesList: ${response.data}`);
 
   return response.data;
 };
 
 export const fetchTeachers = async (
-  params: FetchClassesListParams
-): Promise<ClassesListResponse> => {
-  const cleanedParams = Object.fromEntries(
-    Object.entries(params).filter(
-      ([_, value]) => value !== undefined && value !== null && value !== "all"
-    )
+  params: FetchStudentsNTeachersParams
+): Promise<StudentsNTeachersResponse> => {
+  const response = await axiosClient.get<StudentsNTeachersResponse>(
+    "/teachers",
+
+    {
+      headers: { "X-Requested-Fields": userFields.join(",") },
+      params: params,
+    }
   );
-
-  const response = await axiosClient.get<ClassesListResponse>("/teachers", {
-    params: cleanedParams,
-  });
-
-  console.log(`fetchClassesList: ${response.data}`);
 
   return response.data;
 };

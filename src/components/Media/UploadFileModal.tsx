@@ -2,6 +2,7 @@ import { uploadMediaFile } from "@/api/media/mediafilesApi";
 import { CloseButtonIcon } from "@/app/icons/CloseButtonIcon";
 import { UploadIcon } from "@/app/icons/UploadIcon";
 import { MediaFile } from "@/types/media";
+import { useTranslations } from "next-intl";
 import React, { useState } from "react";
 
 interface UploadModalProps {
@@ -15,6 +16,8 @@ const UploadFileModal = ({
   parentId,
   onUploadSuccess,
 }: UploadModalProps) => {
+  const t = useTranslations();
+
   const [dragActive, setDragActive] = useState(false);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
@@ -92,7 +95,9 @@ const UploadFileModal = ({
       <div className="relative w-full max-w-md mx-auto mt-16 mb-16 p-6 bg-white rounded-lg shadow-xl">
         {/* Заголовок */}
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Загрузка</h2>
+          <h2 className="text-xl font-semibold text-gray-900">
+            {t("label-upload")}
+          </h2>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 transition-colors"
@@ -102,8 +107,7 @@ const UploadFileModal = ({
         </div>
 
         <p className="text-gray-600 mb-8">
-          Здесь вы можете загрузить видео, аудио, изображение, документ или
-          zip-файл
+          {t("label-media-upload-description")}
         </p>
 
         <form onSubmit={handleSubmit}>
@@ -133,7 +137,7 @@ const UploadFileModal = ({
               <UploadIcon height="64" color="gray" />
 
               <p className="text-gray-500">
-                Переместите сюда файл или выберите с устройства
+                {t("hint-media-text-select-file")}
               </p>
             </label>
           </div>
@@ -148,7 +152,7 @@ const UploadFileModal = ({
                   : "bg-gray-300 cursor-not-allowed"
               }`}
             >
-              Загрузить
+              {t("btn-upload")}
             </button>
           </div>
         </form>

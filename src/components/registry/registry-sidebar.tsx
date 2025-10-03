@@ -29,7 +29,6 @@ import {
 import Logo from "../logo";
 import { GroupsIcon } from "./icons/GroupsIcon";
 import { LibraryIcon } from "./icons/LibraryIcon";
-import { InfoIcon } from "./icons/InfoIcon";
 
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -58,14 +57,13 @@ export function RegistrySidebar() {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
 
-  // Мемоизированные данные для навигации
   const libraryItems = useMemo(
     () => [
       { title: t("page-main-page"), path: "/" },
       { title: t("page-assignment-index"), path: "/assignments" },
       { title: t("page-lesson-index"), path: "/lessons" },
       { title: t("page-quiz-index"), path: "/quiz" },
-      { title: t("page-course-index"), path: "/courses" },
+      // { title: t("page-course-index"), path: "/courses" },
       { title: t("page-media-index"), path: "/media" },
     ],
     [t]
@@ -81,7 +79,6 @@ export function RegistrySidebar() {
     [t]
   );
 
-  // Функция для получения следующей локали
   const getNextLocale = useCallback((current: string) => {
     switch (current) {
       case "ru":
@@ -95,7 +92,6 @@ export function RegistrySidebar() {
     }
   }, []);
 
-  // Функция для получения метки языка
   const getLanguageLabel = useCallback((locale: string) => {
     switch (locale) {
       case "kz":
@@ -109,11 +105,9 @@ export function RegistrySidebar() {
     }
   }, []);
 
-  // Смена языка без перезагрузки страницы
   const switchLanguage = useCallback(() => {
     const newLocale = getNextLocale(locale);
 
-    // Обновляем куки
     document.cookie = `locale=${newLocale}; path=/; max-age=31536000; SameSite=Lax`;
 
     router.refresh();
@@ -215,14 +209,6 @@ export function RegistrySidebar() {
               icon={GroupsIcon}
               label={t("label-group-list")}
               items={groupsItems}
-            />
-
-            <SidebarSection
-              icon={InfoIcon}
-              label={t("label-resources")}
-              items={[
-                { title: t("label-digital-library"), path: "/resources" },
-              ]}
             />
           </div>
         </ScrollArea>

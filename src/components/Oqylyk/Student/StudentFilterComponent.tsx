@@ -8,8 +8,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { StudentList, studentSortByOptions } from "@/types/assignment";
+import { SortOption, StudentList } from "@/types/assignment";
 import { useAssignmentStudents } from "@/hooks/useAssignmentStudents";
+import { useTranslations } from "next-intl";
 
 interface StudentFilterComponentProps {
   assignmentId: number;
@@ -34,6 +35,8 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
   children,
   onPageChange,
 }) => {
+  const t = useTranslations();
+
   const [sortBy, setSortBy] = useState<string>("lastname");
   const [filter, setFilter] = useState<StudentFilter>({
     limit: chunks[0],
@@ -54,6 +57,12 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
     filter.query
   );
 
+  const studentSortByOptions: SortOption[] = [
+    { id: "lastname", name: t("option-sort-by-lastname") },
+    { id: "results", name: t("option-sort-by-results") },
+    { id: "credibility", name: t("option-sort-by-credibility") },
+  ];
+
   // Преобразуем AssignmentStudent[] в StudentList (Student[])
   const students = useMemo<StudentList>(() => {
     const assignmentStudents = studentsData?.entities?.data || [];
@@ -72,7 +81,7 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
   const perPageOptions = useMemo(() => {
     return chunks.map((count) => ({
       id: count,
-      name: `${count} студентов`,
+      name: `${count} ${t("option-per-page-students")}`,
     }));
   }, [chunks]);
 

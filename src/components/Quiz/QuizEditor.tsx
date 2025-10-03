@@ -27,7 +27,7 @@ import { AppointIcon } from "@/app/icons/Quiz/QuizHeaderIcons/AppointIcon";
 import { CloneIcon } from "@/app/icons/Quiz/QuizHeaderIcons/CloneIcon";
 import { DeleteIcon } from "@/app/icons/Quiz/QuizHeaderIcons/DeleteIcon";
 import { CloseIcon } from "@/app/icons/Quiz/QuizHeaderIcons/CloseIcon";
-import { HeaderActions } from "./HeaderActions";
+import { HeaderActions } from "../common/HeaderActions";
 
 import { QuestionSettings } from "@/types/quiz/addQuestion";
 import { useTranslations } from "next-intl";

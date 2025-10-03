@@ -9,10 +9,13 @@ import { CertificateItem } from "@/types/certificates/certificates";
 import { SaveIcon } from "@/app/icons/Quiz/QuizHeaderIcons/SaveIcon";
 import { DeleteIcon } from "@/app/icons/DeleteIcon";
 import { CloseIcon } from "@/app/icons/Quiz/QuizHeaderIcons/CloseIcon";
-import { HeaderActions } from "@/components/Quiz/HeaderActions";
+import { HeaderActions } from "@/components/common/HeaderActions";
 import axiosClient from "@/api/axiosClient";
+import { useTranslations } from "next-intl";
 
 export default function CourseEditPage() {
+  const t = useTranslations();
+
   const router = useRouter();
   const params = useParams();
 
@@ -229,13 +232,13 @@ export default function CourseEditPage() {
               onClick={loadCourse}
               className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700"
             >
-              Повторить попытку
+              {t("btn-retry")}
             </button>
             <button
               onClick={() => router.back()}
               className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50"
             >
-              Назад
+              {t("btn-back")}
             </button>
           </div>
         </div>
@@ -244,30 +247,30 @@ export default function CourseEditPage() {
   }
 
   return (
-    <div className="min-h-screen w-full bg-gray-50">
+    <div className="min-h-screen w-full p-4 bg-gray-50">
       <div className="max-w-6xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold text-gray-900">
-            Редактирование курса
+            {courseItemData.name}
           </h1>
 
           <HeaderActions
             actions={[
               {
                 icon: SaveIcon,
-                label: "Сохранить",
+                label: t("btn-save"),
                 onClick: handleSubmit,
                 className: "hover:text-blue-600 hover:bg-blue-50",
               },
               {
                 icon: DeleteIcon,
-                label: "Удалить",
+                label: t("btn-delete"),
                 onClick: handleDelete,
                 className: "hover:text-red-600 hover:bg-red-50",
               },
               {
                 icon: CloseIcon,
-                label: "Закрыть",
+                label: t("btn-close"),
                 onClick: () => router.back(),
                 className: "hover:text-gray-800 hover:bg-gray-100",
               },
@@ -282,9 +285,7 @@ export default function CourseEditPage() {
                 {uploadingImage ? (
                   <div className="flex flex-col items-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-2"></div>
-                    <p className="text-sm text-gray-500">
-                      Загрузка изображения...
-                    </p>
+                    <p className="text-sm text-gray-500">{t("label-upload")}</p>
                   </div>
                 ) : imagePreview ? (
                   <img
@@ -301,7 +302,7 @@ export default function CourseEditPage() {
                 ) : (
                   <div className="text-center">
                     <p className="mt-2 text-sm text-gray-500">
-                      Выбрать изображение
+                      {t("btn-select-image")}
                     </p>
                   </div>
                 )}
@@ -318,12 +319,12 @@ export default function CourseEditPage() {
             <div className="p-6 border-b border-gray-200">
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700">
-                  Статус
+                  {t("label-course-status")}
                 </label>
                 <p className="text-xs text-gray-500 mt-1">
                   {courseItemData?.status === "draft"
-                    ? "Не видно никому кроме вас"
-                    : "Видно всем, за исключением приватного доступа"}
+                    ? t("hint-course-status-draft")
+                    : t("hint-course-status-published")}
                 </p>
                 <div className="mt-2 flex space-x-2">
                   {(["draft", "published"] as const).map((status) => (
@@ -337,7 +338,9 @@ export default function CourseEditPage() {
                           : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                       }`}
                     >
-                      {status === "draft" ? "Черновик" : "Опубликован"}
+                      {status === "draft"
+                        ? t("label-course-status-draft")
+                        : t("label-course-status-published")}
                     </button>
                   ))}
                 </div>
@@ -349,7 +352,7 @@ export default function CourseEditPage() {
                 htmlFor="name"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Название курса
+                {t("label-course-name")}
               </label>
               <input
                 type="text"
@@ -359,6 +362,7 @@ export default function CourseEditPage() {
                 onChange={handleChange}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
+                placeholder={t("placeholder-course-name")}
               />
             </div>
 
@@ -367,7 +371,7 @@ export default function CourseEditPage() {
                 htmlFor="short_description"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Краткое описание
+                {t("label-course-short-description")}
               </label>
               <textarea
                 id="short_description"
@@ -376,7 +380,7 @@ export default function CourseEditPage() {
                 onChange={handleChange}
                 rows={3}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Краткое описание курса..."
+                placeholder={t("placeholder-course-short-description")}
               />
               <p className="text-xs text-gray-500 mt-1">
                 Осталось {200 - (courseItemData.short_description?.length || 0)}{" "}
@@ -389,7 +393,7 @@ export default function CourseEditPage() {
                 htmlFor="description"
                 className="block text-sm font-medium text-gray-700 mb-1"
               >
-                Полное описание
+                {t("label-course-full-description")}
               </label>
               <textarea
                 id="description"
@@ -398,7 +402,7 @@ export default function CourseEditPage() {
                 onChange={handleChange}
                 rows={6}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                placeholder="Полное описание курса..."
+                placeholder={t("label-course-full-description")}
               />
             </div>
 
@@ -414,7 +418,7 @@ export default function CourseEditPage() {
                 disabled={saving}
                 className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
               >
-                {saving ? "Сохранение..." : "Сохранить"}
+                {t("btn-save")}
               </button>
             </div>
           </form>

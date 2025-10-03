@@ -8,12 +8,14 @@ import { useParams, useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { NewsBlock } from "@/components/Courses/CourseItemComponents/NewsBlock";
 import { MaterialsBlock } from "@/components/Courses/CourseItemComponents/MaterialsBlock";
-import { WarningIcon } from "@/app/icons/Courses/WarningIcon";
 import { EditQuestionIcon } from "@/app/icons/Quiz";
-import { fetchCertificatesList } from "@/api/certificates/listApi";
 import { CashIcon } from "@/app/icons/Courses/CashIcon";
+import { useTranslations } from "next-intl";
+import { WarningIcon } from "@/app/icons/Courses/WarningIcon";
 
 export default function CourseItemPage() {
+  const t = useTranslations();
+
   const params = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -42,6 +44,102 @@ export default function CourseItemPage() {
 
   const handleEditCourse = () => {
     router.push(`/courses/${params.id}/edit`);
+  };
+
+  const courseStatusRender = (status: "published" | "draft") => {
+    const isPublished = status === "published";
+
+    const statusStyles = {
+      published: {
+        container: "bg-green-50 border border-green-200",
+        iconColor: "#10b981",
+        title: "text-green-800",
+        description: "text-green-600",
+      },
+      draft: {
+        container: "bg-yellow-50 border border-yellow-200",
+        iconColor: "#f59e0b",
+        title: "text-yellow-800",
+        description: "text-yellow-600",
+      },
+    };
+
+    const styles = isPublished ? statusStyles.published : statusStyles.draft;
+
+    return (
+      <div className={`mb-4 p-4 rounded-lg ${styles.container}`}>
+        <div className="flex items-center">
+          <div className="flex-shrink-0 mr-3">
+            {isPublished ? (
+              <GlobusIcon height={20} color={styles.iconColor} />
+            ) : (
+              <WarningIcon height={20} color={styles.iconColor} />
+            )}
+          </div>
+          <div>
+            <p className={`text-sm font-medium ${styles.title}`}>
+              {isPublished
+                ? t("label-course-status-published-title")
+                : t("label-course-status-draft-title")}
+            </p>
+            <p className={`text-xs ${styles.description} mt-1`}>
+              {isPublished
+                ? t("label-course-status-published-description")
+                : t("label-course-status-draft-description")}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const courseAvailabilityRender = (type: "free" | "private" | "prepaid") => {
+    const availabilityConfig = {
+      free: {
+        container: "bg-blue-50 border border-blue-200",
+        iconColor: "#3b82f6",
+        title: t("label-course-type-free-title"),
+        description: t("label-course-type-free-description"),
+        titleColor: "text-blue-800",
+        descriptionColor: "text-blue-600",
+      },
+      private: {
+        container: "bg-purple-50 border border-purple-200",
+        iconColor: "#8b5cf6",
+        title: t("label-course-type-private-title"),
+        description: t("label-course-type-private-description"),
+        titleColor: "text-purple-800",
+        descriptionColor: "text-purple-600",
+      },
+      prepaid: {
+        container: "bg-orange-50 border border-orange-200",
+        iconColor: "#f97316",
+        title: t("label-course-type-prepaid-title"),
+        description: t("label-course-type-prepaid-description"),
+        titleColor: "text-orange-800",
+        descriptionColor: "text-orange-600",
+      },
+    };
+
+    const config = availabilityConfig[type];
+
+    return (
+      <div className={`mb-4 p-4 rounded-lg ${config.container}`}>
+        <div className="flex items-center">
+          <div className="flex-shrink-0 mr-3">
+            <CashIcon height={20} color={config.iconColor} />
+          </div>
+          <div>
+            <p className={`text-sm font-medium ${config.titleColor}`}>
+              {config.title}
+            </p>
+            <p className={`text-xs ${config.descriptionColor} mt-1`}>
+              {config.description}
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   useEffect(() => {
@@ -104,7 +202,7 @@ export default function CourseItemPage() {
                 className="flex items-center px-4 py-2 gap-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
               >
                 <EditQuestionIcon height={20} color="white" />
-                Редактировать
+                {t("btn-edit")}
               </button>
             </div>
           </div>
@@ -112,53 +210,19 @@ export default function CourseItemPage() {
           <div className="p-6">
             <div className="flex flex-col md:flex-row gap-6">
               <div className="flex-1">
-                <div className="mb-3">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0">
-                      <InfoIcon height={26} color="grey" />
-                      <span className="sr-only">Информация</span>
-                    </div>
-                    <h2 className="ml-2 text-lg font-semibold text-gray-500">
-                      О курсе
-                    </h2>
+                <div className="flex items-center mb-3">
+                  <div className="flex-shrink-0">
+                    <InfoIcon height={26} color="grey" />
                   </div>
+                  <h2 className="ml-2 text-lg font-semibold text-gray-500">
+                    {t("label-course-about")}
+                  </h2>
                 </div>
 
-                <div className="mb-4 p-4 rounded-lg bg-green-50 border border-green-200">
-                  <div className="flex items-center">
-                    <div className="flex-shrink-0 mr-3">
-                      <GlobusIcon height={20} color="#85a888" />
-                    </div>
-                    <div>
-                      <p className="text-sm font-medium text-green-700">
-                        Опубликовано
-                      </p>
-                      <p className="text-xs text-green-600 mt-1">
-                        Текущий курс опубликован и виден всем
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                {courseStatusRender(courseData.status)}
+                {courseAvailabilityRender(courseData.availability_type)}
 
-                {courseData.availability_type === "prepaid" && (
-                  <div className="mb-4 p-4 rounded-lg bg-orange-50 border border-orange-200">
-                    <div className="flex items-center">
-                      <div className="flex-shrink-0 mr-3">
-                        <CashIcon height={20} color="orange" />
-                      </div>
-                      <div>
-                        <p className="text-sm font-medium text-orange-700">
-                          Платный контент
-                        </p>
-                        <p className="text-xs text-orange-600 mt-1">
-                          Доступ к курсу по предоплате
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
-                {courseData.description && (
+                {courseData.description ? (
                   <div className="prose max-w-none">
                     <div
                       dangerouslySetInnerHTML={{
@@ -166,6 +230,8 @@ export default function CourseItemPage() {
                       }}
                     />
                   </div>
+                ) : (
+                  <div className="">{t("label-empty-description")}</div>
                 )}
               </div>
 
@@ -180,9 +246,13 @@ export default function CourseItemPage() {
               )}
             </div>
 
-            <NewsBlock records={courseData.records || []} />
+            {courseData.records.length > 0 && (
+              <NewsBlock records={courseData.records} />
+            )}
 
-            <MaterialsBlock groups={courseData.groups || []} />
+            {courseData.groups.length > 0 && (
+              <MaterialsBlock groups={courseData.groups} />
+            )}
           </div>
         </div>
       </div>
