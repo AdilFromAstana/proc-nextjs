@@ -20,7 +20,7 @@ export default function FormulaEditor({
         mathFieldRef.current = mf;
         onChange(mf.latex());
       }}
-      className="border p-2 rounded-md bg-white w-full"
+      className="border p-2 rounded-md bg-white w-fit"
     />
   );
 }

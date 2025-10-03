@@ -67,7 +67,6 @@ const ModalEdit = ({
         <div className="p-4 border-b">
           <QuestionField
             value={edited.question}
-            isRaw={isRaw}
             onChange={(v) => setEdited({ ...edited, question: v })}
           />
         </div>
@@ -75,7 +74,6 @@ const ModalEdit = ({
         {/* Options */}
         <OptionList
           options={edited.options}
-          isRaw={isRaw}
           onOptionChange={handleOptionChange}
           onToggleCorrect={handleCorrectChange}
           onAddOption={handleAddOption}
