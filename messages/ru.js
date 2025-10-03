@@ -1178,6 +1178,7 @@ export default {
   "label-proctoring-video-head-identity": "Видео Идентификация",
   "label-proctoring-id-verification": "Верификация",
   "label-proctoring-noise-detector": "Аудиодорожка",
+  "label-proctoring-speech-detector": "Детекция голоса",
   "label-proctoring-displays-check": "Устройства отображения",
   "label-proctoring-content-protect": "Content Protect",
   "label-proctoring-fullscreen-mode": "Полноэкранный режим",
@@ -1222,6 +1223,7 @@ export default {
     "Включить идентификацию лица по видео.",
   "hint-proctoring-id-verification": "Идентификация по удостоверению личности",
   "hint-proctoring-noise-detector": "Включить запись аудиодорожки",
+  "hint-proctoring-speech-detector": "Включить детекцию голоса",
   "hint-proctoring-displays-check":
     "Включить проверку на наличие подключенных мониторов, проекторов, TV",
   "hint-proctoring-content-protect":
@@ -2383,8 +2385,4 @@ export default {
   "error-unknown-error": "Неизвестная ошибка",
   "error-user-not-exists":
     "Пользователь не найден или введен неправильный пароль",
-
-  /**
-   * NEW WORDS
-   */
 };

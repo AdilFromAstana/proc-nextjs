@@ -81,7 +81,7 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
   const perPageOptions = useMemo(() => {
     return chunks.map((count) => ({
       id: count,
-      name: `${count} ${t("option-per-page-students")}`,
+      name: `${t("option-per-page-students", { count: count })}`,
     }));
   }, [chunks]);
 
@@ -119,7 +119,7 @@ const StudentFilterComponent: React.FC<StudentFilterComponentProps> = ({
             onChange={(e) =>
               handleFilterChange("query", e.target.value || null)
             }
-            placeholder="Имя / Email / Номер телефона"
+            placeholder={t("placeholder-query")}
             className="w-full"
           />
         </div>

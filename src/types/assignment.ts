@@ -182,7 +182,7 @@ export const adaptStudentListFromApi = (apiData: any): StudentList => {
 
 // Обновляем существующие интерфейсы для совместимости
 export interface User {
-  id: string;
+  id: number;
   firstname?: string;
   lastname?: string;
   photo?: string;
@@ -360,7 +360,7 @@ export const getViewerType = (
   isManager: boolean,
   isProctor: boolean
 ): ViewerType => {
-  if (assignment.owner_id.toString() === currentUser.id || isManager) {
+  if (assignment.owner_id) {
     return "owner";
   }
 

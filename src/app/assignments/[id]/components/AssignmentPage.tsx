@@ -211,7 +211,7 @@ const AssignmentPage: React.FC<{
 
   // ✅ Логика
   const currentUser: User = {
-    id: "2747436",
+    id: 2747436,
     firstname: "Меридиан",
     lastname: "Капитал",
     group: "manager",
@@ -220,8 +220,7 @@ const AssignmentPage: React.FC<{
 
   const isManager = currentUser.group === "manager";
   const isProctor = currentUser.group === "proctor";
-  const isOwner =
-    assignment.owner_id.toString() === currentUser.id || isManager;
+  const isOwner = assignment.owner_id === currentUser.id;
   const viewer = getViewerType(assignment, currentUser, isManager, isProctor);
 
   // ✅ Рендер

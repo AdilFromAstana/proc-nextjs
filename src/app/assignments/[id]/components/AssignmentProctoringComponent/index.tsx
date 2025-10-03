@@ -530,8 +530,8 @@ const ProctoringSettingsModal: React.FC<ProctoringSettingsModalProps> = ({
           />
 
           <SwitchParameter
-            label={t("label-proctoring-voice-detector")}
-            description={t("hint-proctoring-voice-detector")}
+            label={t("label-proctoring-speech-detector")}
+            description={t("hint-proctoring-speech-detector")}
             checked={numericToBoolean(settings.speech_detector)}
             onCheckedChange={(checked) =>
               handleSwitchChange("speech_detector", checked)

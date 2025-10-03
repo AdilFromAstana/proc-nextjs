@@ -77,11 +77,11 @@ const AssignmentScenarioSettingsComponent: React.FC<
   // Computed values
   const scoreOptions = useMemo(
     () => [
-      { id: 1, label: t("option-scenario-score-value") },
-      { id: 2, label: t("option-scenario-score-value") },
-      { id: 3, label: t("option-scenario-score-value") },
-      { id: 4, label: t("option-scenario-score-value") },
-      { id: 5, label: t("option-scenario-score-value") },
+      { id: 1, label: t("option-scenario-score-value", { score: 1 }) },
+      { id: 2, label: t("option-scenario-score-value", { score: 2 }) },
+      { id: 3, label: t("option-scenario-score-value", { score: 3 }) },
+      { id: 4, label: t("option-scenario-score-value", { score: 4 }) },
+      { id: 5, label: t("option-scenario-score-value", { score: 5 }) },
       {
         id: "assignment-completed",
         label: t("option-scenario-assignment-completed"),
