@@ -1,44 +1,221 @@
-import React, { JSX } from "react";
+"use client";
+import React, { JSX, ReactElement, useEffect, useRef, useState } from "react";
 import { InlineMath, BlockMath } from "react-katex";
+import Mathfield from "../WordToCreateTest/ModalEdit/Mathfield";
 
-export const processTextWithRichContent = (
-  text: string
-): (string | JSX.Element)[] => {
+export interface ProcessTextWithRichContentProps {
+  /** Исходная строка с текстом и маркерами [FORMULA:..] или [IMAGE:..] */
+  text: string;
+  /** Колбэк для передачи изменений наружу */
+  onChange?: (value: string) => void;
+  /** Режим редактирования (по умолчанию true) */
+  editable?: boolean;
+}
+
+export const ProcessTextWithRichContent: React.FC<
+  ProcessTextWithRichContentProps
+> = ({ text, onChange, editable = true }): ReactElement => {
   const regex = /\[(FORMULA|IMAGE):([\s\S]*?)\](?=(\s|$|[.,!?]))/g;
-  const parts: (string | JSX.Element)[] = [];
-
+  const parts: JSX.Element[] = [];
   let lastIndex = 0;
+
   for (const match of text.matchAll(regex)) {
     const [full, type, content] = match;
     const start = match.index ?? 0;
 
     if (start > lastIndex) {
-      parts.push(text.substring(lastIndex, start));
+      const raw = text.substring(lastIndex, start);
+
+      if (editable) {
+        parts.push(
+          <InlineToolbarText
+            key={`text-${start}`}
+            text={raw}
+            onChange={(newText) => {
+              const newValue =
+                text.substring(0, lastIndex) + newText + text.substring(start);
+              onChange?.(newValue);
+            }}
+          />
+        );
+      } else {
+        parts.push(<span key={`text-${start}`}>{raw}</span>);
+      }
     }
 
     if (type === "FORMULA") {
-      if (content.includes("\\begin{")) {
-        parts.push(<BlockMath key={start} math={content} />);
+      if (editable) {
+        parts.push(
+          <Mathfield
+            key={`formula-${start}`}
+            value={content}
+            onChange={(newLatex) => {
+              const newValue =
+                text.substring(0, start) +
+                `[FORMULA:${newLatex}]` +
+                text.substring(start + full.length);
+              onChange?.(newValue);
+            }}
+            options={{ virtualKeyboardMode: "off", menu: "false" }}
+            style={{
+              border: "1px solid #cbd5e1",
+              padding: "6px 8px",
+              borderRadius: "0.5rem",
+              background: "white",
+              display: "inline-block",
+              minWidth: "40px",
+              margin: "0 4px",
+              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+            }}
+          />
+        );
       } else {
-        parts.push(<InlineMath key={start} math={content} />);
+        if (content.includes("\\begin{")) {
+          parts.push(<BlockMath key={`block-${start}`} math={content} />);
+        } else {
+          parts.push(<InlineMath key={`inline-${start}`} math={content} />);
+        }
       }
     } else if (type === "IMAGE") {
-      parts.push(
-        <img
-          key={start}
-          src={content}
-          alt="embedded"
-          className="inline-block max-h-40 mx-2"
-        />
-      );
+      if (editable) {
+        parts.push(
+          <input
+            key={`image-${start}`}
+            type="text"
+            defaultValue={content}
+            className="border border-slate-300 rounded-lg px-2 py-1 mx-1 text-sm w-40 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 transition"
+            onBlur={(e) => {
+              const newValue =
+                text.substring(0, start) +
+                `[IMAGE:${e.currentTarget.value}]` +
+                text.substring(start + full.length);
+              onChange?.(newValue);
+            }}
+          />
+        );
+      } else {
+        parts.push(
+          <img
+            key={`img-${start}`}
+            src={content}
+            alt="embedded"
+            className="inline-block max-h-32 mx-2 rounded-md shadow"
+          />
+        );
+      }
     }
 
     lastIndex = start + full.length;
   }
 
   if (lastIndex < text.length) {
-    parts.push(text.substring(lastIndex));
+    const raw = text.substring(lastIndex);
+    if (editable) {
+      parts.push(
+        <InlineToolbarText
+          key={`text-${lastIndex}`}
+          text={raw}
+          onChange={(newText) => {
+            const newValue = text.substring(0, lastIndex) + newText;
+            onChange?.(newValue);
+          }}
+        />
+      );
+    } else {
+      parts.push(<span key={`text-${lastIndex}`}>{raw}</span>);
+    }
   }
 
-  return parts;
+  return <>{parts}</>;
+};
+
+//
+// 🔹 contentEditable с тулбаром
+//
+const InlineToolbarText = ({
+  text,
+  onChange,
+}: {
+  text: string;
+  onChange: (v: string) => void;
+}) => {
+  const [focused, setFocused] = useState(false);
+  const [active, setActive] = useState<{ [key: string]: boolean }>({});
+  const ref = useRef<HTMLSpanElement>(null);
+
+  useEffect(() => {
+    if (ref.current) {
+      ref.current.innerHTML = text;
+    }
+  }, []);
+
+  const updateToolbarState = () => {
+    setActive({
+      bold: document.queryCommandState("bold"),
+      italic: document.queryCommandState("italic"),
+      underline: document.queryCommandState("underline"),
+    });
+  };
+
+  const exec = (cmd: string) => {
+    document.execCommand(cmd, false);
+    const newHtml = ref.current?.innerHTML || "";
+    onChange(newHtml);
+    updateToolbarState();
+  };
+
+  const handleInput = () => {
+    const newHtml = ref.current?.innerHTML || "";
+    onChange(newHtml);
+    updateToolbarState();
+  };
+
+  return (
+    <span className="relative inline-block">
+      {focused && (
+        <div className="absolute -top-10 left-0 flex gap-1 bg-white border border-slate-200 rounded-md shadow-md px-2 py-1 z-50 text-sm">
+          {[
+            { cmd: "bold", label: <b>B</b> },
+            { cmd: "italic", label: <i>I</i> },
+            { cmd: "underline", label: <u>U</u> },
+          ].map((btn) => (
+            <button
+              key={btn.cmd}
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={() => exec(btn.cmd)}
+              className={`px-2 py-0.5 rounded transition ${
+                active[btn.cmd]
+                  ? "bg-blue-100 text-blue-700"
+                  : "hover:bg-slate-100 active:bg-slate-200 text-slate-700"
+              }`}
+            >
+              {btn.label}
+            </button>
+          ))}
+        </div>
+      )}
+
+      <span
+        ref={ref}
+        contentEditable
+        suppressContentEditableWarning
+        className={`whitespace-pre-wrap outline-none border-none rounded-none px-1 py-0.5 text-sm transition min-w-[20px] min-h-[1.2em] ${
+          focused ? "" : "hover:bg-yellow-50"
+        }`}
+        data-placeholder="Введите текст..."
+        onFocus={() => {
+          setFocused(true);
+          updateToolbarState();
+        }}
+        onBlur={() => {
+          setFocused(false);
+          const newHtml = ref.current?.innerHTML || "";
+          onChange(newHtml);
+        }}
+        onInput={handleInput}
+        onKeyUp={updateToolbarState}
+        onMouseUp={updateToolbarState}
+      />
+    </span>
+  );
 };

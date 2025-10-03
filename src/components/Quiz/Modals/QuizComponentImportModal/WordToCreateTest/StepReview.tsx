@@ -111,31 +111,14 @@ const StepReview = forwardRef<
       {/* Список вопросов */}
       <div className="flex-1 overflow-y-auto space-y-4">
         {currentQuestions.map((q) => (
-          <div
+          <QuestionRenderer
             key={q.id}
-            ref={(el) => {
-              questionRefs.current[q.id] = el;
-            }}
-            className={`p-4 border rounded-lg bg-gray-50 shadow-sm transition-colors ${
-              highlightedId === q.id ? "flash-3" : ""
-            }`}
-          >
-            <QuestionRenderer question={q} />
-            <div className="mt-2 flex justify-end gap-2">
-              <button
-                onClick={() => onEdit(q)}
-                className="px-3 py-1 border rounded-md text-blue-600 text-sm"
-              >
-                Редактировать
-              </button>
-              <button
-                onClick={() => onDelete(q.id)}
-                className="px-3 py-1 border rounded-md text-red-600 text-sm"
-              >
-                Удалить
-              </button>
-            </div>
-          </div>
+            questionRefs={questionRefs}
+            highlightedId={highlightedId}
+            question={q}
+            onEdit={onEdit}
+            onDelete={onDelete}
+          />
         ))}
       </div>
 

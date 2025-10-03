@@ -235,7 +235,7 @@ export function RegistrySidebar() {
             size="sm"
             onClick={switchLanguage}
             className="flex items-center gap-2 hover:bg-accent/50 transition-colors"
-            title={t("switch-language") || "Switch language"}
+            title={t("label-import-class-group-language") || "Switch language"}
           >
             <span className="text-sm font-medium">
               {getLanguageLabel(locale)}

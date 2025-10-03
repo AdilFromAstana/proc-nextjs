@@ -75,44 +75,37 @@ export const CustomEditor: React.FC<CustomEditorProps> = ({
 
   const editorSettings = {
     inline: inline,
-    height: height, // Передаем height, как в Vue
+    height: height,
     menubar: false,
     statusbar: false,
     branding: false,
-    plugins: finalPlugins, // Используем обработанный массив
-    toolbar: finalToolbar,
-    mobile: {
-      theme: "mobile",
+    plugins: finalPlugins,
+    toolbar: finalToolbar + " | wirisEditor wirisChemistry", // добавляем кнопки формул
+    external_plugins: {
+      wiris: "/node_modules/@wiris/mathtype-tinymce5/plugin.min.js",
+      // ⚠️ путь нужно настроить правильно в зависимости от сборщика
     },
+    mobile: { theme: "mobile" },
     images_upload_handler: uploadImage,
-    // Настройки autoresize, как в Vue
     autoresize_on_init: true,
-    autoresize_bottom_margin: 0, // Как в Vue
-    autoresize_overflow_padding: 0, // Как в Vue (или можно оставить 10 если нужно)
-    // НЕ устанавливаем content_style, если Vue не делает этого явно
-    // content_style: "...",
+    autoresize_bottom_margin: 0,
+    autoresize_overflow_padding: 0,
     promotion: false,
     ...options,
     setup: (editor: any) => {
       editor.on("init", () => {
-        // editorRef.current = editor; // Не используем editorRef напрямую, полагаемся на setup/onInit
-
-        // Регистрация кастомных кнопок, как в Vue
         buttons.forEach((button) => {
           editor.ui.registry.addButton(button.id, button);
         });
 
-        // Логика floated, как в Vue
         if (floated) {
           applyFloatedSettings(editor);
-          hideToolbar(editor); // Скрываем тулбар при инициализации, как в Vue
+          hideToolbar(editor);
         }
 
-        // Вызов onInit из props, как в Vue
         onInit?.(editor);
       });
 
-      // Обработчики фокуса/блura для управления тулбаром, как в Vue
       if (floated) {
         editor.on("focus", () => showToolbar(editor));
         editor.on("blur", () => hideToolbar(editor));
