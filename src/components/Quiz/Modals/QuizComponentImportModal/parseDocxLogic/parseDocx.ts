@@ -112,11 +112,17 @@ const parseDocx = async (
         options.push({
           id: genId(),
           isCorrect: false,
-          text: candidate || "[Формула не распознана]",
+          answer: candidate || "[Формула не распознана]",
+          percent: null,
         });
       }
 
-      questions.push({ id: currentId, question: questionText, options });
+      questions.push({
+        id: currentId,
+        question: questionText,
+        options,
+        is_multiple: 0,
+      });
     } catch (e) {
       errors.push({
         questionId: currentId ?? undefined,

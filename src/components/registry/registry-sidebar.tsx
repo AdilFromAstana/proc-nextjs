@@ -227,8 +227,8 @@ export function RegistrySidebar() {
               {getLanguageLabel(locale)}
             </span>
           </Button>
-          <ModeToggle />
         </div>
+        
       </SidebarFooter>
     </Sidebar>
   );

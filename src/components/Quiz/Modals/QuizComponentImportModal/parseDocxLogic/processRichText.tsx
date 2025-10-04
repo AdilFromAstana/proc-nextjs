@@ -12,15 +12,23 @@ export interface ProcessTextWithRichContentProps {
   editable?: boolean;
 }
 
+function normalizeText(input: string): string {
+  // заменяем $...$ и $$...$$ на [FORMULA:...]
+  return input.replace(/(\${1,2})([\s\S]*?)\1/g, (_, __, formula) => {
+    console.log("formula: ", formula);
+    return `[FORMULA:${formula.trim()}]`;
+  });
+}
+
 export const ProcessTextWithRichContent: React.FC<
   ProcessTextWithRichContentProps
 > = ({ text, onChange, editable = true }): ReactElement => {
-  const regex = /\[(FORMULA|IMAGE):([\s\S]*?)\](?=(\s|$|[.,!?]))/g;
+  const regex = /(?:\[(FORMULA|IMAGE):([\s\S]*?)\]|(\${1,2})([\s\S]*?)\3)/g;
   const parts: JSX.Element[] = [];
   let lastIndex = 0;
 
   for (const match of text.matchAll(regex)) {
-    const [full, type, content] = match;
+    const [full, type, content, dollar, latexContent] = match;
     const start = match.index ?? 0;
 
     if (start > lastIndex) {
@@ -46,28 +54,46 @@ export const ProcessTextWithRichContent: React.FC<
     if (type === "FORMULA") {
       if (editable) {
         parts.push(
-          <Mathfield
+          <span
             key={`formula-${start}`}
-            value={content}
-            onChange={(newLatex) => {
-              const newValue =
-                text.substring(0, start) +
-                `[FORMULA:${newLatex}]` +
-                text.substring(start + full.length);
-              onChange?.(newValue);
-            }}
-            options={{ virtualKeyboardMode: "off", menu: "false" }}
-            style={{
-              border: "1px solid #cbd5e1",
-              padding: "6px 8px",
-              borderRadius: "0.5rem",
-              background: "white",
-              display: "inline-block",
-              minWidth: "40px",
-              margin: "0 4px",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-            }}
-          />
+            className="relative inline-"
+          >
+            <Mathfield
+              value={content}
+              onChange={(newLatex) => {
+                const newValue =
+                  text.substring(0, start) +
+                  `[FORMULA:${newLatex}]` +
+                  text.substring(start + full.length);
+                onChange?.(newValue);
+              }}
+              options={{ virtualKeyboardMode: "off", menu: "false" }}
+              style={{
+                border: "1px solid #cbd5e1",
+                padding: "6px 8px",
+                borderRadius: "0.5rem",
+                background: "white",
+                display: "inline-block",
+                minWidth: "40px",
+                margin: "0 4px",
+                boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
+              }}
+            />
+
+            {/* 🔽 Кнопка удаления */}
+            <button
+              onClick={() => {
+                const newValue =
+                  text.substring(0, start) +
+                  text.substring(start + full.length);
+                onChange?.(newValue);
+              }}
+              className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs hover:bg-red-600"
+              title="Удалить формулу"
+            >
+              ✖
+            </button>
+          </span>
         );
       } else {
         if (content.includes("\\begin{")) {
@@ -103,12 +129,35 @@ export const ProcessTextWithRichContent: React.FC<
           />
         );
       }
+    } else if (dollar) {
+      const formula = latexContent.trim();
+      if (editable) {
+        parts.push(
+          <Mathfield
+            key={`formula-${start}`}
+            value={formula}
+            onChange={(newLatex) => {
+              const newValue =
+                text.substring(0, start) +
+                `[FORMULA:${newLatex}]` +
+                text.substring(start + full.length);
+              onChange?.(newValue);
+            }}
+          />
+        );
+      } else {
+        if (formula.includes("\\begin{")) {
+          parts.push(<BlockMath key={`block-${start}`} math={formula} />);
+        } else {
+          parts.push(<InlineMath key={`inline-${start}`} math={formula} />);
+        }
+      }
     }
 
     lastIndex = start + full.length;
   }
 
-  if (lastIndex < text.length) {
+  if (lastIndex < text.length || text.length === 0) {
     const raw = text.substring(lastIndex);
     if (editable) {
       parts.push(
@@ -166,7 +215,9 @@ const InlineToolbarText = ({
 
   const handleInput = () => {
     const newHtml = ref.current?.innerHTML || "";
-    onChange(newHtml);
+    const normalized = normalizeText(newHtml); // 👈 конвертируем
+    console.log("normalized: ", normalized);
+    onChange(normalized);
     updateToolbarState();
   };
 
@@ -210,7 +261,9 @@ const InlineToolbarText = ({
         onBlur={() => {
           setFocused(false);
           const newHtml = ref.current?.innerHTML || "";
-          onChange(newHtml);
+          const normalized = normalizeText(newHtml); // 👈 конвертируем
+          console.log("normalized: ", normalized);
+          onChange(normalized);
         }}
         onInput={handleInput}
         onKeyUp={updateToolbarState}

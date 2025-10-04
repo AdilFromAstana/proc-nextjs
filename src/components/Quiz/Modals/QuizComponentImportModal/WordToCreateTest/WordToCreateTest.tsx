@@ -4,15 +4,17 @@ import parseDocx from "../parseDocxLogic/parseDocx";
 
 // Типы
 export type Option = {
-  text: string;
+  answer: string;
   isCorrect: boolean;
   id: string;
+  percent: number;
 };
 
 export type Question = {
   id: number;
   question: string;
   options: Option[];
+  is_multiple: 1 | 0;
 };
 
 export type ParseError = { line: string; reason: string; questionId?: number };
